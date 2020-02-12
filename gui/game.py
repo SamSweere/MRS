@@ -8,9 +8,6 @@ from simulation.World import World
 # Constants
 SCREEN_TITLE = "Platformer"
 
-MOVEMENT_SPEED = 5
-ANGLE_SPEED = 5 # This is in degrees
-
 class MyGame(arcade.Window):
     """
     Main application class.
@@ -57,15 +54,15 @@ class MyGame(arcade.Window):
 
         # Forward/back
         if key == arcade.key.UP:
-            self.robot.speed = MOVEMENT_SPEED
+            self.robot.speed = 1
         elif key == arcade.key.DOWN:
-            self.robot.speed = -MOVEMENT_SPEED
+            self.robot.speed = -1
 
         # Rotate left/right
         elif key == arcade.key.LEFT:
-            self.robot.change_angle += ANGLE_SPEED
+            self.robot.change_angle = 1
         elif key == arcade.key.RIGHT:
-            self.robot.change_angle -= ANGLE_SPEED
+            self.robot.change_angle = -1
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
