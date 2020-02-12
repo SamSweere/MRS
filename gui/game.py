@@ -3,8 +3,7 @@ Platformer Game
 """
 import arcade
 import math
-from simulation.World import World, create_rect_wall
-from simulation.Robot import Robot
+from simulation.World import World
 
 # Constants
 SCREEN_TITLE = "Platformer"
@@ -13,24 +12,27 @@ SCREEN_TITLE = "Platformer"
 class MyGame(arcade.Window):
     """
     Main application class.
+    Should render output and handle user input.
     """
 
-    def __init__(self, environment_width, environment_height):
-        self.SCREEN_WIDTH = environment_width
-        self.SCREEN_HEIGHT = environment_height
+    def __init__(self, env_width, env_height, walls, robot):
+        self.env_width = env_width
+        self.env_height = env_height
+        self.SCREEN_WIDTH = env_width
+        self.SCREEN_HEIGHT = env_height
+        self.walls = walls
+        self.robot = robot
 
         # Call the parent class and set up the window
-        super().__init__(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__(self.env_width, self.env_height, SCREEN_TITLE)
 
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
+        self.setup()
+
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
-        walls = [
-            create_rect_wall(self.SCREEN_WIDTH/2 - 200 , self.SCREEN_HEIGHT/2 - 200, 100, 50)
-        ]
-        robot = Robot(self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2)
-        self.world = World(walls, robot)
+        self.world = World(self.walls, self.robot)
 
     def on_draw(self):
         """ Render the screen. """
