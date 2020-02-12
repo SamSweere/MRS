@@ -41,6 +41,13 @@ class MyGame(arcade.Window):
             arcade.draw_polygon_filled(wall.points, color=arcade.csscolor.BLACK)
             
         self.__draw_robot__()
+        
+    def on_key_press(self, key, modifiers):
+        """Called whenever a key is pressed. """
+
+        # Just for debugging, rotate the agent to check our drawing function
+        if key == arcade.key.UP:
+            self.world.robot.angle += math.pi / 10
             
     def __draw_robot__(self):
         rob = self.world.robot
