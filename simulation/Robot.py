@@ -18,7 +18,7 @@ class Robot:
 
     def update(self):
         # Rotate the robot
-        self.angle += self.change_angle * self.angle_speed
+        self.angle = (self.angle + self.change_angle * self.angle_speed) % (2*math.pi)
 
         # Based on the speed and the angle find the new requested location
         r_x = self.x + self.speed * self.movement_speed * math.cos(self.angle)
@@ -37,5 +37,25 @@ class Robot:
             # No collision, set the new x and y based on the requested values
             self.x = r_x
             self.y = r_y
-        # elif()
+        else:
+            inter_x = closest_inter[0]
+            inter_y = closest_inter[1]
+            # Check the four looking directions
+            if(self.angle >= 0 and self.angle < 0.5*math.pi): 
+                if(r_x > inter_x or r_y > inter_y):
+                    # Collision move the robot to the point
+                    self.x = inter_x
+                    self.y = inter_y
+                else:
+                    # No collision, set the new x and y based on the requested values
+                    self.x = r_x
+                    self.y = r_y
+            elif(self.angle >= 0.5*math.pi and self.angle < math.pi):
+                pass
+            elif(self.angle >= math.pi and self.angle < 1.5*math.pi):
+                pass
+            elif(self.angle >= 1.5*math.pi and self.angle < 2*math.pi):
+                pass
+            else:
+                print("Error: something is wrong with the angle of the robot")
         
