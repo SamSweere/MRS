@@ -9,6 +9,8 @@ from simulation.Robot import Robot
 # Constants
 SCREEN_TITLE = "Platformer"
 
+MOVEMENT_SPEED = 5
+ANGLE_SPEED = 5 # This is in degrees
 
 class MyGame(arcade.Window):
     """
@@ -29,8 +31,8 @@ class MyGame(arcade.Window):
         walls = [
             create_rect_wall(self.SCREEN_WIDTH/2 - 200 , self.SCREEN_HEIGHT/2 - 200, 100, 50)
         ]
-        robot = Robot(self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2)
-        self.world = World(walls, robot)
+        self.robot = Robot(self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2)
+        self.world = World(walls, self.robot)
 
     def on_draw(self):
         """ Render the screen. """
@@ -41,25 +43,48 @@ class MyGame(arcade.Window):
             arcade.draw_polygon_filled(wall.points, color=arcade.csscolor.BLACK)
             
         self.__draw_robot__()
+
+    def on_update(self, delta_time):
+        """ Movement and game logic """
+
+        # Call the updates of all the moving parts
+        self.robot.update()
         
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
-        # Just for debugging, rotate the agent to check our drawing function
+        # Forward/back
         if key == arcade.key.UP:
-            self.world.robot.angle += math.pi / 10
-            
-    def __draw_robot__(self):
-        rob = self.world.robot
-        
+            self.robot.speed = MOVEMENT_SPEED
+        elif key == arcade.key.DOWN:
+            self.robot.speed = -MOVEMENT_SPEED
+
+        # Rotate left/right
+        elif key == arcade.key.LEFT:
+            self.robot.change_angle += ANGLE_SPEED
+        elif key == arcade.key.RIGHT:
+            self.robot.change_angle -= ANGLE_SPEED
+
+    def on_key_release(self, key, modifiers):
+        """Called when the user releases a key. """
+
+        if key == arcade.key.UP or key == arcade.key.DOWN:
+            self.robot.speed = 0
+        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+            self.robot.change_angle = 0
+
+    def __draw_robot__(self):       
         # Draw the shape of the robot as an circle with an line marking its rotation
-        old_x = rob.radius
+        old_x = self.robot.radius
         old_y = 0
-        rotated_x = rob.x + math.cos(rob.angle) * old_x - math.sin(rob.angle) * old_y
-        rotated_y = rob.y + math.sin(rob.angle) * old_x + math.cos(rob.angle) * old_y
+
+        angle_rad = math.radians(self.robot.angle)
+
+        rotated_x = self.robot.x + math.cos(angle_rad) * old_x - math.sin(angle_rad) * old_y
+        rotated_y = self.robot.y + math.sin(angle_rad) * old_x + math.cos(angle_rad) * old_y
         
-        arcade.draw_circle_outline(rob.x, rob.y, rob.radius, color=arcade.csscolor.BLACK)
-        arcade.draw_line(rob.x, rob.y, rotated_x, rotated_y, color=arcade.csscolor.BLACK)
+        arcade.draw_circle_outline(self.robot.x, self.robot.y, self.robot.radius, color=arcade.csscolor.BLACK)
+        arcade.draw_line(self.robot.x, self.robot.y, rotated_x, rotated_y, color=arcade.csscolor.BLACK)
         
         
             
