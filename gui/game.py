@@ -2,6 +2,7 @@
 Platformer Game
 """
 import arcade
+import math
 from simulation.World import World, create_rect_wall
 from simulation.Robot import Robot
 
@@ -43,5 +44,15 @@ class MyGame(arcade.Window):
             
     def __draw_robot__(self):
         rob = self.world.robot
+        
+        # Draw the shape of the robot as an circle with an line marking its rotation
+        old_x = rob.radius
+        old_y = 0
+        rotated_x = rob.x + math.cos(rob.angle) * old_x - math.sin(rob.angle) * old_y
+        rotated_y = rob.y + math.sin(rob.angle) * old_x + math.cos(rob.angle) * old_y
+        
         arcade.draw_circle_outline(rob.x, rob.y, rob.radius, color=arcade.csscolor.BLACK)
+        arcade.draw_line(rob.x, rob.y, rotated_x, rotated_y, color=arcade.csscolor.BLACK)
+        
+        
             
