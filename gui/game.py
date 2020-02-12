@@ -14,12 +14,12 @@ class MyGame(arcade.Window):
     Should render output and handle user input.
     """
 
-    def __init__(self, env_width, env_height, walls, robot):
+    def __init__(self, env_width, env_height, world, robot):
         self.env_width = env_width
         self.env_height = env_height
         self.SCREEN_WIDTH = env_width
         self.SCREEN_HEIGHT = env_height
-        self.walls = walls
+        self.world = world
         self.robot = robot
 
         # Call the parent class and set up the window
@@ -31,7 +31,7 @@ class MyGame(arcade.Window):
 
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
-        self.world = World(self.walls, self.robot)
+        pass
 
     def on_draw(self):
         """ Render the screen. """

@@ -8,10 +8,13 @@ env_params = {
     "env_height": 650
 } 
 
-env_params["walls"] = [create_rect_wall(env_params["env_width"]/2 - 200, 
-    env_params["env_height"]/2 - 200, 100, 50)]
+# env_params["walls"] = [create_rect_wall(env_params["env_width"]/2 - 200, 
+#     env_params["env_height"]/2 - 200, 100, 50)]
 
 env_params["robot"] = Robot(env_params["env_width"]/2, env_params["env_height"]/2)
+
+env_params["world"] = World([create_rect_wall(env_params["env_width"]/2 - 200, 
+    env_params["env_height"]/2 - 200, 100, 50)])
 
 if __name__ == "__main__":    
     window = MyGame(**env_params)

@@ -3,11 +3,17 @@ import numpy as np
 import math
 
 class World:
-    def __init__(self, walls, robot):
+    def __init__(self, walls):
         self.walls = walls
-        self.robot = robot
         
-    def raycast(self, start, direction, max_length):
+    def raycast(self, x, y, angle, max_length):
+        # angle is in radians
+        # Calculate the start from x and y
+        start = np.array([x,y])
+
+        # Calculate the direction from angle
+        direction = np.array([math.cos(angle), math.sin(angle)])
+
         norm_dir = direction / math.sqrt(direction[0] * direction[0] + direction[1] * direction[1])
         end = start + norm_dir * max_length
         
