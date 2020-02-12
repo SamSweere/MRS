@@ -27,7 +27,7 @@ class PolygonWall:
                 closest_inter = inter
                 closest_dist = dist
     
-        return None if closest_inter is None else (closest_inter, closest_dist);
+        return (closest_inter, closest_dist);
           
 def line_intersect(a1, a2, b1, b2):
     # Check if two lines intersect
