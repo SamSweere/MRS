@@ -27,7 +27,7 @@ class World:
                 closest_inter = inter
                 closest_dist = dist
         
-        return (closest_inter, closest_dist)
+        return closest_inter, closest_dist
 
 def create_rect_wall(x, y, width, height):
     points = np.array([

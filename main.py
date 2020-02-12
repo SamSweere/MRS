@@ -8,14 +8,15 @@ env_params = {
     "env_height": 650
 } 
 
-# env_params["walls"] = [create_rect_wall(env_params["env_width"]/2 - 200, 
-#     env_params["env_height"]/2 - 200, 100, 50)]
+walls = [create_rect_wall(env_params["env_width"]/2 - 200, 
+    env_params["env_height"]/2 - 200, 100, 50), create_rect_wall(env_params["env_width"]/2 - 280, 
+    env_params["env_height"]/2 - 200, 150, 100)]
 
-env_params["robot"] = Robot(env_params["env_width"]/2, env_params["env_height"]/2)
+if __name__ == "__main__":
+    world = World(walls)
+    robot = Robot(world, env_params["env_width"]/2, env_params["env_height"]/2)
+    env_params["world"] = world
+    env_params["robot"] = robot
 
-env_params["world"] = World([create_rect_wall(env_params["env_width"]/2 - 200, 
-    env_params["env_height"]/2 - 200, 100, 50)])
-
-if __name__ == "__main__":    
     window = MyGame(**env_params)
     arcade.run()

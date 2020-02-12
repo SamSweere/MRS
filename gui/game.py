@@ -74,13 +74,8 @@ class MyGame(arcade.Window):
 
     def __draw_robot__(self):       
         # Draw the shape of the robot as an circle with an line marking its rotation
-        old_x = self.robot.radius
-        old_y = 0
-
-        angle_rad = math.radians(self.robot.angle)
-
-        rotated_x = self.robot.x + math.cos(angle_rad) * old_x - math.sin(angle_rad) * old_y
-        rotated_y = self.robot.y + math.sin(angle_rad) * old_x + math.cos(angle_rad) * old_y
+        rotated_x = self.robot.x + math.cos(self.robot.angle) * self.robot.radius
+        rotated_y = self.robot.y + math.sin(self.robot.angle) * self.robot.radius
         
         arcade.draw_circle_outline(self.robot.x, self.robot.y, self.robot.radius, color=arcade.csscolor.BLACK)
         arcade.draw_line(self.robot.x, self.robot.y, rotated_x, rotated_y, color=arcade.csscolor.BLACK)
