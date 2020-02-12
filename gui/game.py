@@ -2,8 +2,7 @@
 Platformer Game
 """
 import arcade
-import numpy as np
-from simulation import World
+from simulation.World import World, create_rect_wall
 
 # Constants
 SCREEN_WIDTH = 1000
@@ -25,11 +24,17 @@ class MyGame(arcade.Window):
 
     def setup(self):
         """ Set up the game here. Call this function to restart the game. """
-        # self.world = 
+        walls = [
+            create_rect_wall(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 100, 50)
+        ]
+        
+        self.world = World(walls)
 
     def on_draw(self):
         """ Render the screen. """
 
         arcade.start_render()
-        arcade.draw_polygon_filled(np.array([[20,20],[30,30],[20,30]]), color=arcade.csscolor.BLACK)
         # Code to draw the screen goes here
+        for wall in self.world.walls:
+            arcade.draw_polygon_filled(wall.points, color=arcade.csscolor.BLACK)
+            
