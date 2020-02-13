@@ -127,7 +127,6 @@ class Robot:
         """
 
         raycast_range = 2 * self.movement_speed
-<<<<<<< HEAD
 
         # Start the raycast from edge of the circle
         new_angle = self.angle + theta
@@ -158,27 +157,11 @@ class Robot:
         edge_r_x = r_x + math.cos(intercept_angle) * self.radius
         edge_r_y = r_y + math.sin(intercept_angle) * self.radius
         ###
-=======
-        
-        edge_x = self.x + math.cos(self.angle + theta)*self.radius
-        edge_y = self.y + math.sin(self.angle + theta)*self.radius
-
-        edge_r_x = r_x + math.cos(self.angle + theta)*self.radius
-        edge_r_y = r_y + math.sin(self.angle + theta)*self.radius
-        print("theta:",theta)
-        print("x:",self.x)
-        print("edge_x:",edge_x)
-        print("edge_r_x:",edge_r_x)
-        
-        closest_inter, closest_dist = self.world.raycast(edge_x, edge_y, self.angle + theta, raycast_range)    
-        print("Inter:",closest_inter, closest_dist)
->>>>>>> 2c57235f7389dfb8fe1aab38312246fdff61bcf6
 
         # Define a buffer such that the robot is not placed at exactly the wall
         # This would cause it to stop for one frame and then clip through
         buffer = 1.0e-10
 
-<<<<<<< HEAD
         # Get the intersect x and y
         inter_x = closest_inter[0]
         inter_y = closest_inter[1]
@@ -220,44 +203,6 @@ class Robot:
             self.y = r_y 
 
         return True
-=======
-        if(closest_inter is None):
-            # No collision return None
-            return None
-        else:
-            # Get the intersect x and y
-            inter_x = closest_inter[0]
-            inter_y = closest_inter[1]
-
-            print("self.xy:", self.x, self.y)
-            print("r.xy:", r_x, r_y)
-            print("inter.xy:", inter_x, inter_y)
-
-            final_x = None
-            final_y = None
-
-            # Check the four possible directions
-            if(edge_x >= inter_x and edge_r_x < inter_x): 
-                # Collision, move the robot to the collision x point plus some buffer
-                final_x = inter_x + buffer             
-            elif(edge_x <= inter_x and edge_r_x > inter_x):
-                # Collision, move the robot to the collision x point plus some buffer
-                final_x = inter_x - buffer
-            else:
-                # No collision with x, set the location to the requested x location of the edge
-                final_x = None
-
-            if(edge_y >= inter_y and edge_r_y < inter_y):
-                # Collision, move the robot to the collision y point plus some buffer
-                final_y = inter_y + buffer 
-            elif(edge_y <= inter_y and edge_r_y > inter_y):
-                # Collision, move the robot to the collision y point plus some buffer
-                final_y = inter_y - buffer
-            else:
-                # No collision with y, set the location to the requested y location of the edge
-                final_y = None
-
->>>>>>> 2c57235f7389dfb8fe1aab38312246fdff61bcf6
 
             if(final_x is None and final_y is None):
                 # No collision
