@@ -1,17 +1,23 @@
 from simulation.PolygonWall import PolygonWall
 import numpy as np
+import math
 
 class World:
-    def __init__(self, walls, robot):
+    def __init__(self, walls):
         self.walls = walls
-        self.robot = robot
         
-    def raycast(self, start, direction):
-        end = start + direction
+    def raycast(self, x, y, angle, max_length):
+        # angle is in radians
+        # Calculate the start from x and y
+        start = np.array([x,y])
+
+        # Calculate the direction from angle
+        direction = np.array([math.cos(angle), math.sin(angle)])
+        end = start + direction * max_length
         
         closest_inter = None
         closest_dist = max_length
-        for wall in walls:
+        for wall in self.walls:
             inter, dist = wall.check_line_intercept(start, end)
             
             # Check if the intersection is the closest to our start
@@ -19,7 +25,7 @@ class World:
                 closest_inter = inter
                 closest_dist = dist
         
-        return (closest_inter, closest_dist)
+        return closest_inter, closest_dist
 
 def create_rect_wall(x, y, width, height):
     points = np.array([
