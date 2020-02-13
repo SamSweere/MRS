@@ -4,7 +4,7 @@ import performance
 from simulation.World import World, create_rect_wall
 from simulation.Robot import Robot
 
-run_performance_test = True
+run_performance_test = False
 
 env_params = {
     "env_width" : 1000,
