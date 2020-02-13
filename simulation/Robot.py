@@ -21,8 +21,8 @@ class Robot:
         self.sensor_data = []
 
         self.l = 2 * self.radius
-        self.vl = 1
-        self.vr = 1.5
+        self.vl = 0
+        self.vr = 0
         self.v = (self.vr - self.vl / 2)
         self.w = (self.vr - self.vl) / self.l
         self.R, self.icc = self.calculate_icc()
@@ -44,14 +44,31 @@ class Robot:
         self.w = (self.vr - self.vl) / self.l
 
         # Determine the new angle keep it within 2 pi
-        self.angle = (self.angle + self.w) % (2*math.pi)
-        
-        print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}")
+        # w is basically theta because we just assume time was 1
+        v = (self.vl + self.vr / 2)
+        dt = 1
+        angle_change = self.w * dt * v
 
         # Based on the speed and the angle find the new requested location
-        v = (self.vl + self.vr) / 2
-        r_x = self.x + v * math.cos(self.angle)
-        r_y = self.y + v * math.sin(self.angle)
+        # r_x = self.x + v * math.cos(self.angle)
+        # r_y = self.y + v * math.sin(self.angle)
+
+        icc_x = self.icc[0]
+        icc_y = self.icc[1]
+        r_x = (
+            math.cos(angle_change) * (self.x - icc_x) - 
+            math.sin(angle_change) * (self.y - icc_y) + 
+            icc_x
+        )
+        r_y = (
+            math.sin(angle_change) * (self.x - icc_x) +
+            math.cos(angle_change) * (self.y - icc_y) +
+            icc_y
+        )
+        # TODO: maybe scale up r_x and r_y by R?
+        self.angle = (self.angle + angle_change) % (2*math.pi)
+        
+        print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}, location: ({self.x}, {self.y})")
 
         # Check for collision, this function also sets the new x and y values
         self.check_collision(r_x, r_y) 

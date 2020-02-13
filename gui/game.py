@@ -70,13 +70,13 @@ class MyGame(arcade.Window):
         #     self.robot.speed = -1
 
         if key == arcade.key.W:
-            self.robot.vl += 0.1
+            self.robot.vl += 1
         if key == arcade.key.O:
-            self.robot.vr += 0.1
+            self.robot.vr += 1
         if key == arcade.key.S:
-            self.robot.vl += -0.1
+            self.robot.vl += -1
         if key == arcade.key.L:
-            self.robot.vr += -0.1       
+            self.robot.vr += -1       
 
         # # Rotate left/right
         # elif key == arcade.key.LEFT:
@@ -106,7 +106,7 @@ class MyGame(arcade.Window):
         
         # draw icc
         R, icc = self.robot.get_icc()
-        arcade.draw_circle_outline(icc[0], icc[1], R, color=arcade.csscolor.GREENYELLOW)
+        arcade.draw_circle_outline(icc[0], icc[1], 5, color=arcade.csscolor.GREENYELLOW)
 
         # Draw the sensors
         for hit, dist in self.robot.sensor_data:
