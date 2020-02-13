@@ -51,8 +51,10 @@ class MyGame(arcade.Window):
         arcade.draw_text(output, 0, self.SCREEN_HEIGHT-20, arcade.color.RED, 16)
         self.fps_tracker.tick()
 
-        arcade.draw_text("vl" + str(self.robot.vl), 0, self.SCREEN_HEIGHT-60, arcade.color.GOLD, 16)
-        arcade.draw_text("vr" + str(self.robot.vr), 0, self.SCREEN_HEIGHT-80, arcade.color.GOLD, 16)
+        arcade.draw_text("vl" + str(self.robot.vl), 0, self.SCREEN_HEIGHT-60,
+            arcade.color.GOLD, 16)
+        arcade.draw_text("vr" + str(self.robot.vr), 0, self.SCREEN_HEIGHT-80, 
+            arcade.color.GOLD, 16)
 
     def on_update(self, delta_time):
         """ Movement and game logic """
@@ -94,20 +96,31 @@ class MyGame(arcade.Window):
 
     def __draw_robot__(self):       
         # Draw the shape of the robot as an circle with an line marking its rotation
-        rotated_x = self.robot.x + math.cos(self.robot.angle) * self.robot.radius
-        rotated_y = self.robot.y + math.sin(self.robot.angle) * self.robot.radius
+        rotated_x = (
+            self.robot.x + 
+            math.cos(self.robot.angle) * self.robot.radius
+        )
+        rotated_y = (
+            self.robot.y + 
+            math.sin(self.robot.angle) * self.robot.radius
+        )
         
-        arcade.draw_circle_outline(self.robot.x, self.robot.y, self.robot.radius, color=arcade.csscolor.BLACK)
-        arcade.draw_line(self.robot.x, self.robot.y, rotated_x, rotated_y, color=arcade.csscolor.BLACK)
+        arcade.draw_circle_outline(self.robot.x, self.robot.y,
+            self.robot.radius, color=arcade.csscolor.BLACK)
+        arcade.draw_line(self.robot.x, self.robot.y, rotated_x, rotated_y, 
+            color=arcade.csscolor.BLACK)
         
         # draw icc
         R, icc = self.robot.get_icc()
-        arcade.draw_circle_outline(icc[0], icc[1], 5, color=arcade.csscolor.GREENYELLOW)
+        arcade.draw_circle_outline(icc[0], icc[1], 5, 
+            color=arcade.csscolor.GREENYELLOW)
 
         # Draw the sensors
         for hit, dist in self.robot.sensor_data:
             if hit is None:
                 continue
             
-            arcade.draw_line(self.robot.x, self.robot.y, hit[0], hit[1], color=arcade.csscolor.RED)
-            
+            arcade.draw_line(self.robot.x, self.robot.y, hit[0], hit[1],
+                color=arcade.csscolor.RED)
+            arcade.draw_text(str(round(dist, 2)), hit[0], hit[1],
+                arcade.color.GOLD, 12)

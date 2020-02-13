@@ -3,21 +3,21 @@ import math
 
 class Robot:
     def __init__(self, world, start_x, start_y, radius=20, 
-                movement_speed=5, angle_speed=(5*math.pi/180), n_ray_cast = 10,
-                n_sensors = 12, max_sensor_length = 100):
+            movement_speed=5, angle_speed=(5*math.pi/180), n_ray_cast = 10,
+            n_sensors = 12, max_sensor_length = 100):
         self.world = world
         self.x = start_x
         self.y = start_y
         self.radius = radius
         self.movement_speed = 5 
-        self.angle_speed = angle_speed # This is in radians
-        self.n_ray_cast = n_ray_cast # The amount of raycasts it does
-        self.n_sensors = n_sensors # The amount of sensors used for collecting environment data
+        self.angle_speed = angle_speed  # This is in radians
+        self.n_ray_cast = n_ray_cast  # The amount of raycasts it does
+        self.n_sensors = n_sensors  # The amount of sensors used for collecting environment data
         self.max_sensor_length = max_sensor_length
         
         self.change_angle = 0
         self.speed = 0
-        self.angle = np.pi/4 # In radians
+        self.angle = np.pi * 5 / 4  # In radians
         self.sensor_data = []
 
         self.l = 2 * self.radius
@@ -27,19 +27,23 @@ class Robot:
         self.w = (self.vr - self.vl) / self.l
         self.R, self.icc = self.calculate_icc()
 
+
     def calculate_icc(self):
-        """Returns the radius and the (x,y) coordinates of the center of rotation"""
-        # Calculate the center of rotation, 
+        """
+        Returns the radius and the (x,y) coordinates of the center of rotation
+        """
         diff = self.vr - self.vl
         R = self.l * 1/2 * (self.vl + self.vr) / (diff if diff != 0 else 0.0001)  # avoid division by zero
-        icc = (self.x - R * math.sin(self.angle), self.y + R * math.cos(self.angle))
+        icc = (self.x - R * math.sin(self.angle), self.y + R * 
+            math.cos(self.angle))
         return R, icc
+
 
     def get_icc(self):
         return self.R, self.icc
 
+
     def update(self):
-        # TODO: why does it not move the right way initially
 
         # Get the new center of rotation and speed
         self.R, self.icc = self.calculate_icc()
@@ -56,7 +60,6 @@ class Robot:
             r_x = self.x + v * math.cos(self.angle)
             r_y = self.y + v * math.sin(self.angle)
         else:
-            # TODO: should this move even if vr == vl?
             icc_x = self.icc[0]
             icc_y = self.icc[1]
             r_x = (
@@ -80,9 +83,10 @@ class Robot:
         # Collects information about the environment, by sending raycasts in all directions
         self.collect_sensor_data()
 
+
     def update_old(self):
         """
-        old update method
+        old update method, might be useful for debugging
         """
 
         # Rotate the robot
@@ -100,9 +104,9 @@ class Robot:
         
 
     def check_collision_edge(self, theta, r_x, r_y):
-        # Check the collision for on point on the edge of the circle
+        # Check the collision for a point on the edge of the circle
         # theta is the point on the edge in radians
-        raycast_range = 2*self.movement_speed
+        raycast_range = 2 * self.movement_speed
 
         # Start the raycast from edge of the circle
         edge_x = self.x + math.cos(self.angle + theta)*self.radius
@@ -162,16 +166,15 @@ class Robot:
                 # No collision with y, set the location to the requested y location
                 self.y = r_y
 
+
     def check_collision(self, r_x, r_y):
         theta = 0
         collision = self.check_collision_edge(theta, r_x, r_y)
         if(collision is None):
             # No collision, set the new x and y based on the requested values
             self.x = r_x
-            self.y = r_y
-        
+            self.y = r_y        
 
-        
             
     def collect_sensor_data(self):
         raycast_length = self.radius + self.max_sensor_length
