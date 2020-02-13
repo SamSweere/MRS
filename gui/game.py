@@ -80,5 +80,10 @@ class MyGame(arcade.Window):
         arcade.draw_circle_outline(self.robot.x, self.robot.y, self.robot.radius, color=arcade.csscolor.BLACK)
         arcade.draw_line(self.robot.x, self.robot.y, rotated_x, rotated_y, color=arcade.csscolor.BLACK)
         
-        
+        # Draw the sensors
+        for hit, dist in self.robot.sensor_data:
+            if hit is None:
+                continue
+            
+            arcade.draw_line(self.robot.x, self.robot.y, hit[0], hit[1], color=arcade.csscolor.RED)
             

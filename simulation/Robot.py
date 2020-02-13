@@ -3,7 +3,8 @@ import math
 
 class Robot:
     def __init__(self, world, start_x, start_y, radius=20, 
-                movement_speed=5, angle_speed=(5*math.pi/180), n_ray_cast = 10):
+                movement_speed=5, angle_speed=(5*math.pi/180), n_ray_cast = 10,
+                n_sensors = 10, max_sensor_length = 300):
         self.world = world
         self.x = start_x
         self.y = start_y
@@ -11,10 +12,13 @@ class Robot:
         self.movement_speed = 5 
         self.angle_speed = angle_speed # This is in radians
         self.n_ray_cast = n_ray_cast # The amount of raycasts it does
+        self.n_sensors = n_sensors # The amount of sensors used for collecting environment data
+        self.max_sensor_length = max_sensor_length
         
         self.change_angle = 0
         self.speed = 0
         self.angle = 0 # In radians
+        self.sensor_data = []
 
     def update(self):
         # Rotate the robot
@@ -25,7 +29,10 @@ class Robot:
         r_y = self.y + self.speed * self.movement_speed * math.sin(self.angle)
         
         # Check for collision, this function also sets the new x and y values
-        self.check_collision(r_x, r_y)       
+        self.check_collision(r_x, r_y)   
+        
+        # Collects information about the environment, by sending raycasts in all directions
+        self.collect_sensor_data()
         
 
     def check_collision(self, r_x, r_y):
@@ -58,4 +65,19 @@ class Robot:
                 pass
             else:
                 print("Error: something is wrong with the angle of the robot")
+                
+    def collect_sensor_data(self):
+        raycast_length = self.radius + self.max_sensor_length
+        delta_angle = (math.pi * 2) / self.n_sensors
         
+        self.sensor_data = []
+        for sensor_id in range(self.n_sensors):
+            # Note the sensor angle is relative to our own angle
+            sensor_angle = self.angle + delta_angle * sensor_id
+            
+            # Note instead of calculating the position of the sensor
+            # We just send a raycast from the center of our agent
+            (hit, dist) = self.world.raycast(self.x, self.y, sensor_angle, raycast_length)
+            dist -= self.radius
+            self.sensor_data.append((hit, dist))
+            
