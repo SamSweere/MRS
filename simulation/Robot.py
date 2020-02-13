@@ -75,7 +75,8 @@ class Robot:
 
         self.angle = (self.angle + angle_change) % (2*math.pi)
         
-        print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}, location: ({self.x}, {self.y})")
+        # # for debugging
+        # print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}, location: ({self.x}, {self.y})")
 
         # Check for collision, this function also sets the new x and y values
         self.check_collision(r_x, r_y) 
@@ -101,43 +102,59 @@ class Robot:
         
         # Collects information about the environment, by sending raycasts in all directions
         self.collect_sensor_data()
+
+
+    def check_collision(self, r_x, r_y):
+        theta = 0
+        collision = self.check_collision_edge(theta, r_x, r_y)
+        if not collision:
+            # No collision, set the new x and y based on the requested values
+            self.x = r_x
+            self.y = r_y    
         
 
     def check_collision_edge(self, theta, r_x, r_y):
-        # Check the collision for a point on the edge of the circle
-        # theta is the point on the edge in radians
+        """
+        Check the collision for a point on the edge of the circle
+        @param theta: point on the edge in radians
+        @param r_x: x position after current step
+        @param r_y: y position after current step
+        """
+
         raycast_range = 2 * self.movement_speed
 
         # Start the raycast from edge of the circle
-        edge_x = self.x + math.cos(self.angle + theta)*self.radius
-        edge_y = self.y + math.sin(self.angle + theta)*self.radius
-
-        edge_r_x = r_x + math.cos(self.angle + theta)*self.radius
-        edge_r_y = r_y + math.sin(self.angle + theta)*self.radius
+        new_angle = self.angle + theta
+        edge_x = self.x + math.cos(new_angle) * self.radius
+        edge_y = self.y + math.sin(new_angle) * self.radius
+        edge_r_x = r_x + math.cos(new_angle) * self.radius
+        edge_r_y = r_y + math.sin(new_angle) * self.radius
         
-        closest_inter, closest_dist = self.world.raycast(edge_x, edge_y, self.angle, raycast_range)    
-        print("Inter:",closest_inter, closest_dist)
+        # raycast from point on current edge
+        closest_inter, closest_dist = self.world.raycast(edge_x, edge_y,
+            self.angle, raycast_range)    
+        print("Inter:", closest_inter, closest_dist)
 
         # Define a buffer such that the robot is not placed at exactly the wall
         # This would cause it to stop for one frame and then clip through
         buffer = 1.0e-10
 
         if(closest_inter is None):
-            # No collision return None
-            return None
+            # No collision return False
+            return False
         else:
             # Get the intersect x and y
             inter_x = closest_inter[0]
             inter_y = closest_inter[1]
 
-            print("self.xy:",self.x, self.y)
-            print("r.xy:",r_x,r_y)
-            print("inter.xy:",inter_x, inter_y)
+            print("self.xy:", self.x, self.y)
+            print("r.xy:", r_x, r_y)
+            print("inter.xy:", inter_x, inter_y)
 
             final_x = None
             final_y = None
 
-            # Check the four looking directions
+            # Check the four possible directions
             if(edge_x >= inter_x and edge_r_x < inter_x): 
                 # Collision, move the robot to the collision x point plus some buffer
                 # TODO: this is a bit more complex
@@ -164,16 +181,9 @@ class Robot:
                 self.y = inter_y - buffer
             else:
                 # No collision with y, set the location to the requested y location
-                self.y = r_y
+                self.y = r_y 
 
-
-    def check_collision(self, r_x, r_y):
-        theta = 0
-        collision = self.check_collision_edge(theta, r_x, r_y)
-        if(collision is None):
-            # No collision, set the new x and y based on the requested values
-            self.x = r_x
-            self.y = r_y        
+            return True
 
             
     def collect_sensor_data(self):
