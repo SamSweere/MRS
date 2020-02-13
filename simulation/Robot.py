@@ -33,7 +33,7 @@ class Robot:
         closest_inter, closest_dist = self.world.raycast(self.x, self.y, self.angle, raycast_range)    
         print(closest_inter, closest_dist)
 
-        if(closest_inter == None):
+        if(closest_inter is None):
             # No collision, set the new x and y based on the requested values
             self.x = r_x
             self.y = r_y
