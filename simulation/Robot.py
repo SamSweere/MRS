@@ -28,44 +28,12 @@ class Robot:
         self.R, self.icc = self.calculate_icc()
 
     def calculate_icc(self):
-        # # if self.icc_dist == np.inf:
-        # #     icc_dist = 999
-        # # else: 
-        # icc_dist = self.icc_dist
-        # self.icc_dist = np.linalg.norm(np.array([self.x - self.icc[0], self.y - self.icc[1]]))
-        # print(f"new icc distance {self.icc_dist}")
         R = 1/2 * (self.vl + self.vr) / max((self.vr - self.vl), 0.0001)  # avoid division by zero
         icc = (self.x - R * math.cos(self.angle), self.y - R * math.sin(self.angle))
         return R, icc
 
-
-    def new_position(self):
-        """use dem slides to get da new positions"""
-        # # https://opentextbc.ca/physicstestbook2/chapter/kinematics-of-rotational-motion/
-        
-        # R = 1/2 * (vl + vr) / (vl - vr)
-
-        # w = (vr -vl) / l
-
-        # vr = w(R + l/2)
-        # vl = w(R - l/2)
-
-        # v = (vr + vl) / 2
-
-
-        # ### forward kinematics
-        
-        vl, vr = 1, 1
-        return vl, vr
-
     def get_icc(self):
-        return self.R, self.icc  
-        # if (self.icc[0] != np.inf) and (self.icc[1] != np.inf):
-        #     return self.icc, self.icc_dist  
-        # else:  # TODO: get rid of this somehow
-        #     icc = (400, 325)
-        #     icc_dist = np.linalg.norm(np.array([self.x - icc[0], self.y - icc[1]]))
-        #     return icc, icc_dist
+        return self.R, self.icc
 
     def update(self):
 
@@ -85,20 +53,23 @@ class Robot:
 
         self.collect_sensor_data()
 
-    # def update(self):
+    def update_old(self):
+        """
+        old update method
+        """
 
-    #     # Rotate the robot
-    #     self.angle = (self.angle + self.change_angle * self.angle_speed) % (2*math.pi)
+        # Rotate the robot
+        self.angle = (self.angle + self.change_angle * self.angle_speed) % (2*math.pi)
 
-    #     # Based on the speed and the angle find the new requested location
-    #     r_x = self.x + self.speed * self.movement_speed * math.cos(self.angle)
-    #     r_y = self.y + self.speed * self.movement_speed * math.sin(self.angle)
+        # Based on the speed and the angle find the new requested location
+        r_x = self.x + self.speed * self.movement_speed * math.cos(self.angle)
+        r_y = self.y + self.speed * self.movement_speed * math.sin(self.angle)
         
-    #     # Check for collision, this function also sets the new x and y values
-    #     self.check_collision(r_x, r_y)   
+        # Check for collision, this function also sets the new x and y values
+        self.check_collision(r_x, r_y)   
         
-    #     # Collects information about the environment, by sending raycasts in all directions
-    #     self.collect_sensor_data()
+        # Collects information about the environment, by sending raycasts in all directions
+        self.collect_sensor_data()
         
 
     def check_collision(self, r_x, r_y):

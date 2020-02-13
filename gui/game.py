@@ -51,6 +51,9 @@ class MyGame(arcade.Window):
         arcade.draw_text(output, 0, self.SCREEN_HEIGHT-20, arcade.color.RED, 16)
         self.fps_tracker.tick()
 
+        arcade.draw_text("vl" + str(self.robot.vl), 0, self.SCREEN_HEIGHT-60, arcade.color.GOLD, 16)
+        arcade.draw_text("vr" + str(self.robot.vr), 0, self.SCREEN_HEIGHT-80, arcade.color.GOLD, 16)
+
     def on_update(self, delta_time):
         """ Movement and game logic """
 
@@ -69,7 +72,11 @@ class MyGame(arcade.Window):
         if key == arcade.key.W:
             self.robot.vl = 1
         if key == arcade.key.O:
-            self.robot.vr = 1       
+            self.robot.vr = 1
+        if key == arcade.key.S:
+            self.robot.vl = -1
+        if key == arcade.key.L:
+            self.robot.vr = -1       
 
         # # Rotate left/right
         # elif key == arcade.key.LEFT:
@@ -83,10 +90,10 @@ class MyGame(arcade.Window):
             self.robot.speed = 0
         elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.robot.change_angle = 0
-        elif key == arcade.key.W:
-            self.robot.vl = 0
-        elif key == arcade.key.O:
-            self.robot.vr = 0
+        # elif key == arcade.key.W:
+        #     self.robot.vl = 0
+        # elif key == arcade.key.O:
+        #     self.robot.vr = 0
 
     def __draw_robot__(self):       
         # Draw the shape of the robot as an circle with an line marking its rotation
