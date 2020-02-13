@@ -88,8 +88,12 @@ class Robot:
 
         edge_r_x = r_x + math.cos(self.angle + theta)*self.radius
         edge_r_y = r_y + math.sin(self.angle + theta)*self.radius
+        print("theta:",theta)
+        print("x:",self.x)
+        print("edge_x:",edge_x)
+        print("edge_r_x:",edge_r_x)
         
-        closest_inter, closest_dist = self.world.raycast(edge_x, edge_y, self.angle, raycast_range)    
+        closest_inter, closest_dist = self.world.raycast(edge_x, edge_y, self.angle + theta, raycast_range)    
         print("Inter:",closest_inter, closest_dist)
 
         # Define a buffer such that the robot is not placed at exactly the wall
@@ -114,42 +118,68 @@ class Robot:
             # Check the four looking directions
             if(edge_x >= inter_x and edge_r_x < inter_x): 
                 # Collision, move the robot to the collision x point plus some buffer
-                # TODO: this is a bit more complex
-                print("Collision!")
-                self.x = inter_x + buffer             
+                final_x = inter_x + buffer             
             elif(edge_x <= inter_x and edge_r_x > inter_x):
                 # Collision, move the robot to the collision x point plus some buffer
-                # TODO: this is a bit more complex
-                print("Collision!")
-                self.x = inter_x - buffer
+                final_x = inter_x - buffer
             else:
-                # No collision with x, set the location to the requested x location
-                self.x = r_x
+                # No collision with x, set the location to the requested x location of the edge
+                final_x = None
 
             if(edge_y >= inter_y and edge_r_y < inter_y):
                 # Collision, move the robot to the collision y point plus some buffer
-                # TODO: this is a bit more complex
-                print("Collision!")
-                self.y = inter_y + buffer 
+                final_y = inter_y + buffer 
             elif(edge_y <= inter_y and edge_r_y > inter_y):
                 # Collision, move the robot to the collision y point plus some buffer
-                # TODO: this is a bit more complex
-                print("Collision!")
-                self.y = inter_y - buffer
+                final_y = inter_y - buffer
             else:
-                # No collision with y, set the location to the requested y location
-                self.y = r_y
+                # No collision with y, set the location to the requested y location of the edge
+                final_y = None
+
+
+            if(final_x is None and final_y is None):
+                # No collision
+                return None
+            
+            # We have a collision
+            # Return the collision points with the correct buffer
+            return (final_x, final_y)
 
     def check_collision(self, r_x, r_y):
-        
-        theta = 0
-        collision = self.check_collision_edge(theta, r_x, r_y)
-        if(collision is None):
-            # No collision, set the new x and y based on the requested values
+        n_col_rays = 8 # Ideally powers of 2
+
+        col_ray_angles = np.linspace(0, 2*math.pi, 8, endpoint=False)
+        collision = False
+
+        for theta in col_ray_angles:
+        # theta = math.pi/4
+            collision_point = self.check_collision_edge(theta, r_x, r_y)
+            if(collision_point is None):
+                # No collision
+                continue 
+            else:
+                # There is a collision, set the location to the corrected collision location
+                print("Collision!")
+                collision = True
+                if(collision_point[0] is None):
+                    # No collision here
+                    self.x = r_x
+                else:
+                    self.x = collision_point[0] - math.cos(self.angle + theta)*self.radius
+                
+                if(collision_point[1] is None):
+                    # No collision here
+                    self.x = r_x
+                else:
+                    self.y = collision_point[1] - math.sin(self.angle + theta)*self.radius
+                
+                # We have a collision break out of the loop
+                break
+
+        if(not collision):
+            # No collision, set the location to the requested values
             self.x = r_x
             self.y = r_y
-        
-
         
             
     def collect_sensor_data(self):
