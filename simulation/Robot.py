@@ -39,6 +39,7 @@ class Robot:
         return self.R, self.icc
 
     def update(self):
+        # TODO: why does it not move the right way initially
 
         # Get the new center of rotation and speed
         self.R, self.icc = self.calculate_icc()
@@ -53,7 +54,7 @@ class Robot:
         # Based on the speed and the angle find the new requested location
         if self.vr == self.vl:
             r_x = self.x + v * math.cos(self.angle)
-            r_y = self.y + v * self.movement_speed * math.sin(self.angle)
+            r_y = self.y + v * math.sin(self.angle)
         else:
             # TODO: should this move even if vr == vl?
             icc_x = self.icc[0]
