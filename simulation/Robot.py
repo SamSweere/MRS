@@ -3,21 +3,25 @@ import math
 
 class Robot:
     def __init__(self, world, start_x, start_y, radius=20, 
-            movement_speed=5, angle_speed=(5*math.pi/180), n_ray_cast = 10,
-            n_sensors = 12, max_sensor_length = 100):
+                movement_speed=5, angle_speed=(5*math.pi/180), n_ray_cast = 10,
+                n_sensors = 12, max_sensor_length = 100):
         self.world = world
         self.x = start_x
         self.y = start_y
         self.radius = radius
         self.movement_speed = 5 
-        self.angle_speed = angle_speed  # This is in radians
-        self.n_ray_cast = n_ray_cast  # The amount of raycasts it does
-        self.n_sensors = n_sensors  # The amount of sensors used for collecting environment data
+        self.angle_speed = angle_speed # This is in radians
+        self.n_ray_cast = n_ray_cast # The amount of raycasts it does
+        self.n_sensors = n_sensors # The amount of sensors used for collecting environment data
         self.max_sensor_length = max_sensor_length
         
         self.change_angle = 0
         self.speed = 0
+<<<<<<< HEAD
         self.angle = np.pi * 6 / 4  # In radians
+=======
+        self.angle = np.pi/4 # In radians
+>>>>>>> parent of 2c57235... fixed collision thingy
         self.sensor_data = []
 
         self.l = 2 * self.radius
@@ -27,23 +31,19 @@ class Robot:
         self.w = (self.vr - self.vl) / self.l
         self.R, self.icc = self.calculate_icc()
 
-
     def calculate_icc(self):
-        """
-        Returns the radius and the (x,y) coordinates of the center of rotation
-        """
+        """Returns the radius and the (x,y) coordinates of the center of rotation"""
+        # Calculate the center of rotation, 
         diff = self.vr - self.vl
-        R = self.l * 1/2 * (self.vl + self.vr) / (diff if diff != 0 else 0.0001)  # avoid division by zero
-        icc = (self.x - R * math.sin(self.angle), self.y + R * 
-            math.cos(self.angle))
+        R = 1/2 * (self.vl + self.vr) / (diff if diff != 0 else 0.0001)  # avoid division by zero
+        icc = (self.x - R * math.sin(self.angle), self.y + R * math.cos(self.angle))
         return R, icc
-
 
     def get_icc(self):
         return self.R, self.icc
 
-
     def update(self):
+        # TODO: why does it not move the right way initially
 
         # TODO: turning on the spot currently not working :O
 
@@ -53,7 +53,7 @@ class Robot:
 
         # Determine the new angle keep it within 2 pi
         # w is basically theta because we just assume time was 1
-        v = (self.vl + self.vr) / 2
+        v = (self.vl + self.vr / 2)
         dt = 1
         if v != 0:
             angle_change = self.w * dt * v
@@ -65,6 +65,7 @@ class Robot:
             r_x = self.x + v * math.cos(self.angle)
             r_y = self.y + v * math.sin(self.angle)
         else:
+            # TODO: should this move even if vr == vl?
             icc_x = self.icc[0]
             icc_y = self.icc[1]
             r_x = (
@@ -80,8 +81,7 @@ class Robot:
 
         self.angle = (self.angle + angle_change) % (2*math.pi)
         
-        # # for debugging
-        # print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}, location: ({self.x}, {self.y})")
+        print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}, location: ({self.x}, {self.y})")
 
         # Check for collision, this function also sets the new x and y values
         self.check_collision(r_x, r_y) 
@@ -89,10 +89,9 @@ class Robot:
         # Collects information about the environment, by sending raycasts in all directions
         self.collect_sensor_data()
 
-
     def update_old(self):
         """
-        old update method, might be useful for debugging
+        old update method
         """
 
         # Rotate the robot
@@ -107,56 +106,26 @@ class Robot:
         
         # Collects information about the environment, by sending raycasts in all directions
         self.collect_sensor_data()
-
-
-    def check_collision(self, r_x, r_y):
-        theta = 0
-        collision = self.check_collision_edge(theta, r_x, r_y)
-        if not collision:
-            # No collision, set the new x and y based on the requested values
-            self.x = r_x
-            self.y = r_y    
         
 
     def check_collision_edge(self, theta, r_x, r_y):
-        """
-        Check the collision for a point on the edge of the circle
-        @param theta: point on the edge in radians
-        @param r_x: x position after current step
-        @param r_y: y position after current step
-        """
-
-        raycast_range = 2 * self.movement_speed
+        # Check the collision for on point on the edge of the circle
+        # theta is the point on the edge in radians
+        raycast_range = 2*self.movement_speed
 
         # Start the raycast from edge of the circle
-        new_angle = self.angle + theta
-        edge_x = self.x + math.cos(new_angle) * self.radius
-        edge_y = self.y + math.sin(new_angle) * self.radius
+        edge_x = self.x + math.cos(self.angle + theta)*self.radius
+        edge_y = self.y + math.sin(self.angle + theta)*self.radius
 
-        edge_r_x = r_x + math.cos(new_angle) * self.radius
-        edge_r_y = r_y + math.sin(new_angle) * self.radius
+        edge_r_x = r_x + math.cos(self.angle + theta)*self.radius
+        edge_r_y = r_y + math.sin(self.angle + theta)*self.radius
+        print("theta:",theta)
+        print("x:",self.x)
+        print("edge_x:",edge_x)
+        print("edge_r_x:",edge_r_x)
         
-        # raycast from point on current edge
-        closest_inter, closest_dist = self.world.raycast(edge_x, edge_y,
-            self.angle, raycast_range)    
-        # print("Inter:", closest_inter, closest_dist)
-
-        if(closest_inter is None):
-            # No collision return False
-            return False
-
-        ###
-        # # TODO: don't we need a point at the angle of the ray cast in question?
-        intercept_x_diff = closest_inter[0] - self.x
-        intercept_y_diff = closest_inter[1] - self.y
-        additional_angle = np.arctan(intercept_y_diff/intercept_x_diff)
-        intercept_angle = self.angle + additional_angle
-        print(f"Hitting object at rad {intercept_angle}")
-        edge_x = self.x + math.cos(intercept_angle) * self.radius
-        edge_y = self.y + math.sin(intercept_angle) * self.radius
-        edge_r_x = r_x + math.cos(intercept_angle) * self.radius
-        edge_r_y = r_y + math.sin(intercept_angle) * self.radius
-        ###
+        closest_inter, closest_dist = self.world.raycast(edge_x, edge_y, self.angle + theta, raycast_range)    
+        print("Inter:",closest_inter, closest_dist)
 
         # Define a buffer such that the robot is not placed at exactly the wall
         # This would cause it to stop for one frame and then clip through
@@ -185,24 +154,37 @@ class Robot:
             print("Collision!")
             self.x = inter_x - self.radius - buffer
         else:
-            # No collision with x, set the location to the requested x location
-            self.x = r_x
+            # Get the intersect x and y
+            inter_x = closest_inter[0]
+            inter_y = closest_inter[1]
 
-        if(edge_y >= inter_y and edge_r_y < inter_y):
-            # Collision, move the robot to the collision y point plus some buffer
-            # TODO: this is a bit more complex
-            print("Collision!")
-            self.y = inter_y + self.radius + buffer 
-        elif(edge_y <= inter_y and edge_r_y > inter_y):
-            # Collision, move the robot to the collision y point plus some buffer
-            # TODO: this is a bit more complex
-            print("Collision!")
-            self.y = inter_y - self.radius - buffer
-        else:
-            # No collision with y, set the location to the requested y location
-            self.y = r_y 
+            print("self.xy:",self.x, self.y)
+            print("r.xy:",r_x,r_y)
+            print("inter.xy:",inter_x, inter_y)
 
-        return True
+            final_x = None
+            final_y = None
+
+            # Check the four looking directions
+            if(edge_x >= inter_x and edge_r_x < inter_x): 
+                # Collision, move the robot to the collision x point plus some buffer
+                final_x = inter_x + buffer             
+            elif(edge_x <= inter_x and edge_r_x > inter_x):
+                # Collision, move the robot to the collision x point plus some buffer
+                final_x = inter_x - buffer
+            else:
+                # No collision with x, set the location to the requested x location of the edge
+                final_x = None
+
+            if(edge_y >= inter_y and edge_r_y < inter_y):
+                # Collision, move the robot to the collision y point plus some buffer
+                final_y = inter_y + buffer 
+            elif(edge_y <= inter_y and edge_r_y > inter_y):
+                # Collision, move the robot to the collision y point plus some buffer
+                final_y = inter_y - buffer
+            else:
+                # No collision with y, set the location to the requested y location of the edge
+                final_y = None
 
             if(final_x is None and final_y is None):
                 # No collision
