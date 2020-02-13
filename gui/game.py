@@ -4,6 +4,7 @@ Platformer Game
 import arcade
 import math
 from simulation.World import World
+from .fps_counter import FPSCounter
 
 # Constants
 SCREEN_TITLE = "Platformer"
@@ -21,7 +22,8 @@ class MyGame(arcade.Window):
         self.SCREEN_HEIGHT = env_height
         self.world = world
         self.robot = robot
-
+        self.fps_tracker = FPSCounter()
+        
         # Call the parent class and set up the window
         super().__init__(self.env_width, self.env_height, SCREEN_TITLE)
 
@@ -42,6 +44,12 @@ class MyGame(arcade.Window):
             arcade.draw_polygon_filled(wall.points, color=arcade.csscolor.BLACK)
             
         self.__draw_robot__()
+        
+        # Track and draw the fps
+        fps = self.fps_tracker.get_fps()
+        output = f"FPS: {fps:3.0f}"
+        arcade.draw_text(output, 0, self.SCREEN_HEIGHT-20, arcade.color.RED, 16)
+        self.fps_tracker.tick()
 
     def on_update(self, delta_time):
         """ Movement and game logic """

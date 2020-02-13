@@ -4,7 +4,7 @@ import math
 class Robot:
     def __init__(self, world, start_x, start_y, radius=20, 
                 movement_speed=5, angle_speed=(5*math.pi/180), n_ray_cast = 10,
-                n_sensors = 10, max_sensor_length = 300):
+                n_sensors = 12, max_sensor_length = 100):
         self.world = world
         self.x = start_x
         self.y = start_y
