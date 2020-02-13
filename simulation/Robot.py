@@ -84,6 +84,7 @@ class Robot:
 
         # Collects information about the environment, by sending raycasts in all directions
         self.collect_sensor_data()
+        
 
     def update_old(self):
         """
@@ -192,6 +193,7 @@ class Robot:
             # We have a collision
             # Return the collision points with the correct buffer
             return (final_x, final_y)
+
 
     def check_collision(self, r_x, r_y):
         n_col_rays = 8 # Ideally powers of 2
