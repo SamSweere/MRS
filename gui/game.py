@@ -63,20 +63,16 @@ class MyGame(arcade.Window):
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
-        # # Forward/back
-        # if key == arcade.key.UP:
-        #     self.robot.speed = 1
-        # elif key == arcade.key.DOWN:
-        #     self.robot.speed = -1
+        speed = 0.5
 
         if key == arcade.key.W:
-            self.robot.vl = 2
+            self.robot.vl += speed
         if key == arcade.key.O:
-            self.robot.vr = 2
+            self.robot.vr += speed
         if key == arcade.key.S:
-            self.robot.vl = -2
+            self.robot.vl += -speed
         if key == arcade.key.L:
-            self.robot.vr = -2       
+            self.robot.vr += -speed   
 
         # # Rotate left/right
         # elif key == arcade.key.LEFT:
@@ -86,14 +82,14 @@ class MyGame(arcade.Window):
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
-        if key == arcade.key.UP or key == arcade.key.DOWN:
-            self.robot.speed = 0
-        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.robot.change_angle = 0
-        elif key == arcade.key.W:
-            self.robot.vl = 0
-        elif key == arcade.key.O:
-            self.robot.vr = 0
+        # if key == arcade.key.UP or key == arcade.key.DOWN:
+        #     self.robot.speed = 0
+        # elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+        #     self.robot.change_angle = 0
+        # elif key == arcade.key.W:
+        #     self.robot.vl = 0
+        # elif key == arcade.key.O:
+        #     self.robot.vr = 0
         pass
 
     def __draw_robot__(self):       

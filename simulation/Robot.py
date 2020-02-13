@@ -39,6 +39,7 @@ class Robot:
         return self.R, self.icc
 
     def update(self):
+
         # Get the new center of rotation and speed
         self.R, self.icc = self.calculate_icc()
         self.w = (self.vr - self.vl) / self.l
@@ -50,22 +51,24 @@ class Robot:
         angle_change = self.w * dt * v
 
         # Based on the speed and the angle find the new requested location
-        # r_x = self.x + v * math.cos(self.angle)
-        # r_y = self.y + v * math.sin(self.angle)
+        if self.vr == self.vl:
+            r_x = self.x + v * math.cos(self.angle)
+            r_y = self.y + v * self.movement_speed * math.sin(self.angle)
+        else:
+            # TODO: should this move even if vr == vl?
+            icc_x = self.icc[0]
+            icc_y = self.icc[1]
+            r_x = (
+                math.cos(angle_change) * (self.x - icc_x) - 
+                math.sin(angle_change) * (self.y - icc_y) + 
+                icc_x
+            )
+            r_y = (
+                math.sin(angle_change) * (self.x - icc_x) +
+                math.cos(angle_change) * (self.y - icc_y) +
+                icc_y
+            )
 
-        icc_x = self.icc[0]
-        icc_y = self.icc[1]
-        r_x = (
-            math.cos(angle_change) * (self.x - icc_x) - 
-            math.sin(angle_change) * (self.y - icc_y) + 
-            icc_x
-        )
-        r_y = (
-            math.sin(angle_change) * (self.x - icc_x) +
-            math.cos(angle_change) * (self.y - icc_y) +
-            icc_y
-        )
-        # TODO: maybe scale up r_x and r_y by R?
         self.angle = (self.angle + angle_change) % (2*math.pi)
         
         print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}, location: ({self.x}, {self.y})")
