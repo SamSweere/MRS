@@ -31,7 +31,7 @@ class Robot:
         """Returns the radius and the (x,y) coordinates of the center of rotation"""
         # Calculate the center of rotation, 
         diff = self.vr - self.vl
-        R = 1/2 * (self.vl + self.vr) / (diff if diff != 0 else 0.0001)  # avoid division by zero
+        R = self.l * 1/2 * (self.vl + self.vr) / (diff if diff != 0 else 0.0001)  # avoid division by zero
         icc = (self.x - R * math.sin(self.angle), self.y + R * math.cos(self.angle))
         return R, icc
 
@@ -47,7 +47,7 @@ class Robot:
 
         # Determine the new angle keep it within 2 pi
         # w is basically theta because we just assume time was 1
-        v = (self.vl + self.vr / 2)
+        v = (self.vl + self.vr) / 2
         dt = 1
         angle_change = self.w * dt * v
 
@@ -163,7 +163,6 @@ class Robot:
                 self.y = r_y
 
     def check_collision(self, r_x, r_y):
-        
         theta = 0
         collision = self.check_collision_edge(theta, r_x, r_y)
         if(collision is None):
