@@ -13,9 +13,7 @@ class World:
 
         # Calculate the direction from angle
         direction = np.array([math.cos(angle), math.sin(angle)])
-
-        norm_dir = direction / math.sqrt(direction[0] * direction[0] + direction[1] * direction[1])
-        end = start + norm_dir * max_length
+        end = start + direction * max_length
         
         closest_inter = None
         closest_dist = max_length
