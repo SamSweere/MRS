@@ -42,8 +42,8 @@ class Robot:
         self.R, self.icc = self.calculate_icc()
         self.w = (self.vr - self.vl) / self.l
 
-        # Determine the new angle
-        self.angle = self.angle + self.w
+        # Determine the new angle keep it within 2 pi
+        self.angle = (self.angle + self.w) % (2*math.pi)
         
         print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}")
 
@@ -77,18 +77,28 @@ class Robot:
         self.collect_sensor_data()
         
 
-    def check_collision(self, r_x, r_y):
-        raycast_range = 200
-        closest_inter, closest_dist = self.world.raycast(self.x, self.y, self.angle, raycast_range)    
+    def check_collision_edge(self, theta, r_x, r_y):
+        # Check the collision for on point on the edge of the circle
+        # theta is the point on the edge in radians
+        raycast_range = 2*self.movement_speed
+
+        # Start the raycast from edge of the circle
+        edge_x = self.x + math.cos(self.angle + theta)*self.radius
+        edge_y = self.y + math.sin(self.angle + theta)*self.radius
+
+        edge_r_x = r_x + math.cos(self.angle + theta)*self.radius
+        edge_r_y = r_y + math.sin(self.angle + theta)*self.radius
+        
+        closest_inter, closest_dist = self.world.raycast(edge_x, edge_y, self.angle, raycast_range)    
         print("Inter:",closest_inter, closest_dist)
 
         # Define a buffer such that the robot is not placed at exactly the wall
-        buffer = 1
+        # This would cause it to stop for one frame and then clip through
+        buffer = 1.0e-10
 
         if(closest_inter is None):
-            # No collision, set the new x and y based on the requested values
-            self.x = r_x
-            self.y = r_y
+            # No collision return None
+            return None
         else:
             # Get the intersect x and y
             inter_x = closest_inter[0]
@@ -98,13 +108,16 @@ class Robot:
             print("r.xy:",r_x,r_y)
             print("inter.xy:",inter_x, inter_y)
 
+            final_x = None
+            final_y = None
+
             # Check the four looking directions
-            if(self.x >= inter_x and r_x < inter_x): 
+            if(edge_x >= inter_x and edge_r_x < inter_x): 
                 # Collision, move the robot to the collision x point plus some buffer
                 # TODO: this is a bit more complex
                 print("Collision!")
                 self.x = inter_x + buffer             
-            elif(self.x <= inter_x and r_x > inter_x):
+            elif(edge_x <= inter_x and edge_r_x > inter_x):
                 # Collision, move the robot to the collision x point plus some buffer
                 # TODO: this is a bit more complex
                 print("Collision!")
@@ -113,12 +126,12 @@ class Robot:
                 # No collision with x, set the location to the requested x location
                 self.x = r_x
 
-            if(self.y >= inter_y and r_y < inter_y):
+            if(edge_y >= inter_y and edge_r_y < inter_y):
                 # Collision, move the robot to the collision y point plus some buffer
                 # TODO: this is a bit more complex
                 print("Collision!")
                 self.y = inter_y + buffer 
-            elif(self.y <= inter_y and r_y > inter_y):
+            elif(edge_y <= inter_y and edge_r_y > inter_y):
                 # Collision, move the robot to the collision y point plus some buffer
                 # TODO: this is a bit more complex
                 print("Collision!")
@@ -126,6 +139,18 @@ class Robot:
             else:
                 # No collision with y, set the location to the requested y location
                 self.y = r_y
+
+    def check_collision(self, r_x, r_y):
+        
+        theta = 0
+        collision = self.check_collision_edge(theta, r_x, r_y)
+        if(collision is None):
+            # No collision, set the new x and y based on the requested values
+            self.x = r_x
+            self.y = r_y
+        
+
+        
             
     def collect_sensor_data(self):
         raycast_length = self.radius + self.max_sensor_length
