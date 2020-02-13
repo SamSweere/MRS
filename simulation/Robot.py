@@ -124,52 +124,54 @@ class Robot:
         closest_inter, closest_dist = self.world.raycast(edge_x, edge_y, self.angle + theta, raycast_range)    
         print("Inter:",closest_inter, closest_dist)
 
-        if closest_inter is None:
-            return None
-
         # Define a buffer such that the robot is not placed at exactly the wall
         # This would cause it to stop for one frame and then clip through
         buffer = 1.0e-10
 
-        # Get the intersect x and y
-        inter_x = closest_inter[0]
-        inter_y = closest_inter[1]
-
-        print("self.xy:", self.x, self.y)
-        print("r.xy:", r_x, r_y)
-        print("inter.xy:", inter_x, inter_y)
-
-        final_x = None
-        final_y = None
-
-        # Check the four looking directions
-        if(edge_x >= inter_x and edge_r_x < inter_x): 
-            # Collision, move the robot to the collision x point plus some buffer
-            final_x = inter_x + buffer             
-        elif(edge_x <= inter_x and edge_r_x > inter_x):
-            # Collision, move the robot to the collision x point plus some buffer
-            final_x = inter_x - buffer
+        if(closest_inter is None):
+            # No collision return None
+            return None
         else:
-            # No collision with x, set the location to the requested x location of the edge
+            # Get the intersect x and y
+            inter_x = closest_inter[0]
+            inter_y = closest_inter[1]
+
+            print("self.xy:", self.x, self.y)
+            print("r.xy:", r_x, r_y)
+            print("inter.xy:", inter_x, inter_y)
+
             final_x = None
-
-        if(edge_y >= inter_y and edge_r_y < inter_y):
-            # Collision, move the robot to the collision y point plus some buffer
-            final_y = inter_y + buffer 
-        elif(edge_y <= inter_y and edge_r_y > inter_y):
-            # Collision, move the robot to the collision y point plus some buffer
-            final_y = inter_y - buffer
-        else:
-            # No collision with y, set the location to the requested y location of the edge
             final_y = None
 
-        if(final_x is None and final_y is None):
-            # No collision
-            return None
-        
-        # We have a collision
-        # Return the collision points with the correct buffer
-        return (final_x, final_y)
+            # Check the four possible directions
+            if(edge_x >= inter_x and edge_r_x < inter_x): 
+                # Collision, move the robot to the collision x point plus some buffer
+                final_x = inter_x + buffer             
+            elif(edge_x <= inter_x and edge_r_x > inter_x):
+                # Collision, move the robot to the collision x point plus some buffer
+                final_x = inter_x - buffer
+            else:
+                # No collision with x, set the location to the requested x location of the edge
+                final_x = None
+
+            if(edge_y >= inter_y and edge_r_y < inter_y):
+                # Collision, move the robot to the collision y point plus some buffer
+                final_y = inter_y + buffer 
+            elif(edge_y <= inter_y and edge_r_y > inter_y):
+                # Collision, move the robot to the collision y point plus some buffer
+                final_y = inter_y - buffer
+            else:
+                # No collision with y, set the location to the requested y location of the edge
+                final_y = None
+
+
+            if(final_x is None and final_y is None):
+                # No collision
+                return None
+            
+            # We have a collision
+            # Return the collision points with the correct buffer
+            return (final_x, final_y)
 
 
     def check_collision(self, r_x, r_y):
