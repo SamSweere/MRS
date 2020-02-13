@@ -17,11 +17,7 @@ class Robot:
         
         self.change_angle = 0
         self.speed = 0
-<<<<<<< HEAD
-        self.angle = np.pi * 6 / 4  # In radians
-=======
         self.angle = np.pi/4 # In radians
->>>>>>> parent of 2c57235... fixed collision thingy
         self.sensor_data = []
 
         self.l = 2 * self.radius
@@ -126,6 +122,9 @@ class Robot:
         
         closest_inter, closest_dist = self.world.raycast(edge_x, edge_y, self.angle + theta, raycast_range)    
         print("Inter:",closest_inter, closest_dist)
+
+        if closest_inter is None:
+            return None
 
         # Define a buffer such that the robot is not placed at exactly the wall
         # This would cause it to stop for one frame and then clip through
