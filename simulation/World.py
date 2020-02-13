@@ -21,7 +21,7 @@ class World:
             inter, dist = wall.check_line_intercept(start, end)
             
             # Check if the intersection is the closest to our start
-            if inter is not None and dist < closest_dist:
+            if (inter is not None) and (dist < closest_dist):
                 closest_inter = inter
                 closest_dist = dist
         

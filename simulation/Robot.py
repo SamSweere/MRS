@@ -17,7 +17,7 @@ class Robot:
         
         self.change_angle = 0
         self.speed = 0
-        self.angle = np.pi * 5 / 4  # In radians
+        self.angle = np.pi * 6 / 4  # In radians
         self.sensor_data = []
 
         self.l = 2 * self.radius
@@ -45,6 +45,8 @@ class Robot:
 
     def update(self):
 
+        # TODO: turning on the spot currently not working :O
+
         # Get the new center of rotation and speed
         self.R, self.icc = self.calculate_icc()
         self.w = (self.vr - self.vl) / self.l
@@ -53,7 +55,10 @@ class Robot:
         # w is basically theta because we just assume time was 1
         v = (self.vl + self.vr) / 2
         dt = 1
-        angle_change = self.w * dt * v
+        if v != 0:
+            angle_change = self.w * dt * v
+        else:  # we want to be able to rotate on the spot
+            angle_change = self.w * dt
 
         # Based on the speed and the angle find the new requested location
         if self.vr == self.vl:
@@ -127,63 +132,77 @@ class Robot:
         new_angle = self.angle + theta
         edge_x = self.x + math.cos(new_angle) * self.radius
         edge_y = self.y + math.sin(new_angle) * self.radius
+
         edge_r_x = r_x + math.cos(new_angle) * self.radius
         edge_r_y = r_y + math.sin(new_angle) * self.radius
         
         # raycast from point on current edge
         closest_inter, closest_dist = self.world.raycast(edge_x, edge_y,
             self.angle, raycast_range)    
-        print("Inter:", closest_inter, closest_dist)
+        # print("Inter:", closest_inter, closest_dist)
+
+        if(closest_inter is None):
+            # No collision return False
+            return False
+
+        ###
+        # # TODO: don't we need a point at the angle of the ray cast in question?
+        intercept_x_diff = closest_inter[0] - self.x
+        intercept_y_diff = closest_inter[1] - self.y
+        additional_angle = np.arctan(intercept_y_diff/intercept_x_diff)
+        intercept_angle = self.angle + additional_angle
+        print(f"Hitting object at rad {intercept_angle}")
+        edge_x = self.x + math.cos(intercept_angle) * self.radius
+        edge_y = self.y + math.sin(intercept_angle) * self.radius
+        edge_r_x = r_x + math.cos(intercept_angle) * self.radius
+        edge_r_y = r_y + math.sin(intercept_angle) * self.radius
+        ###
 
         # Define a buffer such that the robot is not placed at exactly the wall
         # This would cause it to stop for one frame and then clip through
         buffer = 1.0e-10
 
-        if(closest_inter is None):
-            # No collision return False
-            return False
+        # Get the intersect x and y
+        inter_x = closest_inter[0]
+        inter_y = closest_inter[1]
+
+        print("self.xy:", self.x, self.y)
+        print("r.xy:", r_x, r_y)
+        print("inter.xy:", inter_x, inter_y)
+
+        final_x = None
+        final_y = None
+
+        # Check the four possible directions
+        if(edge_x >= inter_x and edge_r_x < inter_x): 
+            # Collision, move the robot to the collision x point plus some buffer
+            # TODO: this is a bit more complex
+            print("Collision!")
+            self.x = inter_x + self.radius + buffer             
+        elif(edge_x <= inter_x and edge_r_x > inter_x):
+            # Collision, move the robot to the collision x point plus some buffer
+            # TODO: this is a bit more complex
+            print("Collision!")
+            self.x = inter_x - self.radius - buffer
         else:
-            # Get the intersect x and y
-            inter_x = closest_inter[0]
-            inter_y = closest_inter[1]
+            # No collision with x, set the location to the requested x location
+            self.x = r_x
 
-            print("self.xy:", self.x, self.y)
-            print("r.xy:", r_x, r_y)
-            print("inter.xy:", inter_x, inter_y)
+        if(edge_y >= inter_y and edge_r_y < inter_y):
+            # Collision, move the robot to the collision y point plus some buffer
+            # TODO: this is a bit more complex
+            print("Collision!")
+            self.y = inter_y + self.radius + buffer 
+        elif(edge_y <= inter_y and edge_r_y > inter_y):
+            # Collision, move the robot to the collision y point plus some buffer
+            # TODO: this is a bit more complex
+            print("Collision!")
+            self.y = inter_y - self.radius - buffer
+        else:
+            # No collision with y, set the location to the requested y location
+            self.y = r_y 
 
-            final_x = None
-            final_y = None
-
-            # Check the four possible directions
-            if(edge_x >= inter_x and edge_r_x < inter_x): 
-                # Collision, move the robot to the collision x point plus some buffer
-                # TODO: this is a bit more complex
-                print("Collision!")
-                self.x = inter_x + buffer             
-            elif(edge_x <= inter_x and edge_r_x > inter_x):
-                # Collision, move the robot to the collision x point plus some buffer
-                # TODO: this is a bit more complex
-                print("Collision!")
-                self.x = inter_x - buffer
-            else:
-                # No collision with x, set the location to the requested x location
-                self.x = r_x
-
-            if(edge_y >= inter_y and edge_r_y < inter_y):
-                # Collision, move the robot to the collision y point plus some buffer
-                # TODO: this is a bit more complex
-                print("Collision!")
-                self.y = inter_y + buffer 
-            elif(edge_y <= inter_y and edge_r_y > inter_y):
-                # Collision, move the robot to the collision y point plus some buffer
-                # TODO: this is a bit more complex
-                print("Collision!")
-                self.y = inter_y - buffer
-            else:
-                # No collision with y, set the location to the requested y location
-                self.y = r_y 
-
-            return True
+        return True
 
             
     def collect_sensor_data(self):

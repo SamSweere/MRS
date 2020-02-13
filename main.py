@@ -12,9 +12,9 @@ env_params = {
 } 
 
 walls = [
-    create_rect_wall(env_params["env_width"]/2 - 100, 
+    create_rect_wall(env_params["env_width"]/2 + 50, 
     env_params["env_height"]/2 - 100, 100, 50),
-    create_rect_wall(env_params["env_width"]/2 - 180, 
+    create_rect_wall(env_params["env_width"]/2 - 50, 
     env_params["env_height"]/2 - 100, 150, 100)
 ]
 
