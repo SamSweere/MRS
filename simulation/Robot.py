@@ -11,6 +11,25 @@ class Robot:
         self.speed = 0
         self.angle = 0 # In degrees
 
+    def new_position(self):
+        """use dem slides to get da new positions"""
+        # # https://opentextbc.ca/physicstestbook2/chapter/kinematics-of-rotational-motion/
+        
+        # R = 1/2 * (vl + vr) / (vl - vr)
+
+        # w = (vr -vl) / l
+
+        # vr = w(R + l/2)
+        # vl = w(R - l/2)
+
+        # v = (vr + vl) / 2
+
+
+        # ### forward kinematics
+        
+        vl, vr = 1, 1
+        return vl, vr
+
     def update(self):
         # Rotate the robot
         self.angle += self.change_angle

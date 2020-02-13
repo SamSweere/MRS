@@ -1,4 +1,4 @@
-from .PolygonWall import PolygonWall
+from simulation.PolygonWall import PolygonWall
 import numpy as np
 
 class World:
