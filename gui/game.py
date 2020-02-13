@@ -86,14 +86,18 @@ class MyGame(arcade.Window):
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
-        if key == arcade.key.UP or key == arcade.key.DOWN:
-            self.robot.speed = 0
-        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.robot.change_angle = 0
-        # elif key == arcade.key.W:
-        #     self.robot.vl = 0
-        # elif key == arcade.key.O:
-        #     self.robot.vr = 0
+        # if key == arcade.key.UP or key == arcade.key.DOWN:
+        #     self.robot.speed = 0
+        # elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+        #     self.robot.change_angle = 0
+        if key == arcade.key.W:
+            self.robot.vl = 0
+        if key == arcade.key.O:
+            self.robot.vr = 0
+        if key == arcade.key.S:
+            self.robot.vl = 0
+        if key == arcade.key.L:
+            self.robot.vr = 0
 
     def __draw_robot__(self):       
         # Draw the shape of the robot as an circle with an line marking its rotation
