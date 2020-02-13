@@ -28,10 +28,11 @@ class Robot:
         self.R, self.icc = self.calculate_icc()
 
     def calculate_icc(self):
+        """Returns the radius and the (x,y) coordinates of the center of rotation"""
         # Calculate the center of rotation, 
-        # Returns the radius and the (x,y) coordinates of the center of rotation
-        R = 1/2 * (self.vl + self.vr) / max((self.vr - self.vl), 0.0001)  # avoid division by zero
-        icc = (self.x - R * math.cos(self.angle), self.y - R * math.sin(self.angle))
+        diff = self.vr - self.vl
+        R = 1/2 * (self.vl + self.vr) / (diff if diff != 0 else 0.0001)  # avoid division by zero
+        icc = (self.x - R * math.sin(self.angle), self.y + R * math.cos(self.angle))
         return R, icc
 
     def get_icc(self):
