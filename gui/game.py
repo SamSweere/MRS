@@ -60,25 +60,33 @@ class MyGame(arcade.Window):
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
-        # Forward/back
-        if key == arcade.key.UP:
-            self.robot.speed = 1
-        elif key == arcade.key.DOWN:
-            self.robot.speed = -1
+        # # Forward/back
+        # if key == arcade.key.UP:
+        #     self.robot.speed = 1
+        # elif key == arcade.key.DOWN:
+        #     self.robot.speed = -1
 
-        # Rotate left/right
-        elif key == arcade.key.LEFT:
-            self.robot.change_angle = 1
-        elif key == arcade.key.RIGHT:
-            self.robot.change_angle = -1
+        if key == arcade.key.W:
+            self.robot.vl = 1
+        if key == arcade.key.O:
+            self.robot.vr = 1       
+
+        # # Rotate left/right
+        # elif key == arcade.key.LEFT:
+        #     self.robot.change_angle = 1
+        # elif key == arcade.key.RIGHT:
+        #     self.robot.change_angle = -1
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
-
         if key == arcade.key.UP or key == arcade.key.DOWN:
             self.robot.speed = 0
         elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.robot.change_angle = 0
+        elif key == arcade.key.W:
+            self.robot.vl = 0
+        elif key == arcade.key.O:
+            self.robot.vr = 0
 
     def __draw_robot__(self):       
         # Draw the shape of the robot as an circle with an line marking its rotation
@@ -88,6 +96,10 @@ class MyGame(arcade.Window):
         arcade.draw_circle_outline(self.robot.x, self.robot.y, self.robot.radius, color=arcade.csscolor.BLACK)
         arcade.draw_line(self.robot.x, self.robot.y, rotated_x, rotated_y, color=arcade.csscolor.BLACK)
         
+        # draw icc
+        R, icc = self.robot.get_icc()
+        arcade.draw_circle_outline(icc[0], icc[1], R, color=arcade.csscolor.GREENYELLOW)
+
         # Draw the sensors
         for hit, dist in self.robot.sensor_data:
             if hit is None:
