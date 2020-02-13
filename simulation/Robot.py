@@ -17,7 +17,7 @@ class Robot:
         
         self.change_angle = 0
         self.speed = 0
-        self.angle = np.pi/4 # In radians
+        self.angle = np.pi * 5 / 4 # In radians
         self.sensor_data = []
 
         self.l = 2 * self.radius

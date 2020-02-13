@@ -11,9 +11,12 @@ env_params = {
     "env_height": 650
 } 
 
-walls = [create_rect_wall(env_params["env_width"]/2 - 200, 
-    env_params["env_height"]/2 - 200, 100, 50), create_rect_wall(env_params["env_width"]/2 - 280, 
-    env_params["env_height"]/2 - 200, 150, 100)]
+walls = [
+    create_rect_wall(env_params["env_width"]/2 + 50, 
+    env_params["env_height"]/2 - 100, 100, 50),
+    create_rect_wall(env_params["env_width"]/2 - 50, 
+    env_params["env_height"]/2 - 100, 150, 100)
+]
 
 if __name__ == "__main__":
     world = World(walls)
