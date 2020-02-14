@@ -58,48 +58,51 @@ class MyGame(arcade.Window):
         """ Movement and game logic """
 
         # Call the updates of all the moving parts
-        self.robot.update()
-        
+        # self.robot.update()
+
+        self.robot.update_old()
+
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
         speed = 0.5
 
-        if key == arcade.key.W:
-            self.robot.vl += speed
-        if key == arcade.key.O:
-            self.robot.vr += speed
-        if key == arcade.key.S:
-            self.robot.vl += -speed
-        if key == arcade.key.L:
-            self.robot.vr += -speed   
+        # if key == arcade.key.W:
+        #     self.robot.vl += speed
+        # if key == arcade.key.O:
+        #     self.robot.vr += speed
+        # if key == arcade.key.S:
+        #     self.robot.vl += -speed
+        # if key == arcade.key.L:
+        #     self.robot.vr += -speed
 
-        # # Rotate left/right
-        # elif key == arcade.key.LEFT:
-        #     self.robot.change_angle = 1
-        # elif key == arcade.key.RIGHT:
-        #     self.robot.change_angle = -1
+        # Rotate left/right
+        if key == arcade.key.UP:
+            self.robot.speed = 0.25
+        elif key == arcade.key.DOWN:
+            self.robot.speed = -0.25
+        if key == arcade.key.LEFT:
+            self.robot.change_angle = 4*math.pi/180
+        elif key == arcade.key.RIGHT:
+            self.robot.change_angle = -4*math.pi/180
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
-        # if key == arcade.key.UP or key == arcade.key.DOWN:
-        #     self.robot.speed = 0
-        # elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
-        #     self.robot.change_angle = 0
-        # elif key == arcade.key.W:
-        #     self.robot.vl = 0
-        # elif key == arcade.key.O:
-        #     self.robot.vr = 0
+        if key == arcade.key.UP or key == arcade.key.DOWN:
+            self.robot.speed = 0
+        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+            self.robot.change_angle = 0
+        elif key == arcade.key.W:
+            self.robot.vl = 0
+        elif key == arcade.key.O:
+            self.robot.vr = 0
         pass
 
     def __draw_robot__(self):       
         # Draw the shape of the robot as an circle with an line marking its rotation
         rotated_x = self.robot.x + math.cos(self.robot.angle) * self.robot.radius
         rotated_y = self.robot.y + math.sin(self.robot.angle) * self.robot.radius
-        
-        arcade.draw_circle_outline(self.robot.x, self.robot.y, self.robot.radius, color=arcade.csscolor.BLACK)
-        arcade.draw_line(self.robot.x, self.robot.y, rotated_x, rotated_y, color=arcade.csscolor.BLACK)
-        
+
         # draw icc
         R, icc = self.robot.get_icc()
         arcade.draw_circle_outline(icc[0], icc[1], 5, color=arcade.csscolor.GREENYELLOW)
@@ -110,4 +113,7 @@ class MyGame(arcade.Window):
                 continue
             
             arcade.draw_line(self.robot.x, self.robot.y, hit[0], hit[1], color=arcade.csscolor.RED)
-            
+
+        # Draw the robot last such that it is on top
+        arcade.draw_circle_outline(self.robot.x, self.robot.y, self.robot.radius, color=arcade.csscolor.BLACK)
+        arcade.draw_line(self.robot.x, self.robot.y, rotated_x, rotated_y, color=arcade.csscolor.BLACK)

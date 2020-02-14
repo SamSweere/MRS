@@ -11,6 +11,8 @@ class PolygonWall:
         """
         closest_inter = None
         closest_dist = math.inf
+        closest_line = None
+
         for i in range(len(self.points)):
             seg_start = self.points[i]
             seg_end = self.points[(i+1) % len(self.points)]
@@ -26,8 +28,9 @@ class PolygonWall:
             if dist < closest_dist:
                 closest_inter = inter
                 closest_dist = dist
+                closest_line = (seg_start, seg_end)
     
-        return (closest_inter, closest_dist)
+        return closest_inter, closest_dist, closest_line
           
 def line_intersect(a1, a2, b1, b2):
     """
