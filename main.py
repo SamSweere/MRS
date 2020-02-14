@@ -1,5 +1,4 @@
-from gui.game import MyGame
-import arcade
+from gui.game import MobileRobotGame
 import performance
 from simulation.World import World, create_rect_wall
 from simulation.Robot import Robot
@@ -25,7 +24,8 @@ if __name__ == "__main__":
     env_params["robot"] = robot
 
     if not run_performance_test:
-        window = MyGame(**env_params)
-        arcade.run()
+        game = MobileRobotGame(**env_params)
+        game.init()
+        game.run()
     else:
         performance.stop_time(world, robot, num_steps=10000)

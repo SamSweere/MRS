@@ -1,103 +1,68 @@
-"""
-Platformer Game
-"""
-import arcade
+import pygame
 import math
-from simulation.World import World
 from .fps_counter import FPSCounter
 
-# Constants
-SCREEN_TITLE = "Platformer"
-
-class MyGame(arcade.Window):
+def ti(arr):
     """
-    Main application class.
-    Should render output and handle user input.
+        Very short functionname to convert float-arrays to int
+        Since pygame doesnt accept floats on its own
     """
+    return [int(x) for x in arr]
 
+class MobileRobotGame:
     def __init__(self, env_width, env_height, world, robot):
+        self.done = False
+        
         self.env_width = env_width
         self.env_height = env_height
-        self.SCREEN_WIDTH = env_width
-        self.SCREEN_HEIGHT = env_height
+        self.screen_width = env_width
+        self.screen_height = env_height
         self.world = world
         self.robot = robot
         self.fps_tracker = FPSCounter()
         
-        # Call the parent class and set up the window
-        super().__init__(self.env_width, self.env_height, SCREEN_TITLE)
-
-        arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
-
-        self.setup()
-
-    def setup(self):
-        """ Set up the game here. Call this function to restart the game. """
-        pass
-
-    def on_draw(self):
-        """ Render the screen. """
-
-        arcade.start_render()
+    def init(self):
+        # Initialize pygame and modules that we want to use
+        pygame.init()
+        pygame.font.init()
         
-        for wall in self.world.walls:
-            arcade.draw_polygon_filled(wall.points, color=arcade.csscolor.BLACK)
+        # Instantiate window
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        
+        # Instantiate fonts that we want to use
+        self.fps_font = pygame.font.SysFont('Comic Sans MS', 16)
+    
+    def run(self):
+        # Main game loop
+        while not self.done:
+            self.handle_events()
+            self.update()
             
+            self.screen.fill(pygame.Color('white'))
+            self.draw()
+            # Pygame uses double buffers
+            # This swaps the buffers so everything we've drawn will now show up on the screen
+            pygame.display.flip()
+            
+            self.fps_tracker.tick()
+            
+        pygame.quit()
+            
+    def update(self):
+        self.robot.update_old()
+    
+    def draw(self):
         self.__draw_robot__()
         
-        # Track and draw the fps
+        # Draw walls
+        for wall in self.world.walls:
+            pygame.draw.polygon(self.screen, pygame.Color('black'), wall.points)
+        
+        # Draw fps display in upper left corner
         fps = self.fps_tracker.get_fps()
-        output = f"FPS: {fps:3.0f}"
-        arcade.draw_text(output, 0, self.SCREEN_HEIGHT-20, arcade.color.RED, 16)
-        self.fps_tracker.tick()
-
-        arcade.draw_text("vl" + str(self.robot.vl), 0, self.SCREEN_HEIGHT-60, arcade.color.GOLD, 16)
-        arcade.draw_text("vr" + str(self.robot.vr), 0, self.SCREEN_HEIGHT-80, arcade.color.GOLD, 16)
-
-    def on_update(self, delta_time):
-        """ Movement and game logic """
-
-        # Call the updates of all the moving parts
-        # self.robot.update()
-
-        self.robot.update_old()
-
-    def on_key_press(self, key, modifiers):
-        """Called whenever a key is pressed. """
-
-        speed = 0.5
-
-        # if key == arcade.key.W:
-        #     self.robot.vl += speed
-        # if key == arcade.key.O:
-        #     self.robot.vr += speed
-        # if key == arcade.key.S:
-        #     self.robot.vl += -speed
-        # if key == arcade.key.L:
-        #     self.robot.vr += -speed
-
-        # Rotate left/right
-        if key == arcade.key.UP:
-            self.robot.speed = 0.25
-        elif key == arcade.key.DOWN:
-            self.robot.speed = -0.25
-        if key == arcade.key.LEFT:
-            self.robot.change_angle = 4*math.pi/180
-        elif key == arcade.key.RIGHT:
-            self.robot.change_angle = -4*math.pi/180
-
-    def on_key_release(self, key, modifiers):
-        """Called when the user releases a key. """
-        if key == arcade.key.UP or key == arcade.key.DOWN:
-            self.robot.speed = 0
-        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.robot.change_angle = 0
-        elif key == arcade.key.W:
-            self.robot.vl = 0
-        elif key == arcade.key.O:
-            self.robot.vr = 0
-        pass
-
+        fps_surface = self.fps_font.render(f"FPS: {fps:3.0f}", False, pygame.Color('red'))
+        self.screen.blit(fps_surface, (0, 0))
+        
     def __draw_robot__(self):       
         # Draw the shape of the robot as an circle with an line marking its rotation
         rotated_x = self.robot.x + math.cos(self.robot.angle) * self.robot.radius
@@ -105,15 +70,39 @@ class MyGame(arcade.Window):
 
         # draw icc
         R, icc = self.robot.get_icc()
-        arcade.draw_circle_outline(icc[0], icc[1], 5, color=arcade.csscolor.GREENYELLOW)
+        pygame.draw.circle(self.screen, pygame.Color('green'), ti(icc), 1)
 
         # Draw the sensors
         for hit, dist in self.robot.sensor_data:
             if hit is None:
                 continue
             
-            arcade.draw_line(self.robot.x, self.robot.y, hit[0], hit[1], color=arcade.csscolor.RED)
+            pygame.draw.line(self.screen, pygame.Color('red'), ti((self.robot.x, self.robot.y)), ti(hit))
 
         # Draw the robot last such that it is on top
-        arcade.draw_circle_outline(self.robot.x, self.robot.y, self.robot.radius, color=arcade.csscolor.BLACK)
-        arcade.draw_line(self.robot.x, self.robot.y, rotated_x, rotated_y, color=arcade.csscolor.BLACK)
+        pygame.draw.circle(self.screen, pygame.Color('black'), ti((self.robot.x, self.robot.y)), self.robot.radius, 1)
+        pygame.draw.line(self.screen, pygame.Color('black'), ti((self.robot.x, self.robot.y)), ti((rotated_x, rotated_y)))
+    
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.done = True
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    self.robot.speed = 0.25
+                elif event.key == pygame.K_DOWN:
+                    self.robot.speed = -0.25
+                elif event.key == pygame.K_LEFT:
+                    self.robot.change_angle = math.pi/180
+                elif event.key == pygame.K_RIGHT:
+                    self.robot.change_angle = -math.pi/180
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                    self.robot.speed = 0
+                elif event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                    self.robot.change_angle = 0
+                elif event.key == pygame.K_w:
+                    self.robot.vl = 0
+                elif event.key == pygame.K_o:
+                    self.robot.vr = 0
+        
