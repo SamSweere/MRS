@@ -1,4 +1,4 @@
-from simulation.PolygonWall import PolygonWall
+from simulation.polygon_wall import PolygonWall
 import numpy as np
 import math
 
