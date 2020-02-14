@@ -1,4 +1,5 @@
 import pygame
+import pygame.gfxdraw
 import math
 from .fps_counter import FPSCounter
 
@@ -7,7 +8,7 @@ def ti(arr):
         Very short functionname to convert float-arrays to int
         Since pygame doesnt accept floats on its own
     """
-    return [int(x) for x in arr]
+    return [int(round(x)) for x in arr]
 
 class MobileRobotGame:
     def __init__(self, env_width, env_height, world, robot):
@@ -63,11 +64,7 @@ class MobileRobotGame:
         fps_surface = self.fps_font.render(f"FPS: {fps:3.0f}", False, pygame.Color('red'))
         self.screen.blit(fps_surface, (0, 0))
         
-    def __draw_robot__(self):       
-        # Draw the shape of the robot as an circle with an line marking its rotation
-        rotated_x = self.robot.x + math.cos(self.robot.angle) * self.robot.radius
-        rotated_y = self.robot.y + math.sin(self.robot.angle) * self.robot.radius
-
+    def __draw_robot__(self):
         # draw icc
         R, icc = self.robot.get_icc()
         pygame.draw.circle(self.screen, pygame.Color('green'), ti(icc), 1)
@@ -77,11 +74,16 @@ class MobileRobotGame:
             if hit is None:
                 continue
             
-            pygame.draw.line(self.screen, pygame.Color('red'), ti((self.robot.x, self.robot.y)), ti(hit))
+            pygame.gfxdraw.line(self.screen, *ti((self.robot.x, self.robot.y)), *ti(hit), pygame.Color('red'))
 
-        # Draw the robot last such that it is on top
-        pygame.draw.circle(self.screen, pygame.Color('black'), ti((self.robot.x, self.robot.y)), self.robot.radius, 1)
-        pygame.draw.line(self.screen, pygame.Color('black'), ti((self.robot.x, self.robot.y)), ti((rotated_x, rotated_y)))
+        # Draw the shape of the robot as an circle with an line marking its rotation
+        rotated_x = self.robot.x + math.cos(self.robot.angle) * (self.robot.radius - 1)
+        rotated_y = self.robot.y + math.sin(self.robot.angle) * (self.robot.radius - 1)
+        
+        pygame.gfxdraw.filled_circle(self.screen, *ti((self.robot.x, self.robot.y)), self.robot.radius, pygame.Color('lightblue'))
+        pygame.gfxdraw.line(self.screen, *ti((self.robot.x, self.robot.y)), *ti((rotated_x, rotated_y)), pygame.Color('black'))
+        pygame.gfxdraw.circle(self.screen, *ti((self.robot.x, self.robot.y)), self.robot.radius, pygame.Color('black'))
+        
     
     def handle_events(self):
         for event in pygame.event.get():
