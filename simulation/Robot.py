@@ -187,6 +187,7 @@ class Robot:
                 break  # We have a collision break out of the loop
 
         # we need to check again if the new position is fine
+        # TODO: somehow this does not work for backwards motion
         if collision:
             # TODO: move in parallel to wall or smth?
             # propose new angle & speed in parallel to wall?
