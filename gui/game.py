@@ -88,25 +88,38 @@ class MobileRobotGame:
         
     
     def handle_events(self):
+        speed = 0.5
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.done = True
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    self.robot.speed = 0.25
-                elif event.key == pygame.K_DOWN:
-                    self.robot.speed = -0.25
-                elif event.key == pygame.K_LEFT:
-                    self.robot.change_angle = math.pi/180
-                elif event.key == pygame.K_RIGHT:
-                    self.robot.change_angle = -math.pi/180
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                    self.robot.speed = 0
-                elif event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    self.robot.change_angle = 0
-                elif event.key == pygame.K_w:
-                    self.robot.vl = 0
-                elif event.key == pygame.K_o:
-                    self.robot.vr = 0
+                if event.key == pygame.K_w:
+                    self.robot.vl = speed
+                if event.key == pygame.K_o:
+                    self.robot.vr = speed
+                if event.key == pygame.K_s:
+                    self.robot.vl = -speed
+                if event.key == pygame.K_l:
+                    self.robot.vr = -speed   
+            
+            # if event.type == pygame.QUIT:
+            #     self.done = True
+            # elif event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_UP:
+            #         self.robot.speed = 0.25
+            #     elif event.key == pygame.K_DOWN:
+            #         self.robot.speed = -0.25
+            #     elif event.key == pygame.K_LEFT:
+            #         self.robot.change_angle = math.pi/180
+            #     elif event.key == pygame.K_RIGHT:
+            #         self.robot.change_angle = -math.pi/180
+            # elif event.type == pygame.KEYUP:
+            #     if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+            #         self.robot.speed = 0
+            #     elif event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+            #         self.robot.change_angle = 0
+            #     elif event.key == pygame.K_w:
+            #         self.robot.vl = 0
+            #     elif event.key == pygame.K_o:
+            #         self.robot.vr = 0
         
