@@ -41,8 +41,6 @@ class Robot:
     def update(self):
         # TODO: why does it not move the right way initially
 
-        # TODO: turning on the spot currently not working :O
-
         # Get the new center of rotation and speed
         self.R, self.icc = self.calculate_icc()
         self.w = (self.vr - self.vl) / self.l

@@ -10,11 +10,21 @@ env_params = {
     "env_height": 650
 } 
 
+margin = 10
 walls = [
     create_rect_wall(env_params["env_width"]/2 + 50, 
-    env_params["env_height"]/2 - 100, 100, 50),
+        env_params["env_height"]/2 - 100, 100, 50),
     create_rect_wall(env_params["env_width"]/2 - 50, 
-    env_params["env_height"]/2 - 100, 150, 100)
+        env_params["env_height"]/2 - 100, 150, 100),
+
+    # create world border
+    create_rect_wall(margin, margin,
+        margin, env_params["env_height"]*2 - 4*margin),
+    create_rect_wall(env_params["env_width"]-2*margin, margin,
+        margin, env_params["env_height"]*2 - 4*margin),
+    create_rect_wall(margin, margin, env_params["env_width"]*2, margin),
+    create_rect_wall(margin, env_params["env_height"]-margin,
+        env_params["env_width"]*2-2*margin, margin)
 ]
 
 if __name__ == "__main__":
