@@ -32,7 +32,7 @@ class MobileRobotGame:
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         
         # Instantiate fonts that we want to use
-        self.fps_font = pygame.font.SysFont('Comic Sans MS', 16)
+        self.fps_font = pygame.font.SysFont('Arial', 16)
     
     def run(self):
         # Main game loop
@@ -44,10 +44,8 @@ class MobileRobotGame:
             self.draw()
             # Pygame uses double buffers
             # This swaps the buffers so everything we've drawn will now show up on the screen
-            pygame.display.flip()
-            
-            self.fps_tracker.tick()
-            
+            pygame.display.flip()            
+            self.fps_tracker.tick()            
         pygame.quit()
             
     def update(self):
@@ -63,8 +61,18 @@ class MobileRobotGame:
         
         # Draw fps display in upper left corner
         fps = self.fps_tracker.get_fps()
-        fps_surface = self.fps_font.render(f"FPS: {fps:3.0f}", False, pygame.Color('red'))
-        self.screen.blit(fps_surface, (0, 0))
+        fps_surface = self.fps_font.render(f"FPS: {fps:3.0f}", False, 
+            pygame.Color('red'))
+        self.screen.blit(fps_surface, (30, 20))
+
+        vl_surface = self.fps_font.render(f"Vl: {self.robot.vl}", 
+            False, pygame.Color('red'))
+        print(self.robot.vr)
+        print(self.robot.vl)
+        self.screen.blit(vl_surface, (30, 50))
+        vr_surface = self.fps_font.render(f"Vr: {self.robot.vr}", 
+            False, pygame.Color('red'))
+        self.screen.blit(vr_surface, (30, 70))
         
     def __draw_robot__(self):
         # draw icc
@@ -94,32 +102,11 @@ class MobileRobotGame:
                 self.done = True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w:
-                    self.robot.vl = speed
+                    self.robot.vl += speed
                 if event.key == pygame.K_o:
-                    self.robot.vr = speed
+                    self.robot.vr += speed
                 if event.key == pygame.K_s:
-                    self.robot.vl = -speed
+                    self.robot.vl += -speed
                 if event.key == pygame.K_l:
-                    self.robot.vr = -speed   
+                    self.robot.vr += -speed   
             
-            # if event.type == pygame.QUIT:
-            #     self.done = True
-            # elif event.type == pygame.KEYDOWN:
-            #     if event.key == pygame.K_UP:
-            #         self.robot.speed = 0.25
-            #     elif event.key == pygame.K_DOWN:
-            #         self.robot.speed = -0.25
-            #     elif event.key == pygame.K_LEFT:
-            #         self.robot.change_angle = math.pi/180
-            #     elif event.key == pygame.K_RIGHT:
-            #         self.robot.change_angle = -math.pi/180
-            # elif event.type == pygame.KEYUP:
-            #     if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-            #         self.robot.speed = 0
-            #     elif event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-            #         self.robot.change_angle = 0
-            #     elif event.key == pygame.K_w:
-            #         self.robot.vl = 0
-            #     elif event.key == pygame.K_o:
-            #         self.robot.vr = 0
-        

@@ -52,7 +52,7 @@ class Robot:
         angle_change = self.w * dt
 
         # Based on the speed and the angle find the new requested location
-        if self.vr == self.vl:
+        if (self.vr == self.vl) and (self.vr != 0):
             r_x = self.x + v * math.cos(self.angle)
             r_y = self.y + v * math.sin(self.angle)
         else:
@@ -60,16 +60,16 @@ class Robot:
             icc_x = self.icc[0]
             icc_y = self.icc[1]
             r_x = (math.cos(angle_change) * (self.x - icc_x) -
-                   math.sin(angle_change) * (self.y - icc_y) +
-                   icc_x)
+                    math.sin(angle_change) * (self.y - icc_y) +
+                    icc_x)
             r_y = (math.sin(angle_change) * (self.x - icc_x) +
-                   math.cos(angle_change) * (self.y - icc_y) +
-                   icc_y)
+                    math.cos(angle_change) * (self.y - icc_y) +
+                    icc_y)
 
         r_angle = (self.angle + angle_change) % (2 * math.pi)
 
-        print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}, \
-        location: ({self.x}, {self.y})")
+        print(f"R: {self.R}\t angle: {self.angle:3.0f}\t icc: {np.round(self.icc, 3)}, \
+        location: ({np.round(self.x, 3)}, {np.round(self.y, 3)})")
 
         self.check_collision(r_x, r_y, r_angle)
         self.collect_sensor_data()  # Send raycasts in all directions
