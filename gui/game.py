@@ -2,6 +2,7 @@ import pygame
 import pygame.gfxdraw
 import math
 from .fps_counter import FPSCounter
+import numpy as np
 
 def ti(arr):
     """
