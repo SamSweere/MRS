@@ -59,50 +59,20 @@ class Robot:
             # TODO: should this move even if vr == vl?
             icc_x = self.icc[0]
             icc_y = self.icc[1]
-            r_x = (
-                    math.cos(angle_change) * (self.x - icc_x) -
-                    math.sin(angle_change) * (self.y - icc_y) +
-                    icc_x
-            )
-            r_y = (
-                    math.sin(angle_change) * (self.x - icc_x) +
-                    math.cos(angle_change) * (self.y - icc_y) +
-                    icc_y
-            )
+            r_x = (math.cos(angle_change) * (self.x - icc_x) -
+                   math.sin(angle_change) * (self.y - icc_y) +
+                   icc_x)
+            r_y = (math.sin(angle_change) * (self.x - icc_x) +
+                   math.cos(angle_change) * (self.y - icc_y) +
+                   icc_y)
 
-        self.angle = (self.angle + angle_change) % (2 * math.pi)
+        r_angle = (self.angle + angle_change) % (2 * math.pi)
 
         print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}, \
         location: ({self.x}, {self.y})")
 
-        # Check for collision, this function also sets the new x and y values
         self.check_collision(r_x, r_y, r_angle)
-
-        # Collects information about the environment, by sending raycasts in all directions
-        self.collect_sensor_data()
-
-
-    def get_icc(self):
-        return self.R, self.icc
-
-
-    def update_old(self):
-        """
-        old update method
-        """
-
-        # Calculate the requested angle
-        r_angle = (self.angle + self.change_angle) % (2 * math.pi)
-
-        # Based on the speed and the angle find the new requested location
-        r_x = self.x + self.speed * self.movement_speed * math.cos(r_angle)
-        r_y = self.y + self.speed * self.movement_speed * math.sin(r_angle)
-
-        # Check for collision, this function also sets the new x and y values
-        self.check_collision(r_x, r_y, r_angle)
-
-        # Collects information about the environment, by sending raycasts in all directions
-        self.collect_sensor_data()
+        self.collect_sensor_data()  # Send raycasts in all directions
 
 
     def check_collision_edge(self, theta, r_x, r_y, r_angle):
@@ -174,6 +144,7 @@ class Robot:
 
     def check_collision(self, r_x, r_y, r_angle):
         """
+        Check for collision and set new x and y values
         @param r_x: aspired x position after time step
         @param r_y: aspired y position after time step
         @param r_angle: aspired angle after time step
@@ -227,6 +198,6 @@ class Robot:
 
             # Note instead of calculating the position of the sensor
             # We just send a raycast from the center of our agent
-            (hit, dist, line) = self.world.raycast(self.x, self.y, sensor_angle, raycast_length)
+            hit, dist, line = self.world.raycast(self.x, self.y, sensor_angle, raycast_length)
             dist -= self.radius
             self.sensor_data.append((hit, dist))

@@ -51,7 +51,8 @@ class MobileRobotGame:
         pygame.quit()
             
     def update(self):
-        self.robot.update_old()
+        # self.robot.update_old()
+        self.robot.update()
     
     def draw(self):
         self.__draw_robot__()
@@ -67,7 +68,7 @@ class MobileRobotGame:
         
     def __draw_robot__(self):
         # draw icc
-        R, icc = self.robot.get_icc()
+        R, icc = self.robot.R, self.robot.icc
         pygame.draw.circle(self.screen, pygame.Color('green'), ti(icc), 1)
 
         # Draw the sensors
