@@ -12,6 +12,7 @@ def ti(arr):
     return [int(round(x)) for x in arr]
 
 class MobileRobotGame:
+
     def __init__(self, env_width, env_height, world, robot):
         self.done = False
         
@@ -23,17 +24,16 @@ class MobileRobotGame:
         self.robot = robot
         self.fps_tracker = FPSCounter()
         
+
     def init(self):
         # Initialize pygame and modules that we want to use
         pygame.init()
         pygame.font.init()
         
-        # Instantiate window
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-        
-        # Instantiate fonts that we want to use
         self.fps_font = pygame.font.SysFont('Arial', 16)
     
+
     def run(self):
         # Main game loop
         while not self.done:
@@ -47,19 +47,18 @@ class MobileRobotGame:
             pygame.display.flip()            
             self.fps_tracker.tick()            
         pygame.quit()
+
             
     def update(self):
-        # self.robot.update_old()
         self.robot.update()
     
     def draw(self):
         self.__draw_robot__()
         
-        # Draw walls
-        for wall in self.world.walls:
+        for wall in self.world.walls:  # Draw walls
             pygame.draw.polygon(self.screen, pygame.Color('black'), wall.points)
         
-        # Draw fps display in upper left corner
+        # Draw text displays
         fps = self.fps_tracker.get_fps()
         fps_surface = self.fps_font.render(f"FPS: {fps:3.0f}", False, 
             pygame.Color('red'))
@@ -74,16 +73,16 @@ class MobileRobotGame:
             False, pygame.Color('red'))
         self.screen.blit(vr_surface, (30, 70))
         
+
     def __draw_robot__(self):
-        # draw icc
+        # draw ICC
         R, icc = self.robot.R, self.robot.icc
         pygame.draw.circle(self.screen, pygame.Color('green'), ti(icc), 1)
 
-        # Draw the sensors
+        # Draw sensors
         for hit, dist in self.robot.sensor_data:
             if hit is None:
                 continue
-            
             pygame.gfxdraw.line(self.screen, *ti((self.robot.x, self.robot.y)), *ti(hit), pygame.Color('red'))
 
         # Draw the shape of the robot as an circle with an line marking its rotation
