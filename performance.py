@@ -1,5 +1,5 @@
-from simulation.world import World, create_rect_wall
-from simulation.robot import Robot
+from simulation.World import World, create_rect_wall
+from simulation.Robot import Robot
 import time
 
 def stop_time(world, robot, num_steps=10000):

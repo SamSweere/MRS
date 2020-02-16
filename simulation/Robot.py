@@ -52,7 +52,7 @@ class Robot:
         v = (self.vl + self.vr / 2)
         dt = 1
         if v != 0:
-            angle_change = self.w * dt * v
+            angle_change = self.w * dt
         else:  # we want to be able to rotate on the spot
             angle_change = self.w * dt
 
