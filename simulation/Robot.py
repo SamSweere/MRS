@@ -51,10 +51,7 @@ class Robot:
         # w is basically theta because we just assume time was 1
         v = (self.vl + self.vr / 2)
         dt = 1
-        if v != 0:
-            angle_change = self.w * dt
-        else:  # we want to be able to rotate on the spot
-            angle_change = self.w * dt
+        angle_change = self.w * dt
 
         # Based on the speed and the angle find the new requested location
         if self.vr == self.vl:
