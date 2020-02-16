@@ -11,7 +11,7 @@ class Robot:
         self.y = start_y
         self.radius = radius
         self.movement_speed = 5
-        self.n_ray_cast = n_ray_cast  # The amount of raycasts it does
+        self.n_ray_cast = n_ray_cast
         self.n_sensors = n_sensors  # The amount of sensors used for collecting environment data
         self.max_sensor_length = max_sensor_length
 
@@ -30,7 +30,7 @@ class Robot:
 
     def calculate_icc(self):
         """Returns the radius and the (x,y) coordinates of the center of rotation"""
-        # Calculate the center of rotation, 
+        # Calculate center of rotation
         diff = self.vr - self.vl
         R = self.l / 2 * (self.vl + self.vr) / (diff if diff != 0 else 0.0001)  # avoid division by zero
         icc = (
@@ -171,16 +171,18 @@ class Robot:
                     # No collision here
                     self.x = r_x
                 else:
-                    self.x = collision_point[0] - math.cos(self.angle + theta) * self.radius
+                    self.x = (collision_point[0] - 
+                              math.cos(self.angle + theta) * self.radius)
 
                 if (collision_point[1] is None):
                     # No collision here
                     self.x = r_x
                 else:
-                    self.y = collision_point[1] - math.sin(self.angle + theta) * self.radius
+                    self.y = (collision_point[1] -
+                              math.sin(self.angle + theta) * self.radius)
                 break  # We have a collision break out of the loop
 
-        if (not collision):
+        if not collision:
             # No collision, set the location to the requested values
             self.x = r_x
             self.y = r_y
@@ -198,6 +200,7 @@ class Robot:
 
             # Note instead of calculating the position of the sensor
             # We just send a raycast from the center of our agent
-            hit, dist, line = self.world.raycast(self.x, self.y, sensor_angle, raycast_length)
+            hit, dist, line = self.world.raycast(self.x, self.y, sensor_angle, 
+                raycast_length)
             dist -= self.radius
             self.sensor_data.append((hit, dist))

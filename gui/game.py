@@ -6,10 +6,11 @@ import numpy as np
 
 def ti(arr):
     """
-        Very short functionname to convert float-arrays to int
-        Since pygame doesnt accept floats on its own
+    Very short functionname to convert float-arrays to int
+    Since pygame doesnt accept floats on its own
     """
     return [int(round(x)) for x in arr]
+
 
 class MobileRobotGame:
 
@@ -28,8 +29,7 @@ class MobileRobotGame:
     def init(self):
         # Initialize pygame and modules that we want to use
         pygame.init()
-        pygame.font.init()
-        
+        pygame.font.init()        
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.fps_font = pygame.font.SysFont('Arial', 16)
     
