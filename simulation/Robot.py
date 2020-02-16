@@ -142,7 +142,7 @@ class Robot:
             return final_x, final_y
 
 
-    def check_collision(self, r_x, r_y, r_angle):
+    def check_collision(self, r_x, r_y, r_angle, recursion_count=0):
         """
         Check for collision and set new x and y values
         @param r_x: aspired x position after time step
@@ -168,26 +168,37 @@ class Robot:
                 print("Collision!")
                 collision = True
                 if (collision_point[0] is None):
-                    # No collision here
-                    self.x = r_x
+                    # self.x = r_x
+                    pass
                 else:
                     self.x = (collision_point[0] - 
                               math.cos(self.angle + theta) * self.radius)
+                    collision = True
 
                 if (collision_point[1] is None):
-                    # No collision here
-                    self.x = r_x
+                    # self.x = r_x
+                    pass
                 else:
-                    self.y = (collision_point[1] -
+                    r_y = (collision_point[1] -
                               math.sin(self.angle + theta) * self.radius)
+                    collision = True
+
+
                 break  # We have a collision break out of the loop
 
-        if not collision:
-            # No collision, set the location to the requested values
+        # we need to check again if the new position is fine
+        if collision:
+            # TODO: move in parallel to wall or smth?
+            # propose new angle & speed in parallel to wall?
+            self.vl = 0
+            self.vr = 0
+            self.update()
+            # self.check_collision(r_x, r_y, r_angle, recursion_count+1)
+        else:
             self.x = r_x
             self.y = r_y
             self.angle = r_angle
-
+        
 
     def collect_sensor_data(self):
         raycast_length = self.radius + self.max_sensor_length
