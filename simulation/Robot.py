@@ -76,7 +76,7 @@ class Robot:
         location: ({self.x}, {self.y})")
 
         # Check for collision, this function also sets the new x and y values
-        self.check_collision(r_x, r_y)
+        self.check_collision(r_x, r_y, r_angle)
 
         # Collects information about the environment, by sending raycasts in all directions
         self.collect_sensor_data()
@@ -94,7 +94,6 @@ class Robot:
         # Calculate the requested angle
         r_angle = (self.angle + self.change_angle) % (2 * math.pi)
 
-
         # Based on the speed and the angle find the new requested location
         r_x = self.x + self.speed * self.movement_speed * math.cos(r_angle)
         r_y = self.y + self.speed * self.movement_speed * math.sin(r_angle)
@@ -107,8 +106,12 @@ class Robot:
 
 
     def check_collision_edge(self, theta, r_x, r_y, r_angle):
-        # Check the collision for on point on the edge of the circle
-        # theta is the point on the edge in radians
+        """
+        @param theta: point on the edge in radians
+        @param r_x: aspired x position after time step
+        @param r_y: aspired y position after time step
+        @param r_angle: aspired angle after time step
+        """
         raycast_range = 2 * self.movement_speed
 
         # Start the raycast from edge of the circle
@@ -131,8 +134,7 @@ class Robot:
         buffer = 1#1.0e-10
 
         if (closest_inter is None):
-            # No collision return None
-            return None
+            return None  # No collision return None
         else:
             # Get the intersect x and y
             inter_x = closest_inter[0]
@@ -143,40 +145,30 @@ class Robot:
             # print("inter.xy:", inter_x, inter_y)
 
             collision = False
-
             #TODO: start with fixing the line intersect here. Make use of the intersected line to do normal calculations
 
             # Check the four possible directions
             if (edge_x >= inter_x and edge_r_x < inter_x):
-                # Collision, move the robot to the collision x point plus some buffer
                 final_x = inter_x + buffer
                 collision = True
             elif (edge_x <= inter_x and edge_r_x > inter_x):
-                # Collision, move the robot to the collision x point plus some buffer
                 final_x = inter_x - buffer
                 collision = True
             else:
-                # No collision with x, set the location to the requested x location of the edge
                 final_x = None
 
             if (edge_y >= inter_y and edge_r_y < inter_y):
-                # Collision, move the robot to the collision y point plus some buffer
                 final_y = inter_y + buffer
                 collision = True
             elif (edge_y <= inter_y and edge_r_y > inter_y):
-                # Collision, move the robot to the collision y point plus some buffer
                 final_y = inter_y - buffer
                 collision = True
             else:
-                # No collision with y, set the location to the requested y location of the edge
                 final_y = None
 
-            if (not collision):
-                # No collision
+            if not collision:
                 return None
 
-            # We have a collision
-            # Return the collision points with the correct buffer
             return final_x, final_y
 
 
@@ -184,7 +176,7 @@ class Robot:
         """
         @param r_x: aspired x position after time step
         @param r_y: aspired y position after time step
-        @param r_angle: angle of ray cast
+        @param r_angle: aspired angle after time step
         """
         n_col_rays = 32  # Ideally powers of 2
         single_beam = False
@@ -199,8 +191,7 @@ class Robot:
         for theta in col_ray_angles:
             collision_point = self.check_collision_edge(theta, r_x, r_y, r_angle)
             if (collision_point is None):
-                # No collision
-                continue
+                continue  # No collision
             else:
                 # There is a collision, set the location to the corrected collision location
                 print("Collision!")

@@ -1,13 +1,17 @@
 from gui.game import MobileRobotGame
 import performance
 from simulation.World import World, create_rect_wall
+from simulation.polygon_wall import PolygonWall
 from simulation.Robot import Robot
+import numpy as np
 
 run_performance_test = False
 
+WIDTH = 1000
+HEIGHT = 650
 env_params = {
-    "env_width" : 1000,
-    "env_height": 650
+    "env_width" : WIDTH,
+    "env_height": HEIGHT
 } 
 
 margin = 10
@@ -16,16 +20,40 @@ walls = [
         env_params["env_height"]/2 - 100, 100, 50),
     create_rect_wall(env_params["env_width"]/2 - 50, 
         env_params["env_height"]/2 - 100, 150, 100),
-
-    # create world border
-    create_rect_wall(margin, margin,
-        margin, env_params["env_height"]*2 - 4*margin),
-    create_rect_wall(env_params["env_width"]-2*margin, margin,
-        margin, env_params["env_height"]*2 - 4*margin),
-    create_rect_wall(margin, margin, env_params["env_width"]*2, margin),
-    create_rect_wall(margin, env_params["env_height"]-margin,
-        env_params["env_width"]*2-2*margin, margin)
 ]
+
+border_left = PolygonWall(np.array([
+    [margin, margin],
+    [margin, HEIGHT-margin*2],
+    [margin*2, HEIGHT-margin*2],
+    [margin*2, margin]
+]))
+walls.append(border_left)
+
+border_right = PolygonWall(np.array([
+    [WIDTH-margin*2, margin],
+    [WIDTH-margin*2, HEIGHT-margin*2],
+    [WIDTH-margin, HEIGHT-margin*2],
+    [WIDTH-margin, margin]
+]))
+walls.append(border_right)
+
+border_bottom = PolygonWall(np.array([
+    [margin, HEIGHT-margin*2],
+    [margin, HEIGHT-margin],
+    [WIDTH-margin, HEIGHT-margin],
+    [WIDTH-margin, HEIGHT-margin*2],
+]))
+walls.append(border_bottom)
+
+border_top = PolygonWall(np.array([
+    [margin, margin],
+    [margin, margin*2],
+    [WIDTH-margin, margin*2],
+    [WIDTH-margin, margin],
+]))
+walls.append(border_top)
+
 
 if __name__ == "__main__":
     world = World(walls)
