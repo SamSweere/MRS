@@ -27,20 +27,20 @@ class Robot:
         self.w = (self.vr - self.vl) / self.l
         self.R, self.icc = self.calculate_icc()
 
+
     def calculate_icc(self):
         """Returns the radius and the (x,y) coordinates of the center of rotation"""
         # Calculate the center of rotation, 
         diff = self.vr - self.vl
         R = self.l / 2 * (self.vl + self.vr) / (diff if diff != 0 else 0.0001)  # avoid division by zero
-        icc = (self.x - R * math.sin(self.angle), self.y + R * math.cos(self.angle))
+        icc = (
+            self.x - R * math.sin(self.angle),
+            self.y + R * math.cos(self.angle)
+        )
         return R, icc
 
-    def get_icc(self):
-        return self.R, self.icc
 
     def update(self):
-        # TODO: why does it not move the right way initially
-
         # Get the new center of rotation and speed
         self.R, self.icc = self.calculate_icc()
         self.w = (self.vr - self.vl) / self.l
@@ -72,13 +72,19 @@ class Robot:
 
         self.angle = (self.angle + angle_change) % (2 * math.pi)
 
-        print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}, location: ({self.x}, {self.y})")
+        print(f"R: {self.R}\t angle: {self.angle}\t icc: {self.icc}, \
+        location: ({self.x}, {self.y})")
 
         # Check for collision, this function also sets the new x and y values
         self.check_collision(r_x, r_y)
 
         # Collects information about the environment, by sending raycasts in all directions
         self.collect_sensor_data()
+
+
+    def get_icc(self):
+        return self.R, self.icc
+
 
     def update_old(self):
         """
@@ -99,6 +105,7 @@ class Robot:
         # Collects information about the environment, by sending raycasts in all directions
         self.collect_sensor_data()
 
+
     def check_collision_edge(self, theta, r_x, r_y, r_angle):
         # Check the collision for on point on the edge of the circle
         # theta is the point on the edge in radians
@@ -115,7 +122,8 @@ class Robot:
         # print("edge_x:", edge_x)
         # print("edge_r_x:", edge_r_x)
 
-        closest_inter, closest_dist, closest_line = self.world.raycast(edge_x, edge_y, (self.angle + theta)%(2*math.pi), raycast_range)
+        closest_inter, closest_dist, closest_line = self.world.raycast(edge_x,
+            edge_y, (self.angle + theta)%(2*math.pi), raycast_range)
         # print("Inter:", closest_inter, closest_dist)
 
         # Define a buffer such that the robot is not placed at exactly the wall
@@ -171,15 +179,23 @@ class Robot:
             # Return the collision points with the correct buffer
             return final_x, final_y
 
+
     def check_collision(self, r_x, r_y, r_angle):
+        """
+        @param r_x: aspired x position after time step
+        @param r_y: aspired y position after time step
+        @param r_angle: angle of ray cast
+        """
         n_col_rays = 32  # Ideally powers of 2
+        single_beam = False
 
-        theta = 0# math.pi/4
-        col_ray_angles = [theta]
-
-        # col_ray_angles = np.linspace(0, 2 * math.pi, n_col_rays, endpoint=False)
+        if single_beam:
+            theta = 0# math.pi/4
+            col_ray_angles = [theta]
+        else:
+            col_ray_angles = np.linspace(0, 2 * math.pi, n_col_rays, endpoint=False)
+        
         collision = False
-
         for theta in col_ray_angles:
             collision_point = self.check_collision_edge(theta, r_x, r_y, r_angle)
             if (collision_point is None):
@@ -200,15 +216,14 @@ class Robot:
                     self.x = r_x
                 else:
                     self.y = collision_point[1] - math.sin(self.angle + theta) * self.radius
-
-                # We have a collision break out of the loop
-                break
+                break  # We have a collision break out of the loop
 
         if (not collision):
             # No collision, set the location to the requested values
             self.x = r_x
             self.y = r_y
             self.angle = r_angle
+
 
     def collect_sensor_data(self):
         raycast_length = self.radius + self.max_sensor_length
