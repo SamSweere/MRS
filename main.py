@@ -1,7 +1,7 @@
 from gui.game import MobileRobotGame
 import performance
-from simulation.world import World, create_rect_wall
-from simulation.robot import Robot
+from simulation.World import World, create_rect_wall
+from simulation.Robot import Robot
 
 run_performance_test = False
 
