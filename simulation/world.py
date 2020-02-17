@@ -35,8 +35,16 @@ class World:
         c_pos = np.array([c_pos[0], c_pos[1]])
         r_pos = np.array([r_pos[0], r_pos[1]])
 
+        closest_dist = math.inf
+        closest_hit = None
+
         for wall in self.walls:
             hit = wall.check_circle_intercept(c_pos, r_pos, radius)
+            if not hit is None:
+                dist = hit[0]
+                if(dist < closest_dist):
+                    closest_hit = hit[1]
+                    closest_dist = dist
             # if not hit is None:
             #     print("Hit!")
             #     print(hit)

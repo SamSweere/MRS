@@ -143,7 +143,7 @@ class PolygonWall:
 
             if (from_wall < closest_dist):
                 closest_dist = from_wall
-                closest_hit = p2
+                closest_hit = (p2, plc_dist)
 
         return closest_hit
 
@@ -201,62 +201,62 @@ def point_on_line(line_start, line_end, point):
     return False
 
 
-def line_intersect(a1, a2, b1, b2):
-    """
-    @param a1: start of line 1
-    @param a2: end of line 1
-    @param b1: start of line 2
-    @param b2: end of line 2
-    from: http://ericleong.me/research/circle-line/#moving-circle-and-static-line-segment
-    """
-
-    A1 = a2[1] - a1[1]
-    B1 = a1[0] - a2[0]
-    C1 = A1 * a1[0] + B1 * a1[1]
-    A2 = b2[1] - b1[1]
-    B2 = b1[0] - b2[0]
-    C2 = A2 * b1[0] + B2 * b1[1]
-    det = A1 * B2 - A2 * B1
-    if (det != 0):
-        x = (B2 * C1 - B1 * C2) / det
-        y = (A1 * C2 - A2 * C1) / det
-        if (x >= min(a1[0], a2[0]) and x <= max(a1[0], a2[0])
-                and x >= min(b1[0], b2[0]) and x <= max(b1[0], b2[0])
-                and y >= min(a1[1], a2[1]) and y <= max(a1[1], a2[1])
-                and y >= min(b1[1], b2[1]) and y <= max(b1[1], b2[1])):
-            # Intersection
-            return (x, y)
-
-    return None
-
 # def line_intersect(a1, a2, b1, b2):
 #     """
 #     @param a1: start of line 1
 #     @param a2: end of line 1
 #     @param b1: start of line 2
 #     @param b2: end of line 2
+#     from: http://ericleong.me/research/circle-line/#moving-circle-and-static-line-segment
 #     """
-#     # Check if two lines intersect
-#     # Taken from https://stackoverflow.com/questions/3746274/line-intersection-with-aabb-rectangle
-#     # Note index 0 stands for x position and 1 for y position
-#     b = a2 - a1
-#     d = b2 - b1
-#     b_dot_d_perp = b[0] * d[1] - b[1] * d[0]
 #
-#     # Lines are parallel, aka no intersection
-#     if b_dot_d_perp == 0:
-#         return None
+#     A1 = a2[1] - a1[1]
+#     B1 = a1[0] - a2[0]
+#     C1 = A1 * a1[0] + B1 * a1[1]
+#     A2 = b2[1] - b1[1]
+#     B2 = b1[0] - b2[0]
+#     C2 = A2 * b1[0] + B2 * b1[1]
+#     det = A1 * B2 - A2 * B1
+#     if (det != 0):
+#         x = (B2 * C1 - B1 * C2) / det
+#         y = (A1 * C2 - A2 * C1) / det
+#         if (x >= min(a1[0], a2[0]) and x <= max(a1[0], a2[0])
+#                 and x >= min(b1[0], b2[0]) and x <= max(b1[0], b2[0])
+#                 and y >= min(a1[1], a2[1]) and y <= max(a1[1], a2[1])
+#                 and y >= min(b1[1], b2[1]) and y <= max(b1[1], b2[1])):
+#             # Intersection
+#             return (x, y)
 #
-#     c = b1 - a1
-#     t = (c[0] * d[1] - c[1] * d[0]) / b_dot_d_perp
-#     # Still no intersection
-#     if t < 0 or t > 1:
-#         return None
-#
-#     u = (c[0] * b[1] - c[1] * b[0]) / b_dot_d_perp
-#     # Still no intersection
-#     if u < 0 or u > 1:
-#         return None
-#
-#     intersection = a1 + t * b
-#     return intersection
+#     return None
+
+def line_intersect(a1, a2, b1, b2):
+    """
+    @param a1: start of line 1
+    @param a2: end of line 1
+    @param b1: start of line 2
+    @param b2: end of line 2
+    """
+    # Check if two lines intersect
+    # Taken from https://stackoverflow.com/questions/3746274/line-intersection-with-aabb-rectangle
+    # Note index 0 stands for x position and 1 for y position
+    b = a2 - a1
+    d = b2 - b1
+    b_dot_d_perp = b[0] * d[1] - b[1] * d[0]
+
+    # Lines are parallel, aka no intersection
+    if b_dot_d_perp == 0:
+        return None
+
+    c = b1 - a1
+    t = (c[0] * d[1] - c[1] * d[0]) / b_dot_d_perp
+    # Still no intersection
+    if t < 0 or t > 1:
+        return None
+
+    u = (c[0] * b[1] - c[1] * b[0]) / b_dot_d_perp
+    # Still no intersection
+    if u < 0 or u > 1:
+        return None
+
+    intersection = a1 + t * b
+    return intersection
