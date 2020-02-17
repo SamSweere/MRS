@@ -73,7 +73,7 @@ class Robot:
         # location: ({np.round(self.x, 3)}, {np.round(self.y, 3)})")
 
         self.check_collision(r_x, r_y, r_angle)
-        self.collect_sensor_data()  # Send raycasts in all directions
+        # self.collect_sensor_data()  # Send raycasts in all directions
 
     def check_collision(self, r_x, r_y, r_angle):
         """
