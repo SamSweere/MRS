@@ -98,6 +98,7 @@ class PolygonWall:
             ac_dist = distance(circle_start, a)
             plc_dist = distance(circle_start, p1)
 
+
             # v_dist = distance(circle_start, circle_end)
             # ac = circle_start - a
             # p1c = circle_start - p1
@@ -146,7 +147,7 @@ class PolygonWall:
 
             pC = closest_point_to_seg(seg_start, seg_end, p2)
 
-            if not point_on_line(seg_start, seg_end, pC):
+            if (not point_on_line(seg_start, seg_end, pC)) or (plc_dist < radius):
                 # The point is not on the line, this is a pole scenario
                 # Get the point collest to pC
                 if distance(seg_start, pC) <= distance(seg_end, pC):
