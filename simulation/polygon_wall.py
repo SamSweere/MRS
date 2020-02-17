@@ -39,6 +39,8 @@ class PolygonWall:
         closest_dist = math.inf
         closest_hit = None
 
+        precision = 10000000
+
         if (circle_start[0] == circle_end[0] and circle_start[1] == circle_end[1]):
             # No movement return None
             return closest_hit
@@ -84,8 +86,8 @@ class PolygonWall:
             if (distance(p1, circle_end) > radius):
                 # Not possible
                 continue
-            ac_dist = distance(circle_start, a)
-            plc_dist = distance(circle_start, p1)
+            ac_dist = math.ceil((distance(circle_start, a)*precision)/precision)
+            plc_dist = math.ceil((distance(circle_start, p1)*precision)/precision)
             # v_dist = distance(circle_start, circle_end)
             # ac = circle_start - a
             # p1c = circle_start - p1
@@ -119,6 +121,8 @@ class PolygonWall:
             #     continue
 
             print("Hit!")
+            print(p2)
+
             # diff = circle_start - p2
             # p2_norm_sqrd = (diff[0] ** 2 + diff[1] ** 2)
             # if p2_norm_sqrd < closest_dist_sqrd:
