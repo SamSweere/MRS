@@ -39,23 +39,12 @@ class PolygonWall:
         closest_dist = math.inf
         closest_hit = None
 
-        precision = 10000
-
         if (circle_start[0] == circle_end[0] and circle_start[1] == circle_end[1]):
             # No movement return None
             return closest_hit
 
         # Extend the circle_end in the direction of the line
         p = 1.0e10 # TODO: this number is still  a bit arbitrary
-        # slope = dy/dx
-        # dx = circle_end[0] - circle_start[0]
-        # dy = circle_end[1] - circle_start[1]
-        # if (dx == 0):
-        #     # No movement in the x only change y
-        #     mv_end = np.array([circle_end[0], circle_end[1] + p * math.copysign(1, dy)])
-        # else:
-        #     slope = dy / dx
-        #     mv_end = np.array([circle_end[0] + p * math.cos(slope), circle_end[1] + p * math.sin(slope)])
 
         v = circle_end - circle_start
         u = v/(distance(circle_end, circle_start))
@@ -92,20 +81,11 @@ class PolygonWall:
             if (distance(p1, circle_end) > radius):
                 # Not possible
                 continue
-            # ac_dist = math.ceil((distance(circle_start, a)*precision)/precision)
-            # plc_dist = math.ceil((distance(circle_start, p1)*precision)/precision)
 
             ac_dist = distance(circle_start, a)
             plc_dist = distance(circle_start, p1)
 
-
-            # v_dist = distance(circle_start, circle_end)
-            # ac = circle_start - a
-            # p1c = circle_start - p1
-            # ac_norm = math.sqrt(ac[0] * ac[0] + ac[1] * ac[1])
-            # p1c_norm = math.sqrt(p1c[0] * p1c[0] + p1c[1] * p1c[1])
-            # circle_dir = circle_end - circle_start
-            # circle_dir_norm = math.sqrt(circle_dir[0] * circle_dir[0] + circle_dir[1] * circle_dir[1])
+            # Calculate the distance we have to move back from a along the v vector
             from_a = radius * (ac_dist / plc_dist)
 
             # Calculate the slope between c and a
@@ -121,42 +101,18 @@ class PolygonWall:
             # TODO: some weird rounding makes the thing go through
             p2 = np.array([circle_start[0]+(ac_dist - from_a)*math.cos(theta),
                            circle_start[1]+(ac_dist - from_a)*math.sin(theta)])
-            # else:
-            #     # Vertical line
-            #     p2 s= np.array([a[0], a - math.copysign(1, slope)])
-
-            # p2 =
-            # p2 = a - radius * (ac_dist / plc_dist) * (circle_dir / circle_dir_norm)
-
-            # if distance(p2, a) >= radius:
-            #     # No collision
-            #     continue
-
-            print("Hit!")
-            print(p2)
-
-            # diff = circle_start - p2
-            # p2_norm_sqrd = (diff[0] ** 2 + diff[1] ** 2)
-            # if p2_norm_sqrd < closest_dist_sqrd:
-            # closest_dist_sqrd = distance(p2, circle_start)
-            from_wall = distance(p1, a)
-            v_dist = distance(circle_start, circle_end)
-            # if(from_wall > v_dist+radius):
-            #     # Impossible continue
-            #     continue
 
             pC = closest_point_to_seg(seg_start, seg_end, p2)
 
             if (not point_on_line(seg_start, seg_end, pC)) or (plc_dist < radius):
                 # The point is not on the line, this is a pole scenario
-                # Get the point collest to pC
+                # Get the point closest to pC
                 if distance(seg_start, pC) <= distance(seg_end, pC):
                     # seg_start is closest
                     closest_point = seg_start
                 else:
                     # seg_end is closest
                     closest_point = seg_end
-
 
                 # Check if the closest point is within radius of the final location
                 if distance(circle_end, closest_point) > radius:
@@ -170,33 +126,16 @@ class PolygonWall:
                 # Move back along v
                 p2 = x - from_x * u
 
-
             # p3 = p2 + (p1 - pC)
 
-
+            # Calculate the distance from p1 to a, this will be used to select which collision is more important
+            from_wall = distance(p1, a)
 
             if (from_wall < closest_dist):
                 closest_dist = from_wall
                 closest_hit = (p2, plc_dist)
 
         return closest_hit
-
-    # def get_closest_point(self, point):
-    #     closest_point = None
-    #     closest_dist_sqrd = math.inf
-    #     for i in range(len(self.points)):
-    #         seg_start = self.points[i]
-    #         seg_end = self.points[(i+1) % len(self.points)]
-    #
-    #         closest_segment_point = closest_point_to_seg(seg_start, seg_end, point)
-    #         delta = point - closest_segment_point
-    #         dist_sqrd = delta[0] * delta[0] + delta[1] * delta[1]
-    #         if dist_sqrd < closest_dist_sqrd:
-    #             closest_point = closest_segment_point
-    #             closest_dist_sqrd = dist_sqrd
-    #
-    #     return closest_point
-
 
 def closest_point_to_seg(line_start, line_end, point):
     # Note index 0 stands for x position and 1 for y position
@@ -219,51 +158,7 @@ def distance(point1, point2):
 def point_on_line(line_start, line_end, point):
     if (distance(line_start, point) + distance(point, line_end) == distance(line_start, line_end)):
         return True
-    # dx = line_end[0] - line_start[0]
-    # dy = line_end[1] - line_start[1]
-    # if (dx == 0):
-    #     # No movement in the x only change y
-    #     if (point[0] == line_start[0]):
-    #         return True
-    # else:
-    #     slope = dy / dx
-    #     # c = y - slope*x
-    #     c = line_start[1] - slope * line_start[0]
-    #     margin = 0.00001
-    #     if (slope * point[0] + c < point[1] + margin and slope * point[0] + c > point[1] - margin):
-    #         # Point on line
-    #         return True
-
     return False
-
-
-# def line_intersect(a1, a2, b1, b2):
-#     """
-#     @param a1: start of line 1
-#     @param a2: end of line 1
-#     @param b1: start of line 2
-#     @param b2: end of line 2
-#     from: http://ericleong.me/research/circle-line/#moving-circle-and-static-line-segment
-#     """
-#
-#     A1 = a2[1] - a1[1]
-#     B1 = a1[0] - a2[0]
-#     C1 = A1 * a1[0] + B1 * a1[1]
-#     A2 = b2[1] - b1[1]
-#     B2 = b1[0] - b2[0]
-#     C2 = A2 * b1[0] + B2 * b1[1]
-#     det = A1 * B2 - A2 * B1
-#     if (det != 0):
-#         x = (B2 * C1 - B1 * C2) / det
-#         y = (A1 * C2 - A2 * C1) / det
-#         if (x >= min(a1[0], a2[0]) and x <= max(a1[0], a2[0])
-#                 and x >= min(b1[0], b2[0]) and x <= max(b1[0], b2[0])
-#                 and y >= min(a1[1], a2[1]) and y <= max(a1[1], a2[1])
-#                 and y >= min(b1[1], b2[1]) and y <= max(b1[1], b2[1])):
-#             # Intersection
-#             return (x, y)
-#
-#     return None
 
 def line_intersect(a1, a2, b1, b2):
     """

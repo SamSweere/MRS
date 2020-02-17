@@ -41,37 +41,45 @@ walls = [
         env_params["env_height"]/2 - 100, 150, 100),
 ]
 
-border_left = PolygonWall(np.array([
-    [margin, margin],
-    [margin, HEIGHT-margin*2],
-    [margin*2, HEIGHT-margin*2],
-    [margin*2, margin]
-]))
-walls.append(border_left)
+border = [
+    create_line_wall((0,0),(WIDTH, 0)),
+    create_line_wall((WIDTH, 0), (WIDTH, HEIGHT)),
+    create_line_wall((WIDTH, HEIGHT), (0, HEIGHT)),
+    create_line_wall((0, HEIGHT), (0,0))
+]
+walls += border
 
-border_right = PolygonWall(np.array([
-    [WIDTH-margin*2, margin],
-    [WIDTH-margin*2, HEIGHT-margin*2],
-    [WIDTH-margin, HEIGHT-margin*2],
-    [WIDTH-margin, margin]
-]))
-walls.append(border_right)
-
-border_bottom = PolygonWall(np.array([
-    [margin, HEIGHT-margin*2],
-    [margin, HEIGHT-margin],
-    [WIDTH-margin, HEIGHT-margin],
-    [WIDTH-margin, HEIGHT-margin*2],
-]))
-walls.append(border_bottom)
-
-border_top = PolygonWall(np.array([
-    [margin, margin],
-    [margin, margin*2],
-    [WIDTH-margin, margin*2],
-    [WIDTH-margin, margin],
-]))
-walls.append(border_top)
+# border_left = PolygonWall(np.array([
+#     [margin, margin],
+#     [margin, HEIGHT-margin*2],
+#     [margin*2, HEIGHT-margin*2],
+#     [margin*2, margin]
+# ]))
+# walls.append(border_left)
+#
+# border_right = PolygonWall(np.array([
+#     [WIDTH-margin*2, margin],
+#     [WIDTH-margin*2, HEIGHT-margin*2],
+#     [WIDTH-margin, HEIGHT-margin*2],
+#     [WIDTH-margin, margin]
+# ]))
+# walls.append(border_right)
+#
+# border_bottom = PolygonWall(np.array([
+#     [margin, HEIGHT-margin*2],
+#     [margin, HEIGHT-margin],
+#     [WIDTH-margin, HEIGHT-margin],
+#     [WIDTH-margin, HEIGHT-margin*2],
+# ]))
+# walls.append(border_bottom)
+#
+# border_top = PolygonWall(np.array([
+#     [margin, margin],
+#     [margin, margin*2],
+#     [WIDTH-margin, margin*2],
+#     [WIDTH-margin, margin],
+# ]))
+# walls.append(border_top)
 
 
 if __name__ == "__main__":
