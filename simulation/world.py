@@ -41,14 +41,14 @@ class World:
         for wall in self.walls:
             hit = wall.check_circle_intercept(c_pos, r_pos, radius)
             if not hit is None:
-                dist = hit[0]
+                dist = hit[1]
                 if(dist < closest_dist):
-                    closest_hit = hit[1]
+                    closest_hit = hit[0]
                     closest_dist = dist
             # if not hit is None:
             #     print("Hit!")
             #     print(hit)
-        return hit
+        return closest_hit
 
 
 def create_rect_wall(x, y, width, height):

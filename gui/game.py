@@ -85,6 +85,21 @@ class MobileRobotGame:
         v_test_surface = self.fps_font.render(f"V_abs: {self.robot.v_test}",
                                          False, pygame.Color('red'))
         self.screen.blit(v_test_surface, (30, 110))
+
+        self.screen.blit(v_surface, (30, 90))
+        v_test_surface = self.fps_font.render(f"x: {self.robot.x}",
+                                              False, pygame.Color('red'))
+        self.screen.blit(v_test_surface, (30, 130))
+
+        self.screen.blit(v_surface, (30, 90))
+        v_test_surface = self.fps_font.render(f"y: {self.robot.y}",
+                                              False, pygame.Color('red'))
+        self.screen.blit(v_test_surface, (30, 150))
+
+        self.screen.blit(v_surface, (30, 90))
+        v_test_surface = self.fps_font.render(f"angle: {self.robot.angle}",
+                                              False, pygame.Color('red'))
+        self.screen.blit(v_test_surface, (30, 170))
         
 
     def __draw_robot__(self):
@@ -126,6 +141,9 @@ class MobileRobotGame:
                 if event.key == pygame.K_SPACE:
                     self.robot.vr += speed
                     self.robot.vl += speed
+                if event.key == pygame.K_x:
+                    self.robot.vr = 0
+                    self.robot.vl = 0
                 if event.key == pygame.K_r:
                     self.reset = True
             

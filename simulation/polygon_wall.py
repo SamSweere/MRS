@@ -138,9 +138,6 @@ class PolygonWall:
             #     # Impossible continue
             #     continue
 
-            # TODO: remove this
-            return p2
-
             if (from_wall < closest_dist):
                 closest_dist = from_wall
                 closest_hit = (p2, plc_dist)
@@ -183,20 +180,22 @@ def distance(point1, point2):
 
 
 def point_on_line(line_start, line_end, point):
-    dx = line_end[0] - line_start[0]
-    dy = line_end[1] - line_start[1]
-    if (dx == 0):
-        # No movement in the x only change y
-        if (point[0] == line_start[0]):
-            return True
-    else:
-        slope = dy / dx
-        # c = y - slope*x
-        c = line_start[1] - slope * line_start[0]
-        margin = 0.00001
-        if (slope * point[0] + c < point[1] + margin and slope * point[0] + c > point[1] - margin):
-            # Point on line
-            return True
+    if (distance(line_start, point) + distance(point, line_end) == distance(line_start, line_end)):
+        return True
+    # dx = line_end[0] - line_start[0]
+    # dy = line_end[1] - line_start[1]
+    # if (dx == 0):
+    #     # No movement in the x only change y
+    #     if (point[0] == line_start[0]):
+    #         return True
+    # else:
+    #     slope = dy / dx
+    #     # c = y - slope*x
+    #     c = line_start[1] - slope * line_start[0]
+    #     margin = 0.00001
+    #     if (slope * point[0] + c < point[1] + margin and slope * point[0] + c > point[1] - margin):
+    #         # Point on line
+    #         return True
 
     return False
 
