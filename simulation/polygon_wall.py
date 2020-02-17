@@ -39,14 +39,14 @@ class PolygonWall:
         closest_dist = math.inf
         closest_hit = None
 
-        precision = 10000000
+        precision = 10000
 
         if (circle_start[0] == circle_end[0] and circle_start[1] == circle_end[1]):
             # No movement return None
             return closest_hit
 
         # Extend the circle_end in the direction of the line
-        p = 1000  # TODO: this number is still  a bit arbitrary
+        p = 1.0e10 # TODO: this number is still  a bit arbitrary
         # slope = dy/dx
         # dx = circle_end[0] - circle_start[0]
         # dy = circle_end[1] - circle_start[1]
@@ -86,8 +86,12 @@ class PolygonWall:
             if (distance(p1, circle_end) > radius):
                 # Not possible
                 continue
-            ac_dist = math.ceil((distance(circle_start, a)*precision)/precision)
-            plc_dist = math.ceil((distance(circle_start, p1)*precision)/precision)
+            # ac_dist = math.ceil((distance(circle_start, a)*precision)/precision)
+            # plc_dist = math.ceil((distance(circle_start, p1)*precision)/precision)
+
+            ac_dist = distance(circle_start, a)
+            plc_dist = distance(circle_start, p1)
+
             # v_dist = distance(circle_start, circle_end)
             # ac = circle_start - a
             # p1c = circle_start - p1
@@ -107,6 +111,7 @@ class PolygonWall:
                 slope = dy / dx
             theta = math.atan(slope)
             # if(abs(slope) != np.inf):
+            # TODO: some weird rounding makes the thing go through
             p2 = np.array([circle_start[0]+(ac_dist - from_a)*math.cos(theta),
                            circle_start[1]+(ac_dist - from_a)*math.sin(theta)])
             # else:

@@ -123,6 +123,9 @@ class MobileRobotGame:
                     self.robot.vr += -speed
                 if event.key == pygame.K_l:
                     self.robot.vl += -speed
+                if event.key == pygame.K_SPACE:
+                    self.robot.vr += speed
+                    self.robot.vl += speed
                 if event.key == pygame.K_r:
                     self.reset = True
             

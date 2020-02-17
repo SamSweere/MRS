@@ -17,8 +17,8 @@ env_params = {
 margin = 10
 
 walls = [
-    create_line_wall((500,-100),(500,20000))
-    # create_line_wall((0,100),(1000,100))
+    # create_line_wall((500,-100),(500,20000))
+    create_line_wall((0,100),(1000,100))
 ]
 # walls = [
 #     create_rect_wall(env_params["env_width"]/2 + 50,
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     reset = True
     while reset:
         world = World(walls)
-        robot = Robot(world, 520.002, 300, 1*np.pi)
+        robot = Robot(world, 400, 115, 0.5*np.pi)
         env_params["world"] = world
         env_params["robot"] = robot
 

@@ -21,8 +21,8 @@ class Robot:
         self.sensor_data = []
 
         self.l = 2 * self.radius
-        self.vl = 0
-        self.vr = 0
+        self.vl =0.15 #0
+        self.vr =0.1 #0
         self.v = (self.vr - self.vl / 2)
         self.w = (self.vr - self.vl) / self.l
         self.R, self.icc = self.calculate_icc()
@@ -91,8 +91,8 @@ class Robot:
             # Collision
             self.x = collision[0]
             self.y = collision[1]
-            self.vl = 0
-            self.vr = 0
+            # self.vl = 0
+            # self.vr = 0
         self.angle = r_angle
 
     # def check_collision_edge(self, theta, r_x, r_y, r_angle):
