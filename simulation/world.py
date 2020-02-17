@@ -30,6 +30,26 @@ class World:
 
         return closest_inter, closest_dist, closest_line
 
+    def circle_collision(self, c_pos, r_pos, radius):
+        # Input is tuples has to be numpy arrays
+        c_pos = np.array([c_pos[0], c_pos[1]])
+        r_pos = np.array([r_pos[0], r_pos[1]])
+
+        closest_dist = math.inf
+        closest_hit = None
+
+        for wall in self.walls:
+            hit = wall.check_circle_intercept(c_pos, r_pos, radius)
+            if not hit is None:
+                dist = hit[1]
+                if(dist < closest_dist):
+                    closest_hit = hit[0]
+                    closest_dist = dist
+            # if not hit is None:
+            #     print("Hit!")
+            #     print(hit)
+        return closest_hit
+
 
 def create_rect_wall(x, y, width, height):
     points = np.array([
@@ -37,5 +57,13 @@ def create_rect_wall(x, y, width, height):
         [x - width / 2, y + height / 2],
         [x + width / 2, y + height / 2],
         [x + width / 2, y - height / 2]
+    ])
+    return PolygonWall(points)
+
+
+def create_line_wall(point1, point2):
+    points = np.array([
+        [point1[0], point1[1]],
+        [point2[0], point2[1]]
     ])
     return PolygonWall(points)

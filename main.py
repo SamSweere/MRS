@@ -1,6 +1,6 @@
 from gui.game import MobileRobotGame
 import performance
-from simulation.world import World, create_rect_wall
+from simulation.world import World, create_rect_wall, create_line_wall
 from simulation.polygon_wall import PolygonWall
 from simulation.robot import Robot
 import numpy as np
@@ -15,10 +15,29 @@ env_params = {
 } 
 
 margin = 10
+
+# walls = [
+#     # create_line_wall((500,-100),(500,20000))
+#     create_line_wall((0,100),(1000,100))
+# ]
+
+# walls = [
+#     create_line_wall((500,100),(500,300))
+# ]
+
+# walls = [
+#     create_rect_wall(490,
+#         200, 20, 200),
+# ]
+
+# walls = [
+#     create_rect_wall(600,200, 200, 200),
+# ]
+
 walls = [
-    create_rect_wall(env_params["env_width"]/2 + 50, 
+    create_rect_wall(env_params["env_width"]/2 + 50,
         env_params["env_height"]/2 - 100, 100, 50),
-    create_rect_wall(env_params["env_width"]/2 - 50, 
+    create_rect_wall(env_params["env_width"]/2 - 50,
         env_params["env_height"]/2 - 100, 150, 100),
 ]
 
@@ -59,7 +78,7 @@ if __name__ == "__main__":
     reset = True
     while reset:
         world = World(walls)
-        robot = Robot(world, env_params["env_width"]/2, env_params["env_height"]/2)
+        robot = Robot(world, 620, 145, 2.847)
         env_params["world"] = world
         env_params["robot"] = robot
 
