@@ -56,14 +56,21 @@ walls.append(border_top)
 
 
 if __name__ == "__main__":
-    world = World(walls)
-    robot = Robot(world, env_params["env_width"]/2, env_params["env_height"]/2)
-    env_params["world"] = world
-    env_params["robot"] = robot
+    reset = True
+    while reset:
+        world = World(walls)
+        robot = Robot(world, env_params["env_width"]/2, env_params["env_height"]/2)
+        env_params["world"] = world
+        env_params["robot"] = robot
 
-    if not run_performance_test:
-        game = MobileRobotGame(**env_params)
-        game.init()
-        game.run()
-    else:
-        performance.stop_time(world, robot, num_steps=10000)
+        if not run_performance_test:
+            game = MobileRobotGame(**env_params)
+            game.init()
+            game.run()
+            if game.reset:
+                reset = True
+            else:
+                reset = False
+        else:
+            performance.stop_time(world, robot, num_steps=10000)
+            reset = False

@@ -47,14 +47,14 @@ class Robot:
 
         # Determine the new angle keep it within 2 pi
         # w is basically theta because we just assume time was 1
-        v = (self.vl + self.vr / 2)
+        self.v = (self.vl + self.vr / 2)
         dt = 1
         angle_change = self.w * dt
 
         # Based on the speed and the angle find the new requested location
         if (self.vr == self.vl) and (self.vr != 0):
-            r_x = self.x + v * math.cos(self.angle)
-            r_y = self.y + v * math.sin(self.angle)
+            r_x = self.x + self.v * math.cos(self.angle)
+            r_y = self.y + self.v * math.sin(self.angle)
         else:
             # TODO: should this move even if vr == vl?
             icc_x = self.icc[0]
@@ -67,6 +67,9 @@ class Robot:
                     icc_y)
 
         r_angle = (self.angle + angle_change) % (2 * math.pi)
+
+        # To test if the speed is right
+        self.v_test = math.sqrt((self.x - r_x)**2 + (self.y - r_y)**2)
 
         print(f"R: {self.R}\t angle: {self.angle:3.0f}\t icc: {np.round(self.icc, 3)}, \
         location: ({np.round(self.x, 3)}, {np.round(self.y, 3)})")

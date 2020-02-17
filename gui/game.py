@@ -24,6 +24,7 @@ class MobileRobotGame:
         self.world = world
         self.robot = robot
         self.fps_tracker = FPSCounter()
+        self.reset = False
         
 
     def init(self):
@@ -36,7 +37,7 @@ class MobileRobotGame:
 
     def run(self):
         # Main game loop
-        while not self.done:
+        while (not self.done and not self.reset):
             self.handle_events()
             self.update()
             
@@ -45,7 +46,8 @@ class MobileRobotGame:
             # Pygame uses double buffers
             # This swaps the buffers so everything we've drawn will now show up on the screen
             pygame.display.flip()            
-            self.fps_tracker.tick()            
+            self.fps_tracker.tick()
+
         pygame.quit()
 
             
@@ -72,6 +74,12 @@ class MobileRobotGame:
         vr_surface = self.fps_font.render(f"Vr: {self.robot.vr}", 
             False, pygame.Color('red'))
         self.screen.blit(vr_surface, (30, 70))
+        v_surface = self.fps_font.render(f"V: {self.robot.v}",
+                                          False, pygame.Color('red'))
+        self.screen.blit(v_surface, (30, 90))
+        v_test_surface = self.fps_font.render(f"V_abs: {self.robot.v_test}",
+                                         False, pygame.Color('red'))
+        self.screen.blit(v_test_surface, (30, 110))
         
 
     def __draw_robot__(self):
@@ -107,5 +115,7 @@ class MobileRobotGame:
                 if event.key == pygame.K_s:
                     self.robot.vl += -speed
                 if event.key == pygame.K_l:
-                    self.robot.vr += -speed   
+                    self.robot.vr += -speed
+                if event.key == pygame.K_r:
+                    self.reset = True
             
