@@ -58,7 +58,12 @@ class MobileRobotGame:
         self.__draw_robot__()
         
         for wall in self.world.walls:  # Draw walls
-            pygame.draw.polygon(self.screen, pygame.Color('black'), wall.points)
+            if(len(wall.points) == 2):
+                # This is a line
+                pygame.draw.line(self.screen, pygame.Color('black'), wall.points[0], wall.points[1], 1)
+            else:
+                # This is a polygon
+                pygame.draw.polygon(self.screen, pygame.Color('black'), wall.points)
         
         # Draw text displays
         fps = self.fps_tracker.get_fps()
@@ -68,8 +73,8 @@ class MobileRobotGame:
 
         vl_surface = self.fps_font.render(f"Vl: {self.robot.vl}", 
             False, pygame.Color('red'))
-        print(self.robot.vr)
-        print(self.robot.vl)
+        # print(self.robot.vr)
+        # print(self.robot.vl)
         self.screen.blit(vl_surface, (30, 50))
         vr_surface = self.fps_font.render(f"Vr: {self.robot.vr}", 
             False, pygame.Color('red'))
@@ -85,7 +90,9 @@ class MobileRobotGame:
     def __draw_robot__(self):
         # draw ICC
         R, icc = self.robot.R, self.robot.icc
-        pygame.draw.circle(self.screen, pygame.Color('green'), ti(icc), 1)
+        if(max(icc) < 10e8 and min(icc) > -10e8):
+            # In bounds
+            pygame.draw.circle(self.screen, pygame.Color('green'), ti(icc), 1)
 
         # Draw sensors
         for hit, dist in self.robot.sensor_data:
@@ -103,19 +110,19 @@ class MobileRobotGame:
         
     
     def handle_events(self):
-        speed = 0.5
+        speed = 0.05
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.done = True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w:
-                    self.robot.vl += speed
-                if event.key == pygame.K_o:
                     self.robot.vr += speed
+                if event.key == pygame.K_o:
+                    self.robot.vl += speed
                 if event.key == pygame.K_s:
-                    self.robot.vl += -speed
-                if event.key == pygame.K_l:
                     self.robot.vr += -speed
+                if event.key == pygame.K_l:
+                    self.robot.vl += -speed
                 if event.key == pygame.K_r:
                     self.reset = True
             
