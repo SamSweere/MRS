@@ -21,16 +21,20 @@ margin = 10
 #     create_line_wall((0,100),(1000,100))
 # ]
 
+walls = [
+    create_line_wall((500,100),(500,300))
+]
+
 # walls = [
 #     create_rect_wall(600,200, 200, 200),
 # ]
 
-walls = [
-    create_rect_wall(env_params["env_width"]/2 + 50,
-        env_params["env_height"]/2 - 100, 100, 50),
-    create_rect_wall(env_params["env_width"]/2 - 50,
-        env_params["env_height"]/2 - 100, 150, 100),
-]
+# walls = [
+#     create_rect_wall(env_params["env_width"]/2 + 50,
+#         env_params["env_height"]/2 - 100, 100, 50),
+#     create_rect_wall(env_params["env_width"]/2 - 50,
+#         env_params["env_height"]/2 - 100, 150, 100),
+# ]
 #
 # border_left = PolygonWall(np.array([
 #     [margin, margin],
@@ -69,7 +73,7 @@ if __name__ == "__main__":
     reset = True
     while reset:
         world = World(walls)
-        robot = Robot(world, 620, 145, 2.847)
+        robot = Robot(world, 460, 310, 0)
         env_params["world"] = world
         env_params["robot"] = robot
 

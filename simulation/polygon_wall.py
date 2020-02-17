@@ -65,23 +65,29 @@ class PolygonWall:
             seg_start = self.points[i]
             seg_end = self.points[(i + 1) % len(self.points)]
 
-            a = line_intersect(circle_start, mv_end, seg_start, seg_end)
+            # Extend both the segments with the radius for the pole case
+            s = seg_end - seg_start
+            su = s/(distance(seg_end, seg_start))
+            seg_end_ext = seg_end + su*radius
+            seg_start_ext = seg_start - su*radius
+
+            a = line_intersect(circle_start, mv_end, seg_start_ext, seg_end_ext)
             if a is None:
                 continue
 
-            b = closest_point_to_seg(seg_start, seg_end, circle_end)
-            b_req = (distance(b, circle_end) < radius and point_on_line(seg_start, seg_end, b))
+            b = closest_point_to_seg(seg_start_ext, seg_end_ext, circle_end)
+            b_req = (distance(b, circle_end) < radius and point_on_line(seg_start_ext, seg_end_ext, b))
 
-            c = closest_point_to_seg(circle_start, circle_end, seg_start)
-            c_req = distance(c, seg_start) < radius and point_on_line(circle_start, circle_end, c)
+            c = closest_point_to_seg(circle_start, circle_end, seg_start_ext)
+            c_req = distance(c, seg_start_ext) < radius and point_on_line(circle_start, circle_end, c)
 
-            d = closest_point_to_seg(circle_start, circle_end, seg_end)
-            d_req = distance(d, seg_end) < radius and point_on_line(circle_start, circle_end, d)
+            d = closest_point_to_seg(circle_start, circle_end, seg_end_ext)
+            d_req = distance(d, seg_end_ext) < radius and point_on_line(circle_start, circle_end, d)
 
             if not (b_req or c_req or d_req):
                 # No intersection possible
                 continue
-            p1 = closest_point_to_seg(seg_start, seg_end, circle_start)
+            p1 = closest_point_to_seg(seg_start_ext, seg_end_ext, circle_start)
 
             if (distance(p1, circle_end) > radius):
                 # Not possible
@@ -138,6 +144,36 @@ class PolygonWall:
             #     # Impossible continue
             #     continue
 
+            pC = closest_point_to_seg(seg_start, seg_end, p2)
+
+            if not point_on_line(seg_start, seg_end, pC):
+                # The point is not on the line, this is a pole scenario
+                # Get the point collest to pC
+                if distance(seg_start, pC) <= distance(seg_end, pC):
+                    # seg_start is closest
+                    closest_point = seg_start
+                else:
+                    # seg_end is closest
+                    closest_point = seg_end
+
+
+                # Check if the closest point is within radius of the final location
+                if distance(circle_end, closest_point) > radius:
+                    # No collision yet
+                    continue
+
+                x = closest_point_to_seg(circle_start, mv_end, closest_point)
+                dist_x = distance(x, closest_point)
+                # Use pythagoras to find the p2 point
+                from_x = math.sqrt(radius ** 2 - dist_x ** 2)
+                # Move back along v
+                p2 = x - from_x * u
+
+
+            # p3 = p2 + (p1 - pC)
+
+
+
             if (from_wall < closest_dist):
                 closest_dist = from_wall
                 closest_hit = (p2, plc_dist)
@@ -172,7 +208,7 @@ def closest_point_to_seg(line_start, line_end, point):
     cx = (a1 * c1 - b1 * c2) / det
     cy = (a1 * c2 + b1 * c1) / det
 
-    return (cx, cy)
+    return np.array([cx, cy])
 
 
 def distance(point1, point2):
