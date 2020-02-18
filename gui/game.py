@@ -24,6 +24,7 @@ class MobileRobotGame:
         self.world = world
         self.robot = robot
         self.fps_tracker = FPSCounter()
+        self.clock = pygame.time.Clock()
         self.reset = False
         
 
@@ -42,12 +43,14 @@ class MobileRobotGame:
             self.handle_events()
             
             # Update
-            t = pygame.time.get_ticks()
-            deltaTime = (t - ticks_last_frame) / 1000.0
-            ticks_last_frame = t
-                
-            self.update(deltaTime)
-            
+
+            dt = self.clock.tick(60)
+            # t = pygame.time.get_ticks(
+            # delta_time = (t - ticks_last_frame) / 1000.0
+            # ticks_last_frame = t
+            # self.update(delta_time)
+            self.update(dt)
+
             self.screen.fill(pygame.Color('white'))
             self.draw()
             # Pygame uses double buffers
@@ -132,7 +135,7 @@ class MobileRobotGame:
         
     
     def handle_events(self):
-        speed = 10
+        speed = 0.02
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.done = True

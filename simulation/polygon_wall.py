@@ -1,7 +1,6 @@
 import math
 import numpy as np
 
-
 class PolygonWall:
     def __init__(self, points):
         self.points = points
@@ -44,7 +43,7 @@ class PolygonWall:
             return closest_hit
 
         # Extend the circle_end in the direction of the line
-        p = 1.0e10 # TODO: this number is still  a bit arbitrary
+        p = 99e99 # TODO: this number is still  a bit arbitrary
 
         v = circle_end - circle_start
         u = v/(distance(circle_end, circle_start))
@@ -95,7 +94,7 @@ class PolygonWall:
             dy = a[1]-circle_start[1]
             if (dx == 0):
                 # No movement in the x only change y
-                slope = dy * math.inf
+                slope = float(dy) * math.inf
             else:
                 slope = dy / dx
             theta = math.atan(slope)
