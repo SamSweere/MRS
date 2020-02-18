@@ -139,11 +139,16 @@ class PolygonWall:
             from_wall = distance(p1, a)
 
             if (from_wall < closest_dist):
-                margin = 0
+                # safety margin to avoid rounding errors
+                margin = 0.5
                 sgn_x = np.sign(circle_start[0] - circle_end[0])
                 sgn_y = np.sign(circle_start[1] - circle_end[1])
+                p2[0] += margin * sgn_x
+                p2[1] += margin * sgn_y
+
+                print(f"sign_x: {sgn_x}, sign_y: {sgn_y}")
                 closest_dist = from_wall
-                closest_hit = (p2 + margin * sgn_x, plc_dist + margin * sgn_y)
+                closest_hit = (p2, plc_dist)
 
         return closest_hit
 
