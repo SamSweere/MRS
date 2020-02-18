@@ -37,9 +37,16 @@ class MobileRobotGame:
 
     def run(self):
         # Main game loop
+        ticks_last_frame = pygame.time.get_ticks()
         while (not self.done and not self.reset):
             self.handle_events()
-            self.update()
+            
+            # Update
+            t = pygame.time.get_ticks()
+            deltaTime = (t - ticks_last_frame) / 1000.0
+            ticks_last_frame = t
+                
+            self.update(deltaTime)
             
             self.screen.fill(pygame.Color('white'))
             self.draw()
@@ -51,8 +58,8 @@ class MobileRobotGame:
         pygame.quit()
 
             
-    def update(self):
-        self.robot.update()
+    def update(self, delta_time):
+        self.robot.update(delta_time)
     
     def draw(self):
         self.__draw_robot__()
@@ -125,7 +132,7 @@ class MobileRobotGame:
         
     
     def handle_events(self):
-        speed = 0.05
+        speed = 10
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.done = True

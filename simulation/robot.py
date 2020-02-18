@@ -21,8 +21,8 @@ class Robot:
         self.sensor_data = []
 
         self.l = 2 * self.radius
-        self.vl = 2
-        self.vr = 2.5
+        self.vl = 0
+        self.vr = 0
         self.v = (self.vr - self.vl / 2)
         self.w = (self.vr - self.vl) / self.l
         self.R, self.icc = self.calculate_icc()
@@ -38,7 +38,7 @@ class Robot:
         )
         return R, icc
 
-    def update(self):
+    def update(self, delta_time):
         # Get the new center of rotation and speed
         self.R, self.icc = self.calculate_icc()
         self.w = (self.vr - self.vl) / self.l
@@ -46,13 +46,12 @@ class Robot:
         # Determine the new angle keep it within 2 pi
         # w is basically theta because we just assume time was 1
         self.v = (self.vl + self.vr / 2)
-        dt = 1
-        angle_change = self.w * dt
+        angle_change = self.w * delta_time
 
         # Based on the speed and the angle find the new requested location
         if (self.vr == self.vl) and (self.vr != 0):
-            r_x = self.x + self.v * math.cos(self.angle)
-            r_y = self.y + self.v * math.sin(self.angle)
+            r_x = self.x + self.v * math.cos(self.angle) * delta_time
+            r_y = self.y + self.v * math.sin(self.angle) * delta_time
         else:
             # TODO: should this move even if vr == vl?
             icc_x = self.icc[0]
