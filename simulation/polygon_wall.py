@@ -35,11 +35,16 @@ class PolygonWall:
         return closest_inter, math.sqrt(closest_dist_sqrd), closest_line
 
     def check_circle_intercept(self, circle_start, circle_end, radius):
+        """
+        @param circle_start: circle coordinates at beginning
+        @param circle_end: circle coordinates after movement
+        @param radius: circle radius
         # Following the guide from: http://ericleong.me/research/circle-line/#moving-circle-and-static-line-segment
+        """
         closest_dist = math.inf
         closest_hit = None
 
-        if (circle_start[0] == circle_end[0] and circle_start[1] == circle_end[1]):
+        if (circle_start[0] == circle_end[0]) and (circle_start[1] == circle_end[1]):
             # No movement return None
             return closest_hit
 
@@ -132,8 +137,11 @@ class PolygonWall:
             from_wall = distance(p1, a)
 
             if (from_wall < closest_dist):
+                margin = 0
+                sgn_x = np.sign(circle_start[0] - circle_end[0])
+                sgn_y = np.sign(circle_start[1] - circle_end[1])
                 closest_dist = from_wall
-                closest_hit = (p2, plc_dist)
+                closest_hit = (p2 + margin * sgn_x, plc_dist + margin * sgn_y)
 
         return closest_hit
 
