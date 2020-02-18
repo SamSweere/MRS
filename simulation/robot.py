@@ -21,8 +21,8 @@ class Robot:
         self.sensor_data = []
 
         self.l = 2 * self.radius
-        self.vl =0
-        self.vr =0
+        self.vl = 2
+        self.vr = 2.5
         self.v = (self.vr - self.vl / 2)
         self.w = (self.vr - self.vl) / self.l
         self.R, self.icc = self.calculate_icc()

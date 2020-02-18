@@ -86,7 +86,7 @@ if __name__ == "__main__":
     reset = True
     while reset:
         world = World(walls)
-        robot = Robot(world, 620, 145, 2.847)
+        robot = Robot(world, 728, 70, 3.3)
         env_params["world"] = world
         env_params["robot"] = robot
 
