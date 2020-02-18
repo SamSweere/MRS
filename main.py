@@ -49,44 +49,44 @@ border = [
 ]
 walls += border
 
-# border_left = PolygonWall(np.array([
-#     [margin, margin],
-#     [margin, HEIGHT-margin*2],
-#     [margin*2, HEIGHT-margin*2],
-#     [margin*2, margin]
-# ]))
-# walls.append(border_left)
-#
-# border_right = PolygonWall(np.array([
-#     [WIDTH-margin*2, margin],
-#     [WIDTH-margin*2, HEIGHT-margin*2],
-#     [WIDTH-margin, HEIGHT-margin*2],
-#     [WIDTH-margin, margin]
-# ]))
-# walls.append(border_right)
-#
-# border_bottom = PolygonWall(np.array([
-#     [margin, HEIGHT-margin*2],
-#     [margin, HEIGHT-margin],
-#     [WIDTH-margin, HEIGHT-margin],
-#     [WIDTH-margin, HEIGHT-margin*2],
-# ]))
-# walls.append(border_bottom)
-#
-# border_top = PolygonWall(np.array([
-#     [margin, margin],
-#     [margin, margin*2],
-#     [WIDTH-margin, margin*2],
-#     [WIDTH-margin, margin],
-# ]))
-# walls.append(border_top)
+border_left = PolygonWall(np.array([
+    [margin, margin],
+    [margin, HEIGHT-margin*2],
+    [margin*2, HEIGHT-margin*2],
+    [margin*2, margin]
+]))
+walls.append(border_left)
+
+border_right = PolygonWall(np.array([
+    [WIDTH-margin*2, margin],
+    [WIDTH-margin*2, HEIGHT-margin*2],
+    [WIDTH-margin, HEIGHT-margin*2],
+    [WIDTH-margin, margin]
+]))
+walls.append(border_right)
+
+border_bottom = PolygonWall(np.array([
+    [margin, HEIGHT-margin*2],
+    [margin, HEIGHT-margin],
+    [WIDTH-margin, HEIGHT-margin],
+    [WIDTH-margin, HEIGHT-margin*2],
+]))
+walls.append(border_bottom)
+
+border_top = PolygonWall(np.array([
+    [margin, margin],
+    [margin, margin*2],
+    [WIDTH-margin, margin*2],
+    [WIDTH-margin, margin],
+]))
+walls.append(border_top)
 
 
 if __name__ == "__main__":
     reset = True
     while reset:
         world = World(walls)
-        robot = Robot(world, 728, 70, 3.3)
+        robot = Robot(world, 735, 215, 1.83)
         env_params["world"] = world
         env_params["robot"] = robot
 

@@ -57,8 +57,10 @@ class PolygonWall:
             # Extend both the segments with the radius for the pole case
             s = seg_end - seg_start
             su = s/(distance(seg_end, seg_start))
-            seg_end_ext = seg_end + su*radius
-            seg_start_ext = seg_start - su*radius
+            seg_end_ext = seg_end + su * p
+            seg_start_ext = seg_start - su * p
+            # seg_end_ext = seg_end + su*radius
+            # seg_start_ext = seg_start - su*radius
 
             a = line_intersect(circle_start, mv_end, seg_start_ext, seg_end_ext)
             if a is None:
@@ -105,7 +107,7 @@ class PolygonWall:
             pC = closest_point_to_seg(seg_start, seg_end, p2)
 
             if (not point_on_line(seg_start, seg_end, pC)) or (plc_dist < radius):
-                # The point is not on the line, this is a pole scenario
+                # The point is not on the line, this is a pole or shallow angle scenario
                 # Get the point closest to pC
                 if distance(seg_start, pC) <= distance(seg_end, pC):
                     # seg_start is closest
