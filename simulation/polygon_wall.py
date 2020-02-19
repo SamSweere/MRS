@@ -139,7 +139,7 @@ class PolygonWall:
 
             if (from_wall < closest_dist):
                 # safety margin to avoid rounding errors
-                margin = 0.5
+                margin = 0.001
                 dx = circle_start[0] - circle_end[0]
                 dy = circle_start[1] - circle_end[1]
                 v = np.sqrt(np.square(dx) + np.square(dy))
