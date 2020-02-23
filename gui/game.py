@@ -3,6 +3,7 @@ import pygame.gfxdraw
 import math
 from .fps_counter import FPSCounter
 import numpy as np
+from gui.dustgrid_sprite import DustGridSprite
 
 def ti(arr):
     """
@@ -34,7 +35,7 @@ class MobileRobotGame:
         pygame.font.init()        
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.fps_font = pygame.font.SysFont('Arial', 16)
-    
+        self.dust_sprite = DustGridSprite(self.robot, self.world.dustgrid)
 
     def run(self):
         # Main game loop
@@ -50,7 +51,6 @@ class MobileRobotGame:
             # self.update(delta_time)
             self.update(dt)
 
-            self.screen.fill(pygame.Color('white'))
             self.draw()
             # Pygame uses double buffers
             # This swaps the buffers so everything we've drawn will now show up on the screen
@@ -62,9 +62,10 @@ class MobileRobotGame:
             
     def update(self, delta_time):
         self.world.update(delta_time)
+        self.dust_sprite.update(delta_time)
     
     def draw(self):
-        self.__draw_dustgrid__()
+        self.dust_sprite.draw(self.screen)
         self.__draw_robot__()
         
         for wall in self.world.walls:  # Draw walls
@@ -109,16 +110,7 @@ class MobileRobotGame:
         self.screen.blit(v_surface, (30, 90))
         v_test_surface = self.fps_font.render(f"angle: {self.robot.angle}",
                                               False, pygame.Color('red'))
-        self.screen.blit(v_test_surface, (30, 170))
-
-    def __draw_dustgrid__(self):
-    	for y, row in enumerate(self.world.dustgrid.cells):
-    		for x, col in enumerate(row):
-    			if col:
-    				continue
-    			
-    			cs = self.world.dustgrid.cell_size
-    			pygame.draw.rect(self.screen, pygame.Color('green'), (x * cs, y * cs, cs, cs))        
+        self.screen.blit(v_test_surface, (30, 170))       
 
     def __draw_robot__(self):
         # draw ICC

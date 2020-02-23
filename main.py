@@ -16,24 +16,6 @@ env_params = {
 
 margin = 10
 
-# walls = [
-#     # create_line_wall((500,-100),(500,20000))
-#     create_line_wall((0,100),(1000,100))
-# ]
-
-# walls = [
-#     create_line_wall((500,100),(500,300))
-# ]
-
-# walls = [
-#     create_rect_wall(490,
-#         200, 20, 200),
-# ]
-
-# walls = [
-#     create_rect_wall(600,200, 200, 200),
-# ]
-
 walls = [
     create_rect_wall(env_params["env_width"]/2 + 50,
         env_params["env_height"]/2 - 100, 100, 50),
