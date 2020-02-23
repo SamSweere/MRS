@@ -1,11 +1,21 @@
 from simulation.polygon_wall import PolygonWall
+from simulation.dustgrid import DustGrid
 import numpy as np
 import math
 
 
 class World:
-    def __init__(self, walls):
-        self.walls = walls
+    def __init__(self, walls, robot, width, height):
+    	self.walls = walls
+    	self.robot = robot
+    	self.dustgrid = DustGrid(width, height, 5)
+    	
+    	# The robot is now part of this world, so make sure he can access it
+    	self.robot.world = self
+
+    def update(self, delta_time):
+        self.robot.update(delta_time)
+        self.dustgrid.clean_circle_area(self.robot.x, self.robot.y, self.robot.radius)
 
     def raycast(self, x, y, angle, max_length):
         # angle is in radians

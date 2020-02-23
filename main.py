@@ -85,8 +85,8 @@ walls.append(border_top)
 if __name__ == "__main__":
     reset = True
     while reset:
-        world = World(walls)
-        robot = Robot(world, 620, 100, 1.15*np.pi)
+        robot = Robot(620, 100, 1.15*np.pi)
+        world = World(walls, robot, WIDTH, HEIGHT)
         env_params["world"] = world
         env_params["robot"] = robot
 

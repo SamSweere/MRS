@@ -43,7 +43,6 @@ class MobileRobotGame:
             self.handle_events()
             
             # Update
-
             dt = self.clock.tick(60)
             # t = pygame.time.get_ticks(
             # delta_time = (t - ticks_last_frame) / 1000.0
@@ -62,9 +61,10 @@ class MobileRobotGame:
 
             
     def update(self, delta_time):
-        self.robot.update(delta_time)
+        self.world.update(delta_time)
     
     def draw(self):
+        self.__draw_dustgrid__()
         self.__draw_robot__()
         
         for wall in self.world.walls:  # Draw walls
@@ -110,7 +110,15 @@ class MobileRobotGame:
         v_test_surface = self.fps_font.render(f"angle: {self.robot.angle}",
                                               False, pygame.Color('red'))
         self.screen.blit(v_test_surface, (30, 170))
-        
+
+    def __draw_dustgrid__(self):
+    	for y, row in enumerate(self.world.dustgrid.cells):
+    		for x, col in enumerate(row):
+    			if col:
+    				continue
+    			
+    			cs = self.world.dustgrid.cell_size
+    			pygame.draw.rect(self.screen, pygame.Color('green'), (x * cs, y * cs, cs, cs))        
 
     def __draw_robot__(self):
         # draw ICC
