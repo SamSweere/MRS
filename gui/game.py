@@ -68,13 +68,8 @@ class MobileRobotGame:
         self.dust_sprite.draw(self.screen)
         self.__draw_robot__()
         
-        for wall in self.world.walls:  # Draw walls
-            if(len(wall.points) == 2):
-                # This is a line
-                pygame.draw.line(self.screen, pygame.Color('black'), wall.points[0], wall.points[1], 1)
-            else:
-                # This is a polygon
-                pygame.draw.polygon(self.screen, pygame.Color('black'), wall.points)
+        for wall in self.world.walls:  # Draw walls=
+            pygame.draw.line(self.screen, pygame.Color('black'), wall.start, wall.end, 1)
         
         # Draw text displays
         fps = self.fps_tracker.get_fps()

@@ -1,4 +1,4 @@
-from simulation.polygon_wall import PolygonWall
+from simulation.line_wall import LineWall
 from simulation.dustgrid import DustGrid
 import numpy as np
 import math
@@ -60,19 +60,15 @@ class World:
         return closest_hit
 
 
-def create_rect_wall(x, y, width, height):
-    points = np.array([
-        [x - width / 2, y - height / 2],
-        [x - width / 2, y + height / 2],
-        [x + width / 2, y + height / 2],
-        [x + width / 2, y - height / 2]
-    ])
-    return PolygonWall(points)
-
-
-def create_line_wall(point1, point2):
-    points = np.array([
-        [point1[0], point1[1]],
-        [point2[0], point2[1]]
-    ])
-    return PolygonWall(points)
+def create_rect_walls(x, y, width, height):
+    bottomLeft = (x - width / 2, y - height / 2)
+    topLeft = (x - width / 2, y + height / 2)
+    topRight = (x + width / 2, y + height / 2)
+    bottomRight= (x + width / 2, y - height / 2)
+    
+    return [
+        LineWall(bottomLeft, topLeft),
+        LineWall(topLeft, topRight),
+        LineWall(topRight, bottomRight),
+        LineWall(bottomRight, bottomLeft)
+    ]

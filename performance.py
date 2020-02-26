@@ -1,4 +1,4 @@
-from simulation.world import World, create_rect_wall
+from simulation.world import World
 from simulation.robot import Robot
 import time
 
