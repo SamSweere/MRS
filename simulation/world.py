@@ -1,5 +1,6 @@
 from simulation.line_wall import LineWall
 from simulation.dustgrid import DustGrid
+from pygame.math import Vector2
 import numpy as np
 import math
 
@@ -19,10 +20,10 @@ class World:
     def raycast(self, x, y, angle, max_length):
         # angle is in radians
         # Calculate the start from x and y
-        start = np.array([x, y])
+        start = Vector2(x, y)
 
         # Calculate the direction from angle
-        direction = np.array([math.cos(angle), math.sin(angle)])
+        direction = Vector2(math.cos(angle), math.sin(angle))
         end = start + direction * max_length
 
         closest_inter = None
