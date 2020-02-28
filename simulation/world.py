@@ -39,36 +39,11 @@ class World:
 
         return closest_inter, closest_dist, closest_line
 
-    def circle_collision(self, c_pos, r_pos, radius):
-        # Input is tuples has to be numpy arrays
-        c_pos = np.array([c_pos[0], c_pos[1]])
-        r_pos = np.array([r_pos[0], r_pos[1]])
-
-        closest_dist = math.inf
-        closest_hit = None
-
+    def circle_collision(self, circle_position, radius):
+        collisions = []
         for wall in self.walls:
-            hit = wall.check_circle_intercept(c_pos, r_pos, radius)
-            if not hit is None:
-                dist = hit[1]
-                if(dist < closest_dist):
-                    closest_hit = hit[0]
-                    closest_dist = dist
-            # if not hit is None:
-            #     print("Hit!")
-            #     print(hit)
-        return closest_hit
-
-
-def create_rect_walls(x, y, width, height):
-    bottomLeft = (x - width / 2, y - height / 2)
-    topLeft = (x - width / 2, y + height / 2)
-    topRight = (x + width / 2, y + height / 2)
-    bottomRight= (x + width / 2, y - height / 2)
-    
-    return [
-        LineWall(bottomLeft, topLeft),
-        LineWall(topLeft, topRight),
-        LineWall(topRight, bottomRight),
-        LineWall(bottomRight, bottomLeft)
-    ]
+            intercept = wall.check_circle_intercept(circle_position, radius)
+            if intercept is not None:
+                collisions.append(intercept)
+                
+        return collisions if len(collisions) > 0 else None

@@ -1,9 +1,9 @@
 from gui.game import MobileRobotGame
 import performance
-from simulation.world import World, create_rect_walls
+from simulation.world import World
 from simulation.line_wall import LineWall
 from simulation.robot import Robot
-from world_creator import WorldCreator
+from world_creator import WorldCreator, create_rect_walls
 import numpy as np
 
 run_performance_test = False
@@ -35,10 +35,10 @@ if __name__ == "__main__":
         env_params["robot"] = robot
         
         # ToDo Enable later when everything works correctly
-        #creator = WorldCreator(WIDTH, HEIGHT)
-        #world, robot = creator.create_star_world()
-        #env_params["world"] = world
-        #env_params["robot"] = robot
+        creator = WorldCreator(WIDTH, HEIGHT)
+        world, robot = creator.create_star_world()
+        env_params["world"] = world
+        env_params["robot"] = robot
 
         if not run_performance_test:
             game = MobileRobotGame(**env_params)

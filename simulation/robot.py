@@ -67,11 +67,8 @@ class Robot:
         # To test if the speed is right
         self.v_test = math.sqrt((self.x - r_x) ** 2 + (self.y - r_y) ** 2)
 
-        # print(f"R: {self.R}\t angle: {self.angle:3.0f}\t icc: {np.round(self.icc, 3)}, \
-        # location: ({np.round(self.x, 3)}, {np.round(self.y, 3)})")
-
         self.check_collision(r_x, r_y, r_angle)
-        self.collect_sensor_data()  # Send raycasts in all directions
+        self.collect_sensor_data()
 
     def check_collision(self, r_x, r_y, r_angle):
         """
@@ -79,17 +76,11 @@ class Robot:
         @param r_y: aspired y position after time step
         @param r_angle: aspired angle after time step
         """
-        collision = self.world.circle_collision((self.x, self.y), (r_x, r_y), self.radius)
+        collision = self.world.circle_collision((r_x, r_y), self.radius)
         if collision is None:
             # No collision
             self.x = r_x
             self.y = r_y
-        else:
-            # Collision
-            self.x = collision[0]
-            self.y = collision[1]
-            self.vl = 0
-            self.vr = 0
 
         self.angle = r_angle
 

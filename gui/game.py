@@ -44,12 +44,10 @@ class MobileRobotGame:
             self.handle_events()
             
             # Update
-            dt = self.clock.tick(60)
-            # t = pygame.time.get_ticks(
-            # delta_time = (t - ticks_last_frame) / 1000.0
-            # ticks_last_frame = t
-            # self.update(delta_time)
-            self.update(dt)
+            t = pygame.time.get_ticks()
+            delta_time = (t - ticks_last_frame) / 1000.0
+            ticks_last_frame = t
+            self.update(delta_time)
 
             self.draw()
             # Pygame uses double buffers
@@ -68,7 +66,8 @@ class MobileRobotGame:
         self.dust_sprite.draw(self.screen)
         self.__draw_robot__()
         
-        for wall in self.world.walls:  # Draw walls=
+        # Draw walls
+        for wall in self.world.walls:
             pygame.draw.line(self.screen, pygame.Color('black'), wall.start, wall.end, 1)
         
         # Draw text displays
@@ -130,7 +129,7 @@ class MobileRobotGame:
         
     
     def handle_events(self):
-        speed = 0.02
+        speed = 10
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.done = True
