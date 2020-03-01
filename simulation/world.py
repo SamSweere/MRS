@@ -46,5 +46,6 @@ class World:
             intercept = wall.check_circle_intercept(circle_position, radius)
             if intercept is not None:
                 collisions.append(intercept)
-                
+
+        # TODO: check for multiple collisions if the new sliding location is not inside another wall
         return collisions if len(collisions) > 0 else None

@@ -81,6 +81,11 @@ class Robot:
             # No collision
             self.x = r_x
             self.y = r_y
+        else:
+            # Slide
+            # TODO: handle mutliple collisoins
+            self.x = collision[0].x
+            self.y = collision[0].y
 
         self.angle = r_angle
 

@@ -38,7 +38,8 @@ def create_star_walls(x, y, inner_radius, outer_radius, num_points = 5):
     curr_radius = outer_radius
     
     walls = []
-    for i in range(num_points * 2):
+    # TODO: change back
+    for i in range(num_points * 2 -1):
         # Generate a wall
         new_x = x + math.cos(delta_angle * i) * curr_radius
         new_y = y + math.sin(delta_angle * i) * curr_radius

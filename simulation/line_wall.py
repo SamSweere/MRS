@@ -42,8 +42,65 @@ class LineWall:
         if dist_v.length() <= 0:
             raise ValueError("Circle's center is exactly on the wall")
             
-        offset = dist_v / dist_v.length() * (radius / dist_v.length())
-        return offset
+        # offset = dist_v / dist_v.length() * (radius / dist_v.length())
+        # Calculate the movement along the line of the requested position
+        # This will cause the sliding
+
+        dx = self.end.x - self.start.x
+        dy = self.end.y - self.start.y
+
+        normal_point = Vector2(circle_pos.x - dy, circle_pos.y + dx)
+
+
+
+        # The line from circle_pos and normal point is now tangent to the wall
+        inter, distance, closest_line = self.check_line_intercept(circle_pos, normal_point)
+
+        if inter is None:
+            # Check the other normal line
+            normal_point = Vector2(circle_pos.x + dy, circle_pos.y - dx)
+            inter, distance, closest_line = self.check_line_intercept(circle_pos, normal_point)
+            # inter = line_intersect(seg_start_ext, seg_end_ext, circle_pos, normal_point)
+
+        if inter is not None:
+            # Extend the line from the requested circle location through the intersect of the normal line
+            v = inter - circle_pos
+            u = v / euclid_distance(circle_pos, inter)
+            slide_loc = inter - radius * u
+
+        else:
+            # The normal line does not intersect with the line, we are on an endpoint
+            # Calculate the normal line which is outside of the linesegment
+            # Find the closest endpoint of the wall
+            # Move the circle on the normal line until the point is r away from the endpoint
+
+            # Extend both the segments with the radius for the pole case
+            s = self.end - self.start
+            su = s / euclid_distance(self.start, self.end)
+            seg_end_ext = self.end + su * radius
+            seg_start_ext = self.start - su * radius
+
+            normal_point = Vector2(circle_pos.x - dy, circle_pos.y + dx)
+            inter = line_intersect(seg_start_ext, seg_end_ext, circle_pos, normal_point)
+            if inter is None:
+                # Check the other normal line
+                normal_point = Vector2(circle_pos.x + dy, circle_pos.y - dx)
+                inter = line_intersect(seg_start_ext, seg_end_ext, circle_pos, normal_point)
+
+            # Find the closest endpoint to the intersect
+            if euclid_distance(inter, self.start) <= euclid_distance(inter, self.end):
+                closest_point = self.start
+            else:
+                closest_point = self.end
+
+            # Calculate the distance from the intersect point of the pole case using some triogenomitry
+            dist_from_inter = math.sqrt(radius**2 - euclid_distance(inter, closest_point)**2)
+            # Extend the line from the requested circle location through the intersect of the normal line
+            v = inter - circle_pos
+            u = v / euclid_distance(circle_pos, inter)
+            slide_loc = inter - dist_from_inter * u
+
+        return slide_loc
 
     def check_line_intercept(self, line_start, line_end):
         """
@@ -64,6 +121,13 @@ class LineWall:
         closest_line = (self.start, self.end)
 
         return inter, distance, closest_line
+
+def euclid_distance(a, b):
+    """
+    @param a: point 1
+    @param b: point 2
+    """
+    return math.sqrt((b.x - a.x)**2 + (b.y - a.y)**2)
 
 def line_intersect(a1, a2, b1, b2):
     """
