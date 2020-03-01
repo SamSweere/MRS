@@ -38,11 +38,15 @@ class LineWall:
         closest = self.get_closest_point(circle_pos)
         dist_v = circle_pos - closest
         if dist_v.length() >= radius:
-            return None
+            return False
         if dist_v.length() <= 0:
             raise ValueError("Circle's center is exactly on the wall")
             
         # offset = dist_v / dist_v.length() * (radius / dist_v.length())
+        return True
+
+    def calculate_sliding(self, circle_pos, radius):
+        circle_pos = Vector2(circle_pos)
         # Calculate the movement along the line of the requested position
         # This will cause the sliding
 

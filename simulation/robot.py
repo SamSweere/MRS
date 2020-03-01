@@ -76,7 +76,7 @@ class Robot:
         @param r_y: aspired y position after time step
         @param r_angle: aspired angle after time step
         """
-        collision = self.world.circle_collision((r_x, r_y), self.radius)
+        collision = self.world.circle_collision((self.x, self.y),(r_x, r_y), self.radius)
         if collision is None:
             # No collision
             self.x = r_x
@@ -84,8 +84,8 @@ class Robot:
         else:
             # Slide
             # TODO: handle mutliple collisoins
-            self.x = collision[0].x
-            self.y = collision[0].y
+            self.x = collision.x
+            self.y = collision.y
 
         self.angle = r_angle
 
