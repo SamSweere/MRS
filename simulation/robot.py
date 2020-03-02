@@ -44,15 +44,13 @@ class Robot:
 
         # Determine the new angle keep it within 2 pi
         # w is basically theta because we just assume time was 1
-        self.v = (self.vl + self.vr / 2)
         angle_change = self.w * delta_time
 
         # Based on the speed and the angle find the new requested location
         if (self.vr == self.vl) and (self.vr != 0):
-            r_x = self.x + self.v * math.cos(self.angle) * delta_time
-            r_y = self.y + self.v * math.sin(self.angle) * delta_time
+            r_x = self.x + self.vr * math.cos(self.angle) * delta_time
+            r_y = self.y + self.vr * math.sin(self.angle) * delta_time
         else:
-            # TODO: should this move even if vr == vl?
             icc_x = self.icc[0]
             icc_y = self.icc[1]
             r_x = (math.cos(angle_change) * (self.x - icc_x) -
@@ -64,11 +62,18 @@ class Robot:
 
         r_angle = (self.angle + angle_change) % (2 * math.pi)
 
-        # To test if the speed is right
-        self.v_test = math.sqrt((self.x - r_x) ** 2 + (self.y - r_y) ** 2)
+        # Save the x and y for the speed calculation
+        x_tmp = self.x
+        y_tmp = self.y
 
         self.check_collision(r_x, r_y, r_angle)
         self.collect_sensor_data()
+
+        # To calculate the actual speed, the 200 is a correction factor compared to vl and vr
+        self.v = math.sqrt((x_tmp - self.x) ** 2 + (y_tmp - self.y) ** 2)*200
+
+
+
 
     def check_collision(self, r_x, r_y, r_angle):
         """

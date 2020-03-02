@@ -4,6 +4,7 @@ import math
 from .fps_counter import FPSCounter
 import numpy as np
 from gui.dustgrid_sprite import DustGridSprite
+from statistics import median
 
 def ti(arr):
     """
@@ -12,6 +13,27 @@ def ti(arr):
     """
     return [int(round(x)) for x in arr]
 
+class V_QUEUE:
+    # Class to get the mean q value for printing
+    def __init__(self):
+        self.v_queue = list()
+        self.v_queue_length = 20
+
+    def median(self):
+        if(len(self.v_queue) < 1):
+            return 0.0
+
+        return median(self.v_queue)
+
+    def update(self, v):
+        self.v_queue.insert(0, v)
+        if len(self.v_queue) > self.v_queue_length:
+            self.dequeue()
+
+    def dequeue(self):
+        if len(self.v_queue) > 0:
+            return self.v_queue.pop()
+        return ("Queue Empty!")
 
 class MobileRobotGame:
 
@@ -27,6 +49,7 @@ class MobileRobotGame:
         self.fps_tracker = FPSCounter()
         self.clock = pygame.time.Clock()
         self.reset = False
+        self.v_queue = V_QUEUE()
         
 
     def init(self):
@@ -84,12 +107,14 @@ class MobileRobotGame:
         vr_surface = self.fps_font.render(f"Vr: {self.robot.vr}", 
             False, pygame.Color('red'))
         self.screen.blit(vr_surface, (30, 70))
-        v_surface = self.fps_font.render(f"V: {self.robot.v}",
+
+        self.v_queue.update(self.robot.v)
+        v_surface = self.fps_font.render(f"V: {round(self.v_queue.median(),1)}",
                                           False, pygame.Color('red'))
         self.screen.blit(v_surface, (30, 90))
-        v_test_surface = self.fps_font.render(f"V_abs: {self.robot.v_test}",
-                                         False, pygame.Color('red'))
-        self.screen.blit(v_test_surface, (30, 110))
+        # v_test_surface = self.fps_font.render(f"V_abs: {self.robot.v_test}",
+        #                                  False, pygame.Color('red'))
+        # self.screen.blit(v_test_surface, (30, 110))
 
         self.screen.blit(v_surface, (30, 90))
         v_test_surface = self.fps_font.render(f"x: {self.robot.x}",
@@ -111,7 +136,7 @@ class MobileRobotGame:
         R, icc = self.robot.R, self.robot.icc
         if(max(icc) < 10e8 and min(icc) > -10e8):
             # In bounds
-            pygame.draw.circle(self.screen, pygame.Color('green'), ti(icc), 1)
+            pygame.draw.circle(self.screen, pygame.Color('orange'), ti(icc), 1)
 
         # Draw sensors
         for hit, dist in self.robot.sensor_data:
