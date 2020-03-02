@@ -38,12 +38,12 @@ class LineWall:
         closest = self.get_closest_point(circle_pos)
         dist_v = circle_pos - closest
         if dist_v.length() >= radius:
-            return False
+            return None
         if dist_v.length() <= 0:
             raise ValueError("Circle's center is exactly on the wall")
             
-        # offset = dist_v / dist_v.length() * (radius / dist_v.length())
-        return True
+        offset = dist_v / dist_v.length() * (radius / dist_v.length())
+        return offset
 
     def calculate_sliding(self, circle_pos, radius):
         buffer = 1e-13
@@ -54,10 +54,6 @@ class LineWall:
         dy = self.end.y - self.start.y
 
         normal_point = Vector2(circle_pos.x - dy, circle_pos.y + dx)
-
-
-
-
 
         # The line from circle_pos and normal point is now tangent to the wall
         inter, distance, closest_line = self.check_line_intercept(circle_pos, normal_point)

@@ -3,6 +3,7 @@ from simulation.robot import Robot
 from simulation.line_wall import LineWall
 import numpy as np
 import math
+import random
 
 def create_rect_walls(x, y, width, height):
     bottomLeft = (x - width / 2, y - height / 2)
@@ -57,44 +58,77 @@ def create_star_walls(x, y, inner_radius, outer_radius, num_points = 5):
     
     
 class WorldCreator:
-    def __init__(self, width, height):
+    def __init__(self, width, height, robot_radius=20):
         self.width = width
         self.height = height
+        self.robot_radius = robot_radius
         
     def create_rect_world(self):
         walls = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
-        robot = self.__create_randomly_placed_robot__()
         
-        return World(walls, robot, self.width, self.height), robot
+        world = World(walls, self.width, self.height)
+        robot = self.__add_random_robot__(world)
+        return world, robot
     
     def create_double_rect_world(self):
         outer_walls = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
         inner_walls = create_rect_walls(self.width / 2, self.height / 2, self.width / 2, self.height / 2)
         walls = [*outer_walls, *inner_walls]
         
-        robot = self.__create_randomly_placed_robot__()
-        return World(walls, robot, self.width, self.height), robot
+        world = World(walls, self.width, self.height)
+        robot = self.__add_random_robot__(world)
+        return world, robot
     
     def create_trapezoid_world(self):
         walls = create_trapezoid_walls(self.width / 2, self.height / 2, self.height, self.width, self.width/ 2)
         
-        robot = self.__create_randomly_placed_robot__()
-        return World(walls, robot, self.width, self.height), robot
+        world = World(walls, self.width, self.height)
+        robot = self.__add_random_robot__(world)
+        return world, robot
     
     def create_double_trapezoid_world(self):
         outer_walls = create_trapezoid_walls(self.width / 2, self.height / 2, self.height, self.width, self.width/ 2)
         inner_walls = create_trapezoid_walls(self.width / 2, self.height / 2, self.height / 2, self.width / 2, self.width / 4)
         walls = [*outer_walls, *inner_walls]
         
-        robot = self.__create_randomly_placed_robot__()
-        return World(walls, robot, self.width, self.height), robot
+        world = World(walls, self.width, self.height)
+        robot = self.__add_random_robot__(world)
+        return world, robot
     
     def create_star_world(self):
         walls = create_star_walls(self.width / 2, self.height / 2, self.height / 4, self.height / 2)
         
-        robot = self.__create_randomly_placed_robot__()
-        return World(walls, robot, self.width, self.height), robot
+        world = World(walls, self.width, self.height)
+        robot = self.__add_random_robot__(world)
+        return world, robot
+    
+    def create_random_world(self):
+        world_func = random.choice([
+            self.create_rect_world,
+            self.create_double_rect_world,
+            self.create_trapezoid_world,
+            self.create_double_trapezoid_world,
+            self.create_star_world
+        ])
         
+        return world_func()
         
-    def __create_randomly_placed_robot__(self):
-        return Robot(self.width / 2, self.height / 2, 1.15*np.pi)
+    def __add_random_robot__(self, world):
+        min_x = self.robot_radius
+        max_x = self.width - self.robot_radius
+        min_y = self.robot_radius
+        max_y = self.height - self.robot_radius
+        
+        # Place robot randomly until no collisions occur
+        angle = random.uniform(0, 2 * math.pi)
+        robot = Robot(0, 0, angle, radius=self.robot_radius)
+        world.set_robot(robot)
+        while True:
+            robot.x = random.uniform(min_x, max_x)
+            robot.y = random.uniform(min_y, max_y)
+            
+            collisions = world.circle_collision((robot.x, robot.y), robot.radius)
+            if len(collisions) == 0:
+                break
+        
+        return robot

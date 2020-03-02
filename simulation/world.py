@@ -6,13 +6,14 @@ import math
 
 
 class World:
-    def __init__(self, walls, robot, width, height):
+    def __init__(self, walls, width, height):
     	self.walls = walls
-    	self.robot = robot
     	self.dustgrid = DustGrid(width, height, 5)
-    	
-    	# The robot is now part of this world, so make sure he can access it
-    	self.robot.world = self
+
+    def set_robot(self, robot):
+        self.robot = robot
+        # The robot is now part of this world, so make sure he can access it
+        self.robot.world = self
 
     def update(self, delta_time):
         self.robot.update(delta_time)
@@ -40,28 +41,31 @@ class World:
 
         return closest_inter, closest_dist, closest_line
 
-    def circle_collision(self, circle_position, r_circle_position, radius):
+    def circle_collision(self, circle_position, radius):
         circle_position = Vector2(circle_position)
-        r_circle_position = Vector2(r_circle_position)
 
         collisions = []
         # prev_intercept = False
         for wall in self.walls:
-            intercept = wall.check_circle_intercept(r_circle_position, radius)
-            if intercept is True:
-                # if prev_intercept:
-                #     # This is the second intercept
-                #     return None
-                # prev_intercept = True
-                slide_loc = wall.calculate_sliding(r_circle_position, radius)
-                collisions.append(slide_loc)
-
+            offset = wall.check_circle_intercept(circle_position, radius)
+            if offset is not None:
+                collisions.append((wall, offset))
+            
+        return collisions
+    
+    def slide_collision(self, circle_position, r_circle_position, radius):
+        circle_position = Vector2(circle_position)
+        r_circle_position = Vector2(r_circle_position)
+        
+        collisions = self.circle_collision(r_circle_position, radius)
         if len(collisions) == 0:
             return None
 
         # Check if the slide locations do not cause interceptions, take the first slide location that did not cause
         # an intercept
-        for slide_loc in collisions:
+        for wall, offset in collisions:
+            slide_loc = wall.calculate_sliding(r_circle_position, radius)
+            
             free_from_all = True
             for wall in self.walls:
                 intercept = wall.check_circle_intercept(slide_loc, radius)
