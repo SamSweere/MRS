@@ -41,6 +41,9 @@ class World:
         return closest_inter, closest_dist, closest_line
 
     def circle_collision(self, circle_position, r_circle_position, radius):
+        circle_position = Vector2(circle_position)
+        r_circle_position = Vector2(r_circle_position)
+
         collisions = []
         # prev_intercept = False
         for wall in self.walls:
@@ -56,22 +59,19 @@ class World:
         if len(collisions) == 0:
             return None
 
-        # TODO: this is a temporary solution
-        if len(collisions) >= 2:
-            return Vector2(circle_position)
-
         # Check if the slide locations do not cause interceptions, take the first slide location that did not cause
         # an intercept
         for slide_loc in collisions:
+            free_from_all = True
             for wall in self.walls:
-                # TODO: this does not seem to work
-                intercept = wall.check_circle_intercept((slide_loc.x, slide_loc.y), radius)
-                if(intercept):
-                    print(intercept)
-                if not intercept:
-                    return slide_loc
+                intercept = wall.check_circle_intercept(slide_loc, radius)
+                if intercept:
+                    # Not free from all walls
+                    free_from_all = False
 
+            if free_from_all:
+                # This slide position is free from all walls
+                return slide_loc
+
+        # At this point all the slide positions are behind walls, return the old location
         return circle_position
-
-        # # TODO: check for multiple collisions if the new sliding location is not inside another wall
-        # return collisions if len(collisions) > 0 else None

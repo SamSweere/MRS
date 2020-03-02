@@ -46,7 +46,7 @@ class LineWall:
         return True
 
     def calculate_sliding(self, circle_pos, radius):
-        circle_pos = Vector2(circle_pos)
+        buffer = 1e-13
         # Calculate the movement along the line of the requested position
         # This will cause the sliding
 
@@ -54,6 +54,8 @@ class LineWall:
         dy = self.end.y - self.start.y
 
         normal_point = Vector2(circle_pos.x - dy, circle_pos.y + dx)
+
+
 
 
 
@@ -70,7 +72,7 @@ class LineWall:
             # Extend the line from the requested circle location through the intersect of the normal line
             v = inter - circle_pos
             u = v / euclid_distance(circle_pos, inter)
-            slide_loc = inter - radius * u
+            slide_loc = inter - (radius + buffer) * u
 
         else:
             # The normal line does not intersect with the line, we are on an endpoint
@@ -102,7 +104,7 @@ class LineWall:
             # Extend the line from the requested circle location through the intersect of the normal line
             v = inter - circle_pos
             u = v / euclid_distance(circle_pos, inter)
-            slide_loc = inter - dist_from_inter * u
+            slide_loc = inter - (dist_from_inter + buffer) * u
 
         return slide_loc
 
