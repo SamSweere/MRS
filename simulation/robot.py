@@ -4,13 +4,12 @@ import math
 
 class Robot:
     def __init__(self, start_x, start_y, start_angle, radius=20,
-                 movement_speed=5, angle_speed=(5 * math.pi / 180), n_ray_cast=10,
-                 n_sensors=12, max_sensor_length=100):
+                 max_v=100, v_step=10, n_sensors=12, max_sensor_length=100):
         self.x = start_x
         self.y = start_y
         self.radius = radius
-        self.movement_speed = 5
-        self.n_ray_cast = n_ray_cast
+        self.max_v = max_v
+        self.v_step = v_step
         self.n_sensors = n_sensors  # The amount of sensors used for collecting environment data
         self.max_sensor_length = max_sensor_length
 
@@ -25,6 +24,34 @@ class Robot:
         self.v = (self.vr - self.vl / 2)
         self.w = (self.vr - self.vl) / self.l
         self.R, self.icc = self.calculate_icc()
+
+    def update_vr(self, direction):
+        if direction == 0:
+            # Stop
+            self.vr = 0
+            return
+
+        r_vr = self.vr + direction * self.v_step
+
+        if -self.max_v <= r_vr <= self.max_v:
+            self.vr = r_vr
+        else:
+            # Over speed limit
+            pass
+
+    def update_vl(self, direction):
+        if direction == 0:
+            # Stop
+            self.vl = 0
+            return
+
+        r_vl = self.vl + direction * self.v_step
+
+        if -self.max_v <= r_vl <= self.max_v:
+            self.vl = r_vl
+        else:
+            # Over speed limit
+            pass
 
     def calculate_icc(self):
         """Returns the radius and the (x,y) coordinates of the center of rotation"""
@@ -69,11 +96,8 @@ class Robot:
         self.check_collision(r_x, r_y, r_angle)
         self.collect_sensor_data()
 
-        # To calculate the actual speed, the 200 is a correction factor compared to vl and vr
-        self.v = math.sqrt((x_tmp - self.x) ** 2 + (y_tmp - self.y) ** 2)*200
-
-
-
+        # To calculate the actual speed
+        self.v = math.sqrt((x_tmp - self.x) ** 2 + (y_tmp - self.y) ** 2)
 
     def check_collision(self, r_x, r_y, r_angle):
         """
@@ -81,7 +105,7 @@ class Robot:
         @param r_y: aspired y position after time step
         @param r_angle: aspired angle after time step
         """
-        collision = self.world.circle_collision((self.x, self.y),(r_x, r_y), self.radius)
+        collision = self.world.circle_collision((self.x, self.y), (r_x, r_y), self.radius)
         if collision is None:
             # No collision
             self.x = r_x
