@@ -151,12 +151,14 @@ def evolve(n, pop, pop_size, min_val, max_val):
 
 
 if __name__ == "__main__":
-    # genotypes
     pop_size = 100
     min_val = 0
     max_val = 2
-    pop = generate_pop(pop_size, min_val, max_val, rosenbrock)
-    new_pop, avg_fitness, avg_a1, avg_b1 = evolve(10000, pop, pop_size, min_val,
+    func = rastrigin
+
+
+    pop = generate_pop(pop_size, min_val, max_val, func)
+    new_pop, avg_fitness, avg_a1, avg_b1 = evolve(1000, pop, pop_size, min_val,
         max_val)
     df = pd.DataFrame({
         "avg_fitness": avg_fitness,
