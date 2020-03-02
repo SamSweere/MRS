@@ -4,6 +4,8 @@ from copy import deepcopy
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import PSO.plots as plots
+import os
 
 # • Devise genetic representation
 # • Build a population
@@ -15,8 +17,6 @@ import matplotlib.pyplot as plt
 
 def generate_pop(pop_size, min_val, max_val, fit_func):
     """
-    generate the population
-    @param pop_size: number of individuals in population
     @param min_val: min_val bound for a1 and a2
     @param max_val: max_val bound for b1 and b2
     @param fit_func: fitness function
@@ -49,8 +49,7 @@ def generate_child(a1, b1, a2, b2, fit_func):
         "b1": b1,
         "a2": a2,
         "b2": b2,
-        "x1": x1,
-        "x2": x2,
+        "pos": [x1, x2],
         "fitness": fitness
     }
     return ind
@@ -62,10 +61,12 @@ def select(pop, percentile):
 
 
 def reproduce(survivors, pop_size, fit_func):
-    # TODO: should we copy or create children?
     new_pop = []
+    counter = 0
     while len(new_pop) < pop_size:
-        chosen = np.random.randint(0, len(survivors))
+        # chosen = np.random.randint(0, len(survivors))
+        chosen = counter % len(survivors)
+        counter += 1
         parent = survivors[chosen]
         ind = generate_child(parent["a1"], parent["b1"], parent["a2"],
             parent["b2"], fit_func)
@@ -74,13 +75,11 @@ def reproduce(survivors, pop_size, fit_func):
 
 
 def crossover(pop):
-    # TODO: implement all the possible swaps
-    # TODO: make sure a is always smaller than b
     """
     swap some genes around by mixing distribution parameters
     """
     for i, p in enumerate(pop):
-        if np.random.uniform(0, 1) > 0.98:
+        if np.random.uniform(0, 1) > 0.90:
             idx1 = np.random.randint(0, len(pop))
             idx2 = np.random.randint(0, len(pop))
             if i % 2 == 0:
@@ -97,7 +96,7 @@ def mutate(pop):
     mutate a gene at a time
     """
     for i, p in enumerate(pop):
-        if np.random.uniform(0, 1) > 0.98:
+        if np.random.uniform(0, 1) > 0.90:
             param = np.random.choice(["a1", "b1", "a2", "b2"])
             diff = np.random.randn() * 0.01
             p[param] += diff
@@ -107,7 +106,7 @@ def mutate(pop):
 
 def check(pop):
     """
-    remove individuals with invalide genes
+    remove individuals with invalid genes
     """
     # TODO: maybe just swap?
     new_pop = []
@@ -124,8 +123,8 @@ def show(pop):
             b1 = i["b1"]
             a2 = i["a2"]
             b2 = i["b2"]
-            x1 = i["x1"]
-            x2 = i["x2"]
+            x1 = i["pos"][0]
+            x2 = i["pos"][1]
             fitness = i["fitness"]
             print(f"{a1:.1f} {b1:.2f} {a2:.1f} {b2:.2f}\t{x1:.2f} {x2:.2f}\tfit {fitness:.2f}")
     avg_fitness = np.mean([i["fitness"] for i in pop])
@@ -133,42 +132,68 @@ def show(pop):
 
 
 def evolve(n, pop, pop_size, min_val, max_val):
-    avg_a1 = []
-    avg_b1 = []
-    avg_fitnesses = []
+    """train function"""
+    history = []
     for i in range(n):
         survivors = select(pop, 75)
         pop = crossover(pop)
         pop = mutate(pop)
         # pop = check(pop)
         pop = reproduce(survivors, pop_size, rosenbrock)
-        avg_fitnesses.append(np.mean([i["fitness"] for i in pop]))
-        avg_a1.append(np.mean([i["a2"] for i in pop]))
-        avg_b1.append(np.mean([i["b1"] for i in pop]))
+        history.append(deepcopy(pop))
         if i % 100 == 0:
             show(pop)
-    return pop, avg_fitnesses, avg_a1, avg_b1
+    return pop, history
+
+
+def process_history(history):
+    """create a df from history for plotting"""
+    fitness = []
+    diversity = []
+    for pop in history:
+        fitness.append(np.mean([i["fitness"] for i in pop]))
+        x1_diversity = np.var([i["pos"][0] for i in pop])
+        x2_diversity = np.var([i["pos"][1] for i in pop])
+        div = np.linalg.norm([x1_diversity, x2_diversity])
+        diversity.append(div)
+
+    df = pd.DataFrame({
+        "fitness": fitness,
+        "diversity": diversity
+    })
+    df["Generation"] = df.index
+    df = pd.melt(df, id_vars=['Generation'],
+        value_vars=["fitness", "diversity"])
+    return df
 
 
 if __name__ == "__main__":
     pop_size = 100
-    min_val = 0
+    min_val = -2
     max_val = 2
-    func = rastrigin
+    functions = [rosenbrock, rastrigin]
+    function_num = 1 # 0: rosenbrock, 1: rastrigin
+    fn = functions[function_num]
 
 
-    pop = generate_pop(pop_size, min_val, max_val, func)
-    new_pop, avg_fitness, avg_a1, avg_b1 = evolve(1000, pop, pop_size, min_val,
+    pop = generate_pop(pop_size, min_val, max_val, fn)
+    new_pop, history = evolve(1000, pop, pop_size, min_val,
         max_val)
-    df = pd.DataFrame({
-        "avg_fitness": avg_fitness,
-        "avg_a1": avg_a1,
-        "avg_b1": avg_b1
-    })
-    df["iter"] = df.index
-    df = pd.melt(df, id_vars=['iter'],
-        value_vars=["avg_fitness", "avg_a1", "avg_b1"])
 
-    sns.lineplot(data=df, x="iter", y="value", hue="variable")
+    df = process_history(history)
+    g = sns.FacetGrid(data=df, row="variable", height=3, sharey="row")
+    g = g.map(plt.plot, "Generation", "value")
+    # sns.lineplot(data=df, x="Generation", y="value", hue="variable")
     plt.show()
+
+
+    extent = [-2, 2, -2, 2]
+    file_name = "ae"
+    img_dir = ""
+    if(function_num == 0):
+        file_name = "ae_rosenbrock"
+    elif(function_num == 1):
+        file_name = "ae_rastrigin"
+    plots.visualize_heatmap(fn, history, extent, trail_lenght=5,
+        fname=os.path.join(img_dir, file_name+".gif"), output="step")
 
