@@ -25,14 +25,10 @@ def check(pop):
 def show(pop):
     for j, i in enumerate(pop.individuals):
         if j % 10 == 0:
-            a1 = i["a1"]
-            b1 = i["b1"]
-            a2 = i["a2"]
-            b2 = i["b2"]
             x1 = i["pos"][0]
             x2 = i["pos"][1]
             fitness = i["fitness"]
-            print(f"{a1:.1f} {b1:.2f} {a2:.1f} {b2:.2f}\t{x1:.2f} {x2:.2f}\tfit {fitness:.2f}")
+            print(f"{x1:.2f} {x2:.2f}\tfit {fitness:.2f}")
     avg_fitness = np.mean([i["fitness"] for i in pop.individuals])
     print(f"average fitness: {avg_fitness}\n")
 
@@ -44,7 +40,6 @@ def evolve(n, pop):
         pop.select(75)
         pop.crossover()
         pop.mutate()
-        pop.reproduce()
         history.append(deepcopy(pop.individuals))
         if i % 100 == 0:
             show(pop)
