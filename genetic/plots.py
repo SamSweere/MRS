@@ -1,14 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits import mplot3d
 from matplotlib import cm, animation
-import matplotlib.image as mpimg
-from matplotlib.offsetbox import TextArea, DrawingArea, OffsetImage, AnnotationBbox
 from scipy.optimize import minimize
-import functions as utils
-import seaborn as sns
+import genetic.functions as utils
 import imageio
-import time
 
 def plot_3d(fn, x1_low, x1_high, x2_low, x2_high, stepsize=0.1):
     # Create 2d raster
@@ -54,13 +49,6 @@ def visualize_heatmap(fn, history, extent, trail_lenght = 20,
     average_x = np.mean([p["pos"][0] for p in history[0]])
     average_y = np.mean([p["pos"][1] for p in history[0]])
     avg_pos, = ax.plot(average_x, average_y, "y*")
-
-    rainbow_cat = mpimg.imread('nyancat.png')
-    imagebox = OffsetImage(rainbow_cat, zoom=0.1)
-    ab = AnnotationBbox(imagebox, xy=(average_x, average_y), xycoords="data" , frameon=False)
-    # ab.set_animated(True)
-    ax.add_artist(ab)
-    # ax.plot(ab)
     
     # Create initial scatterplot
     x_points = [p["pos"][0] for p in history[0]]
@@ -98,28 +86,12 @@ def visualize_heatmap(fn, history, extent, trail_lenght = 20,
         average_y = np.mean(y_points)
         avg_pos.set_data(average_x, average_y)
 
-        # update the position of the nyan cat
-        ab.xybox = (average_x, average_y)
-
         # Update the text box
         avg_mse = utils.distance_mse([average_x], [average_y], minimum.x[0], minimum.x[1])
         sum_mse = utils.distance_mse(x_points, y_points, minimum.x[0], minimum.x[1])
 
         textstr = f'Step        : {step_num}\nAvg MSE : {avg_mse:.4f}\nSum MSE: {sum_mse:.4f}'
         label.set_text(textstr)
-        
-        # update motion lines
-        num_frames = min(trail_lenght, i)
-        x_steps = np.empty((num_particles, num_frames))
-        y_steps = np.empty((num_particles, num_frames))
-
-        for frame, all_particles in enumerate(history[i-num_frames:i]):
-            for p_index, particle in enumerate(all_particles):
-                x_steps[p_index, frame] = particle["pos"][0]
-                y_steps[p_index, frame] = particle["pos"][1]
-            
-        for i, line in enumerate(lines):
-            line.set_data(x_steps[i], y_steps[i])
     
     if(output == "step"):
         # Step through the frames   
