@@ -37,7 +37,7 @@ def evolve(n, pop):
     """train function"""
     history = []
     for i in range(n):
-        pop.select(75)
+        pop.select(0.90)
         pop.crossover()
         pop.mutate()
         history.append(deepcopy(pop.individuals))
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     fn = functions[function_num]
     population = Population(100, fn)
         
-    history = evolve(1000, population)
+    history = evolve(100, population)
 
     df = process_history(history)
     g = sns.FacetGrid(data=df, row="variable", height=3, sharey="row")

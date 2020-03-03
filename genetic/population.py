@@ -18,11 +18,13 @@ class Population:
         
         self.__generate_population__()
         
-    def select(self, percentile):
-        cutoff = np.percentile([i["fitness"] for i in self.individuals], percentile)
-        if len([i for i in self.individuals if i["fitness"] < cutoff]) == 0:
-            return # quickfix find a better selection method
-        self.individuals = [i for i in self.individuals if i["fitness"] < cutoff]
+    def select(self, percentage):
+        sorted_individuals = sorted(self.individuals, key=lambda x: x["fitness"], reverse=True)
+        total_rank_sum = (len(self.individuals) * (len(self.individuals) + 1)) / 2
+        propabilities = [(i+1)/total_rank_sum for i, p in enumerate(sorted_individuals)]
+        
+        num = int(len(sorted_individuals) * percentage)
+        self.individuals = np.random.choice(sorted_individuals, num, p=propabilities).tolist()
         
     def regenerate(self):
         """
@@ -58,7 +60,7 @@ class Population:
         for i, p in enumerate(self.individuals):
             if np.random.uniform(0, 1) < self.mutation_rate:
                 param = np.random.choice([0, 1])
-                diff = np.random.randn() * 0.1
+                diff = np.random.randn() * 0.15
                 p["pos"][param] += diff
                 p["fitness"] = self.eval_func(p["pos"])
         
