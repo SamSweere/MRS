@@ -45,8 +45,8 @@ class Population:
                 p2 = self.individuals[np.random.randint(0, len(self.individuals))]
                 
                 crossover_point = np.random.randint(1, self.genome_size)
-                c1_genome = [*p1["pos"][:crossover_point],*p2["pos"][crossover_point:]]
-                c2_genome = [*p2["pos"][:crossover_point],*p1["pos"][crossover_point:]]
+                c1_genome = np.array([*p1["pos"][:crossover_point],*p2["pos"][crossover_point:]])
+                c2_genome = np.array([*p2["pos"][:crossover_point],*p1["pos"][crossover_point:]])
                 c1 = {
                     "pos": c1_genome,
                     "fitness": self.eval_func(c1_genome)
