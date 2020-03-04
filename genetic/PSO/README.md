@@ -1,3 +1,0 @@
-# PSO
-
-![](particles.gif)

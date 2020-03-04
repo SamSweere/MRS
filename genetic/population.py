@@ -8,8 +8,9 @@ from copy import deepcopy
 # • Choose crossover & mutation
 # • Choose data analysis method
 class Population:
-    def __init__(self, pop_size, eval_func, min_val=-2, max_val=2, crossover_rate=0.75, mutation_rate=0.1):
+    def __init__(self, pop_size, genome_size, eval_func, min_val=-2, max_val=2, crossover_rate=0.75, mutation_rate=0.1):
         self.pop_size = pop_size
+        self.genome_size = genome_size
         self.eval_func = eval_func
         self.min_val = min_val
         self.max_val= max_val
@@ -19,7 +20,7 @@ class Population:
         self.__generate_population__()
         
     def select(self, percentage):
-        sorted_individuals = sorted(self.individuals, key=lambda x: x["fitness"], reverse=True)
+        sorted_individuals = sorted(self.individuals, key=lambda x: x["fitness"])
         total_rank_sum = (len(self.individuals) * (len(self.individuals) + 1)) / 2
         propabilities = [(i+1)/total_rank_sum for i, p in enumerate(sorted_individuals)]
         
@@ -40,16 +41,21 @@ class Population:
         num_crossovers = (self.pop_size - len(self.individuals)) // 2
         for _ in range(num_crossovers):
             if np.random.rand() < self.crossover_rate:
-                i1 = self.individuals[np.random.randint(0, len(self.individuals))]
-                i2 = self.individuals[np.random.randint(0, len(self.individuals))]
-                c1 = deepcopy(i1)
-                c2 = deepcopy(i2)
+                p1 = self.individuals[np.random.randint(0, len(self.individuals))]
+                p2 = self.individuals[np.random.randint(0, len(self.individuals))]
                 
-                c1["pos"][0], c2["pos"][0] = c2["pos"][0], c1["pos"][0]
-                c1["pos"][1], c2["pos"][1] = c2["pos"][1], c1["pos"][1]
-                    
-                c1["fitness"] = self.eval_func(c1["pos"])
-                c2["fitness"] = self.eval_func(c2["pos"])
+                crossover_point = np.random.randint(1, self.genome_size)
+                c1_genome = [*p1["pos"][:crossover_point],*p2["pos"][crossover_point:]]
+                c2_genome = [*p2["pos"][:crossover_point],*p1["pos"][crossover_point:]]
+                c1 = {
+                    "pos": c1_genome,
+                    "fitness": self.eval_func(c1_genome)
+                }
+                c2 = {
+                    "pos": c2_genome,
+                    "fitness": self.eval_func(c2_genome)
+                }
+                
                 self.individuals.append(c1)
                 self.individuals.append(c2)
                     
@@ -72,27 +78,14 @@ class Population:
         """
         self.individuals = []
         for i in range(self.pop_size):
-            a1 = np.random.uniform(self.min_val, self.max_val)
-            b1 = np.random.uniform(self.min_val, self.max_val)
-            a2 = np.random.uniform(self.min_val, self.max_val)
-            b2 = np.random.uniform(self.min_val, self.max_val)
-            ind = self.__generate_child__(a1, b1, a2, b2)
+            ind = self.__generate_child__()
             self.individuals.append(ind)
             
-    def __generate_child__(self, a1, b1, a2, b2):
-        """
-        @param a1: 1st bound on x1 phonotype
-        @param b1: 2nd bound on x1 phonotype
-        @param a2: 1st bound on x2 phonotype
-        @param b2: 2nd bound on x2 phonotype
-        x1: x1 value of position
-        x2: x2 value of position
-        """
-        x1 = np.random.uniform(a1, b1)
-        x2 = np.random.uniform(a2, b2)
-        fitness = self.eval_func([x1, x2])
+    def __generate_child__(self):
+        x = np.random.uniform(low=self.min_val, high=self.max_val, size=self.genome_size)
+        fitness = self.eval_func(x)
         ind = {
-            "pos": [x1, x2],
+            "pos": x,
             "fitness": fitness
         }
         return ind

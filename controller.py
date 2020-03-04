@@ -10,18 +10,6 @@ import os
 from genetic.population import Population
 
 
-def check(pop):
-    """
-    remove individuals with invalid genes
-    """
-    # TODO: maybe just swap?
-    new_pop = []
-    for p in pop:
-        if (p["a1"] < p["b1"]) and (p["a2"] < p["b2"]):
-            new_pop.append(p)
-    return new_pop
-
-
 def show(pop):
     for j, i in enumerate(pop.individuals):
         if j % 10 == 0:
@@ -71,7 +59,7 @@ if __name__ == "__main__":
     functions = [rosenbrock, rastrigin]
     function_num = 1
     fn = functions[function_num]
-    population = Population(100, fn)
+    population = Population(100, 2, lambda x: -fn(x))
         
     history = evolve(100, population)
 
