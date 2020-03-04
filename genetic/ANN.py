@@ -4,11 +4,10 @@ np.set_printoptions(suppress=True)
 
 class ANN:
 
-    def __init__(self, input_dims, output_dims, num_hidden, hidden_dims,
+    def __init__(self, input_dims, output_dims, hidden_dims,
     eta=0.15, reg=0):
         self.input_dims = input_dims
         self.output_dims = output_dims
-        self.num_hidden = num_hidden
         self.hidden_dims = hidden_dims
         self.weight_matrices = []
         self.eta = eta
@@ -16,18 +15,14 @@ class ANN:
         self.create_architecture()
 
     def create_architecture(self):
-        if self.num_hidden > 0:
+        prev_dim = self.input_dims
+        for hidden_dim in self.hidden_dims:
             self.weight_matrices.append(
-                (np.random.rand(self.hidden_dims, self.input_dims+1)-0.5)/1)
-            for i in range(self.num_hidden-1):
-                self.weight_matrices.append(
-                    (np.random.rand(self.hidden_dims, self.hidden_dims+1)-0.5)/1)
-            self.weight_matrices.append(
-                (np.random.rand(self.output_dims, self.hidden_dims+1)-0.5)/1)
-        else:
-            print("Creating single layer NN")
-            self.weight_matrices.append(
-                (np.random.rand(self.output_dims, self.input_dims+1)-0.5)/1)
+                (np.random.rand(hidden_dim, prev_dim+1)-0.5)/1)
+            prev_dim = hidden_dim
+            
+        self.weight_matrices.append(
+            (np.random.rand(self.output_dims, prev_dim+1)-0.5)/1)
 
     def show(self):
         for i, l in enumerate(self.weight_matrices):
@@ -122,7 +117,7 @@ class ANN:
     
 
 if __name__ == "__main__":
-    cn = ANN(input_dims=8, output_dims=8, num_hidden=1, hidden_dims=3)
+    cn = ANN(input_dims=8, output_dims=8, hidden_dims=[3])
     cn.show()
     x = np.eye(8)
     y = x
