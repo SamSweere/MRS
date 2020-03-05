@@ -17,6 +17,7 @@ class World:
 
     def update(self, delta_time):
         self.robot.update(delta_time)
+        self.dustgrid.clean_circle_area(self.robot.x, self.robot.y, self.robot.radius)
 
     def raycast(self, x, y, angle, max_length):
         # angle is in radians

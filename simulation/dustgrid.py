@@ -26,4 +26,7 @@ class DustGrid:
         self.cleaned_cells += np.sum(self.cells[y_start:y_end, x_start:x_end])
         self.cells[y_start:y_end, x_start:x_end] = 0
         
-        return (x_start * self.cell_size, x_end * self.cell_size, y_start * self.cell_size, y_end * self.cell_size)
+        self.x_start = x_start * self.cell_size
+        self.x_end = x_end * self.cell_size
+        self.y_start = y_start * self.cell_size
+        self.y_end = y_end * self.cell_size
