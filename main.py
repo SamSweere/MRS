@@ -21,7 +21,7 @@ if __name__ == "__main__":
     reset = True
     while reset:
         creator = WorldCreator(WIDTH, HEIGHT)
-        world, robot = creator.create_random_world()
+        world, robot = creator.create_rect_world()
         env_params["world"] = world
         env_params["robot"] = robot
 

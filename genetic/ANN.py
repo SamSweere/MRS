@@ -38,10 +38,8 @@ class ANN:
             z = self.sigmoid(z, deriv=False)
             x = np.concatenate((np.ones((1, batch_size)), z), axis=0)
             activations.append(x)
-            # current_shape = x.shape
-            # print(f"Output shape {current_shape}, moving on to next layer")
-        activations[-1] = activations[-1][1:, :]
-        return activations
+            
+        return activations[-1][1:, :]
 
     def backpropagate(self, x, y):
         batch_size = x.shape[1]

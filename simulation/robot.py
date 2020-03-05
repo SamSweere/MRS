@@ -112,7 +112,6 @@ class Robot:
             self.y = r_y
         else:
             # Slide
-            # TODO: handle mutliple collisoins
             self.x = collision.x
             self.y = collision.y
 

@@ -4,17 +4,43 @@ from world_creator import WorldCreator
 
 import numpy as np
 
+def exponential_decay(x, start=1, end_factor=0.2, factor=10):
+    """
+        Taken from the slides, dont ask me how it works
+    """
+    x = np.array(x)
+    return start + (start * end_factor - start)*(1 - np.exp(-x/factor))
+
 class ANNCoverageEvaluator:
-    def __init__(self, input_dims, output_dims, hidden_dims):
+    def __init__(self, generator, input_dims, output_dims, hidden_dims, eval_seconds=20, step_size_ms=270):
+        self.generator = generator
         self.input_dims = input_dims
         self.output_dims = output_dims
         self.hidden_dims = hidden_dims
+        self.eval_seconds = eval_seconds
+        # According to the internetz humans have a reaction time of somewhat 200ms to 300ms
+        self.step_size_ms = step_size_ms
         
     def evaluate(self, genome):
         ann = self.__to_ann__(genome)
+        world, robot = self.generator.create_random_world()
+        # Dirty Hack - Do an update to let the robot collect sensor data
+        world.update(0)
         
-        inp = np.ones(self.input_dims).reshape(-1, 1)
-        return ann.predict(inp)[-1][0][0]
+        # We round up so that we are above the evaluation time, instead of below
+        steps = int((self.eval_seconds * 1000) / self.step_size_ms) + 1
+        delta_time = self.step_size_ms / 1000
+        for i in range(steps):
+            inp = exponential_decay([dist for hit, dist in robot.sensor_data])
+            action = ann.predict(inp.reshape(-1, 1)).reshape(-1)
+            
+            # The network outputs values between 0 and 1 for each motor
+            # We treat those outputs as normalized velocities
+            robot.vl = action[0] * robot.max_v
+            robot.vr = action[1] * robot.max_v
+            world.update(delta_time)
+        
+        return world.dustgrid.cleaned_cells
         
     def get_genome_size(self):
         genome_size = 0
@@ -64,7 +90,7 @@ if __name__ == "__main__":
     }
     
     generator = WorldCreator(WIDTH, HEIGHT, **robot_args)
-    evaluator = ANNCoverageEvaluator(4, 3, [3,2])
+    evaluator = ANNCoverageEvaluator(generator, robot_args["n_sensors"], 2, [32,16])
     population = Population(POP_SIZE, evaluator.get_genome_size(), evaluator.evaluate, min_val=-1, max_val=1)
     
     for i in range(100):
