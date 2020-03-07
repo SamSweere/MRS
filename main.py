@@ -22,8 +22,7 @@ if __name__ == "__main__":
         controller_func = lambda robot: ANNController(robot, ANN.load("./checkpoints/model_99.p"))
     
     # Game loop
-    reset = True
-    while reset:
+    while True:
         world, robot = creator.create_random_world()
         controller = controller_func(robot)
         env_params["world"] = world
@@ -34,4 +33,5 @@ if __name__ == "__main__":
         game.init()
         game.run()
         
-        reset = game.reset
+        if not game.reset:
+            break
