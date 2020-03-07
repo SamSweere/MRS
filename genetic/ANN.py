@@ -1,6 +1,6 @@
 import numpy as np
+import pickle
 np.set_printoptions(suppress=True)
-
 
 class ANN:
 
@@ -112,6 +112,13 @@ class ANN:
     def train_on_function(self, cn, x, func):
         y = func(x)
         pass 
+    
+    def save(self, file_path):
+        pickle.dump(self, open(file_path, "wb"))
+        
+    @staticmethod
+    def load(file_path):
+        return pickle.load(open(file_path, "rb"))
     
 
 if __name__ == "__main__":

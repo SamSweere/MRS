@@ -69,6 +69,9 @@ class Population:
                 diff = np.random.randn() * 0.15
                 p["pos"][param] += diff
                 p["fitness"] = self.eval_func(p["pos"])
+                
+    def get_fittest_genome(self):
+        return max(self.individuals, key=lambda x: x["fitness"])
         
     def __generate_population__(self):
         """

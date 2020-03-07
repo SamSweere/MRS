@@ -81,23 +81,28 @@ class WorldCreator:
         return world, robot
     
     def create_trapezoid_world(self):
-        walls = create_trapezoid_walls(self.width / 2, self.height / 2, self.height, self.width, self.width/ 2)
+        border = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
+        trapezoid = create_trapezoid_walls(self.width / 2, self.height / 2, self.height, self.width, self.width/ 2)
+        walls = [*border, *trapezoid]
         
         world = World(walls, self.width, self.height)
         robot = self.__add_random_robot__(world)
         return world, robot
     
     def create_double_trapezoid_world(self):
+        border = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
         outer_walls = create_trapezoid_walls(self.width / 2, self.height / 2, self.height, self.width, self.width/ 2)
         inner_walls = create_trapezoid_walls(self.width / 2, self.height / 2, self.height / 2, self.width / 2, self.width / 4)
-        walls = [*outer_walls, *inner_walls]
+        walls = [*border, *outer_walls, *inner_walls]
         
         world = World(walls, self.width, self.height)
         robot = self.__add_random_robot__(world)
         return world, robot
     
     def create_star_world(self):
-        walls = create_star_walls(self.width / 2, self.height / 2, self.height / 4, self.height / 2)
+        border = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
+        star = create_star_walls(self.width / 2, self.height / 2, self.height / 4, self.height / 2)
+        walls = [*border, *star]
         
         world = World(walls, self.width, self.height)
         robot = self.__add_random_robot__(world)

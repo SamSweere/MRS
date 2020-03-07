@@ -1,15 +1,7 @@
 from genetic.ANN import ANN
 from genetic.population import Population
 from world_creator import WorldCreator
-
-import numpy as np
-
-def exponential_decay(x, start=1, end_factor=0.2, factor=10):
-    """
-        Taken from the slides, dont ask me how it works
-    """
-    x = np.array(x)
-    return start + (start * end_factor - start)*(1 - np.exp(-x/factor))
+from gui.ann_controller import apply_action
 
 class ANNCoverageEvaluator:
     def __init__(self, generator, input_dims, output_dims, hidden_dims, eval_seconds=20, step_size_ms=270):
@@ -22,7 +14,7 @@ class ANNCoverageEvaluator:
         self.step_size_ms = step_size_ms
         
     def evaluate(self, genome):
-        ann = self.__to_ann__(genome)
+        ann = self.to_ann(genome)
         world, robot = self.generator.create_random_world()
         # Dirty Hack - Do an update to let the robot collect sensor data
         world.update(0)
@@ -31,13 +23,7 @@ class ANNCoverageEvaluator:
         steps = int((self.eval_seconds * 1000) / self.step_size_ms) + 1
         delta_time = self.step_size_ms / 1000
         for i in range(steps):
-            inp = exponential_decay([dist for hit, dist in robot.sensor_data])
-            action = ann.predict(inp.reshape(-1, 1)).reshape(-1)
-            
-            # The network outputs values between 0 and 1 for each motor
-            # We treat those outputs as normalized velocities
-            robot.vl = action[0] * robot.max_v
-            robot.vr = action[1] * robot.max_v
+            apply_action(robot, ann)
             world.update(delta_time)
         
         return world.dustgrid.cleaned_cells
@@ -53,7 +39,7 @@ class ANNCoverageEvaluator:
         genome_size += self.output_dims * (prev_dim+1)
         return genome_size
         
-    def __to_ann__(self, genome):
+    def to_ann(self, genome):
         prev_dim = self.input_dims
         prev_index = 0
         
@@ -80,6 +66,11 @@ class ANNCoverageEvaluator:
         return ann
     
 if __name__ == "__main__":
+    # Create folder for saving models
+    from pathlib import Path
+    Path("./checkpoints").mkdir(parents=True, exist_ok=True)
+    
+    # Initialization
     WIDTH = 1000
     HEIGHT = 650
     POP_SIZE = 100
@@ -93,10 +84,18 @@ if __name__ == "__main__":
     evaluator = ANNCoverageEvaluator(generator, robot_args["n_sensors"], 2, [32,16])
     population = Population(POP_SIZE, evaluator.get_genome_size(), evaluator.evaluate, min_val=-1, max_val=1)
     
-    for i in range(100):
+    # Train
+    train_steps = 100
+    for i in range(train_steps):
         population.select(0.90)
         population.crossover()
         population.mutate()
         
-        fittest_genome = max(population.individuals, key=lambda x: x["fitness"])
+        fittest_genome = population.get_fittest_genome()
         print(f"{i}: {evaluator.evaluate(fittest_genome['pos'])}")
+        
+        if i % 20 == 0 or i == train_steps - 1:
+            # Save the best genome
+            ann = evaluator.to_ann(fittest_genome['pos'])
+            ann.save(f'./checkpoints/model_{i}.p')
+    

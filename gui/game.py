@@ -40,17 +40,19 @@ class V_QUEUE:
 
 class MobileRobotGame:
 
-    def __init__(self, env_width, env_height, world, robot):
+    def __init__(self, env_width, env_height, world, robot, robot_controller):
         self.done = False
 
         self.env_width = env_width
         self.env_height = env_height
         self.screen_width = env_width
         self.screen_height = env_height
+        
         self.world = world
         self.robot = robot
+        self.robot_controller = robot_controller        
+        
         self.fps_tracker = FPSCounter()
-        self.clock = pygame.time.Clock()
         self.reset = False
         self.v_queue = V_QUEUE()
 
@@ -83,6 +85,7 @@ class MobileRobotGame:
         pygame.quit()
 
     def update(self, delta_time):
+        self.robot_controller.update(delta_time)
         self.world.update(delta_time)
         self.dust_sprite.update(delta_time)
 
@@ -153,23 +156,15 @@ class MobileRobotGame:
         pygame.gfxdraw.circle(self.screen, *ti((self.robot.x, self.robot.y)), self.robot.radius, pygame.Color('black'))
 
     def handle_events(self):
-        for event in pygame.event.get():
+        events = pygame.event.get()
+        for event in events:
             if event.type == pygame.QUIT:
                 self.done = True
+                return
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_w:
-                    self.robot.update_vr(1)
-                if event.key == pygame.K_o:
-                    self.robot.update_vl(1)
-                if event.key == pygame.K_s:
-                    self.robot.update_vr(-1)
-                if event.key == pygame.K_l:
-                    self.robot.update_vl(-1)
-                if event.key == pygame.K_SPACE:
-                    self.robot.update_vr(1)
-                    self.robot.update_vl(1)
-                if event.key == pygame.K_x:
-                    self.robot.update_vr(0)
-                    self.robot.update_vl(0)
                 if event.key == pygame.K_r:
                     self.reset = True
+                    return
+        
+        self.robot_controller.handle_events(events)
+        
