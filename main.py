@@ -2,7 +2,7 @@ from gui.game import MobileRobotGame
 from gui.human_controller import HumanController
 from gui.ann_controller import ANNController
 from genetic.ANN import ANN
-from world_creator import WorldCreator
+from world_generator import WorldGenerator
 
 if __name__ == "__main__":
     use_human_controller = False
@@ -14,12 +14,12 @@ if __name__ == "__main__":
         "env_width": WIDTH,
         "env_height": HEIGHT
     }
-    creator = WorldCreator(WIDTH, HEIGHT)
+    creator = WorldGenerator(WIDTH, HEIGHT)
     
     if use_human_controller:
         controller_func = HumanController
     else:
-        controller_func = lambda robot: ANNController(robot, ANN.load("./checkpoints/model_99.p"))
+        controller_func = lambda robot: ANNController(robot, ANN.load("./checkpoints/model_16.p"))
     
     # Game loop
     while True:

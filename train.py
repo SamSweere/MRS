@@ -1,6 +1,6 @@
 from genetic.ANN import ANN
 from genetic.population import Population
-from world_creator import WorldCreator
+from world_generator import WorldGenerator
 from gui.ann_controller import apply_action
 
 import numpy as np
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         "max_sensor_length": 100
     }
     
-    generator = WorldCreator(WIDTH, HEIGHT, **robot_args)
+    generator = WorldGenerator(WIDTH, HEIGHT, **robot_args)
     evaluator = ANNCoverageEvaluator(generator, robot_args["n_sensors"], 2, [32,16])
     population = Population(POP_SIZE, evaluator.get_genome_size(), evaluator.evaluate, min_val=-1, max_val=1)
     
