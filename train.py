@@ -1,7 +1,7 @@
 from genetic.ANN import ANN
 from genetic.population import Population
 from world_generator import WorldGenerator
-from gui.ann_controller import apply_action
+from gui.ann_controller import apply_action, exponential_decay
 
 import numpy as np
 
@@ -24,11 +24,15 @@ class ANNCoverageEvaluator:
         # We round up so that we are above the evaluation time, instead of below
         steps = int((self.eval_seconds * 1000) / self.step_size_ms) + 1
         delta_time = self.step_size_ms / 1000
+        distance_sums = []
         for i in range(steps):
             apply_action(robot, ann)
             world.update(delta_time)
+            
+            sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
+            distance_sums.append(np.sum(sensors))
         
-        return world.dustgrid.cleaned_cells
+        return world.dustgrid.cleaned_cells - np.sum(distance_sums) * 10
         
     def get_genome_size(self):
         genome_size = 0
@@ -98,6 +102,7 @@ if __name__ == "__main__":
         
         # Collect some data
         fittest_genome = population.get_fittest_genome()
+        print(fittest_genome["id"])
         max_fitness.append(population.get_max_fitness())
         avg_fitness.append(population.get_average_fitness())
         diversity.append(population.get_average_diversity())
