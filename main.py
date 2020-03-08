@@ -5,7 +5,7 @@ from genetic.ANN import ANN
 from world_generator import WorldGenerator
 
 if __name__ == "__main__":
-    use_human_controller = False
+    use_human_controller = True
     
     # Setup
     WIDTH = 1000

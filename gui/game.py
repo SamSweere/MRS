@@ -12,7 +12,7 @@ def ti(arr):
     Very short functionname to convert float-arrays to int
     Since pygame doesnt accept floats on its own
     """
-    return [int(round(x)) for x in arr]
+    return np.rint(arr).astype(int).tolist()
 
 
 class V_QUEUE:

@@ -2,8 +2,9 @@ from genetic.ANN import ANN
 from genetic.population import Population
 from world_generator import WorldGenerator
 from gui.ann_controller import apply_action, exponential_decay
-
+import matplotlib.pyplot as plt
 import numpy as np
+
 
 class ANNCoverageEvaluator:
     def __init__(self, generator, input_dims, output_dims, hidden_dims, eval_seconds=20, step_size_ms=270):
@@ -16,12 +17,16 @@ class ANNCoverageEvaluator:
         self.step_size_ms = step_size_ms
         
     def evaluate(self, genome):
+        """
+            Let the ANN perform an action and collect sensor data
+        """
         ann = self.to_ann(genome)
         world, robot = self.generator.create_random_world()
+        # TODO: is this legit?
         # Dirty Hack - Do an update to let the robot collect sensor data
         world.update(0)
         
-        # We round up so that we are above the evaluation time, instead of below
+        # We round up so that we'd rather overestimate evaluation time
         steps = int((self.eval_seconds * 1000) / self.step_size_ms) + 1
         delta_time = self.step_size_ms / 1000
         distance_sums = []
@@ -46,6 +51,10 @@ class ANNCoverageEvaluator:
         return genome_size
         
     def to_ann(self, genome):
+        """
+            Initialize ANN with genome weights
+            @param genome: flattened ANN weights
+        """
         prev_dim = self.input_dims
         prev_index = 0
         
@@ -70,6 +79,63 @@ class ANNCoverageEvaluator:
         ann = ANN(self.input_dims,self.output_dims, self.hidden_dims)
         ann.weight_matrices = weight_matrices
         return ann
+
+def train(iterations, generator, evaluator, population):
+    max_fitness = []
+    avg_fitness = []
+    diversity = []
+    for i in range(iterations):
+        population.select(0.90)
+        population.crossover()
+        population.mutate()
+        
+        # Collect some data
+        fittest_genome = population.get_fittest_genome()
+        max_fitness.append(population.get_max_fitness())
+        avg_fitness.append(population.get_average_fitness())
+        diversity.append(population.get_average_diversity())
+            
+        # Early Stopping
+        if diversity[-1] < 0.08:
+            # Save the best genome
+            ann = evaluator.to_ann(fittest_genome['pos'])
+            ann.save(f'./checkpoints/model_{i}.p')
+            
+            print("Early stopping due to low diversity")
+            break
+        
+        # Print iteration data
+        print(f"{i}: {evaluator.evaluate(fittest_genome['pos'])}")
+        print(population.get_average_diversity())
+        if i % 20 == 0 or i == iterations - 1:
+            # Save the best genome
+            ann = evaluator.to_ann(fittest_genome['pos'])
+            ann.save(f'./checkpoints/model_{i}.p')
+    history = {
+        "max_fitness": max_fitness,
+        "avg_fitness": avg_fitness,
+        "diversity": diversity
+    }
+    return ann, history
+
+
+def show_history(history):
+    # Fitness plot
+    plt.figure()
+    plt.title("Fitness")
+    plt.xlabel("Epoch")
+    plt.ylabel("Fitness")
+    plt.plot(history["max_fitness"], label="Maximum")
+    plt.plot(history["avg_fitness"], label="Average")
+    plt.legend()
+    plt.show()
+    
+    # Diversity plot
+    plt.figure()
+    plt.title("Diversity")
+    plt.xlabel("Epoch")
+    plt.ylabel("Diversity")
+    plt.plot(history["diversity"])
     
 if __name__ == "__main__":
     # Create folder for saving models
@@ -91,53 +157,10 @@ if __name__ == "__main__":
     population = Population(POP_SIZE, evaluator.get_genome_size(), evaluator.evaluate, init_func=np.random.normal)
     
     # Train
-    train_steps = 100
-    max_fitness = []
-    avg_fitness = []
-    diversity = []
-    for i in range(train_steps):
-        population.select(0.90)
-        population.crossover()
-        population.mutate()
-        
-        # Collect some data
-        fittest_genome = population.get_fittest_genome()
-        max_fitness.append(population.get_max_fitness())
-        avg_fitness.append(population.get_average_fitness())
-        diversity.append(population.get_average_diversity())
+    iterations = 100
+
+    ann, history = train(iterations, generator, evaluator, population)
+    show_history(history)
+
+
             
-        # Early Stopping
-        if diversity[-1] < 0.08:
-            # Save the best genome
-            ann = evaluator.to_ann(fittest_genome['pos'])
-            ann.save(f'./checkpoints/model_{i}.p')
-            
-            print("Early stopping because of an low diversity")
-            break
-        
-        # Output some data
-        print(f"{i}: {evaluator.evaluate(fittest_genome['pos'])}")
-        print(population.get_average_diversity())
-        if i % 20 == 0 or i == train_steps - 1:
-            # Save the best genome
-            ann = evaluator.to_ann(fittest_genome['pos'])
-            ann.save(f'./checkpoints/model_{i}.p')
-            
-    # Fitnessplot
-    import matplotlib.pyplot as plt
-    plt.figure()
-    plt.title("Fitness")
-    plt.xlabel("Epoch")
-    plt.ylabel("Fitness")
-    plt.plot(max_fitness, label="Maximum")
-    plt.plot(avg_fitness, label="Average")
-    plt.legend()
-    plt.show()
-    
-    # Diversity plot
-    plt.figure()
-    plt.title("Diversity")
-    plt.xlabel("Epoch")
-    plt.ylabel("Diversity")
-    plt.plot(diversity)
-    

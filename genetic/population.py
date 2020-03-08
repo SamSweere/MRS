@@ -7,6 +7,7 @@ from copy import deepcopy
 # • Choose selection method
 # • Choose crossover & mutation
 # • Choose data analysis method
+
 class Population:
     def __init__(self, pop_size, genome_size, eval_func,
                  crossover_rate=0.75, mutation_rate=0.1, init_func=np.random.uniform):
@@ -20,42 +21,42 @@ class Population:
         self.__generate_population__()
         
     def select(self, percentage):
+        # TODO: seems more complicated than necessary
+        """
+        1) Sort individuals by fitness, divide by squared number of individuals
+        2) Select <percentage> according to number obtained in 1)
+        """
         sorted_individuals = sorted(self.individuals, key=lambda x: x["fitness"])
         total_rank_sum = (len(self.individuals) * (len(self.individuals) + 1)) / 2
-        propabilities = [(i+1)/total_rank_sum for i, p in enumerate(sorted_individuals)]
-        
+        probabilities = [(i+1)/total_rank_sum for i in range(len(sorted_individuals))]
         num = int(len(sorted_individuals) * percentage)
-        self.individuals = np.random.choice(sorted_individuals, num, p=propabilities).tolist()
+        self.individuals = np.random.choice(sorted_individuals, num, p=probabilities).tolist()
         
     def regenerate(self):
+        # TODO: why not replicate / stay close to the current population?
         """
             Generates random genomes until the population is full
         """
         for _ in range(self.pop_size - len(self.individuals)):
-            self.individuals.append(self.__generate_child__(self.min_val, self.max_val, self.min_val, self.max_val))
+            self.individuals.append(self.__generate_child__())
         
     def crossover(self):
         """
-            swap some genes around by mixing distribution parameters
+            Generate some new individuals that are a mix of existing ones
         """
         num_crossovers = (self.pop_size - len(self.individuals)) // 2
         for _ in range(num_crossovers):
             if np.random.rand() < self.crossover_rate:
+                # choose two particles for mutation
                 p1 = self.individuals[np.random.randint(0, len(self.individuals))]
                 p2 = self.individuals[np.random.randint(0, len(self.individuals))]
-                
+                # combine genes at "cross over point"
                 crossover_point = np.random.randint(1, self.genome_size)
-                c1_genome = np.array([*p1["pos"][:crossover_point],*p2["pos"][crossover_point:]])
-                c2_genome = np.array([*p2["pos"][:crossover_point],*p1["pos"][crossover_point:]])
-                c1 = {
-                    "pos": c1_genome,
-                    "fitness": self.eval_func(c1_genome)
-                }
-                c2 = {
-                    "pos": c2_genome,
-                    "fitness": self.eval_func(c2_genome)
-                }
-                
+                c1_genome = np.array([*p1["pos"][:crossover_point], *p2["pos"][crossover_point:]])
+                c2_genome = np.array([*p2["pos"][:crossover_point], *p1["pos"][crossover_point:]])
+                # create new individuals from resulting genes
+                c1 = {"pos": c1_genome, "fitness": self.eval_func(c1_genome)}
+                c2 = {"pos": c2_genome, "fitness": self.eval_func(c2_genome)}                
                 self.individuals.append(c1)
                 self.individuals.append(c2)
                     
@@ -63,7 +64,7 @@ class Population:
         """
             mutate some random genomes
         """
-        for i, p in enumerate(self.individuals):
+        for p in self.individuals:
             if np.random.uniform(0, 1) < self.mutation_rate:
                 p["pos"] += np.random.normal(scale=0.05, size=self.genome_size)
                 p["fitness"] = self.eval_func(p["pos"])
@@ -89,11 +90,6 @@ class Population:
         return distance_sum / len(self.individuals)
         
     def __generate_population__(self):
-        """
-            @param min_val: min_val bound for a1 and a2
-            @param max_val: max_val bound for b1 and b2
-            @param fit_func: fitness function
-        """
         self.individuals = []
         for i in range(self.pop_size):
             ind = self.__generate_child__()
@@ -102,8 +98,5 @@ class Population:
     def __generate_child__(self):
         x = self.init_func(size=self.genome_size)
         fitness = self.eval_func(x)
-        ind = {
-            "pos": x,
-            "fitness": fitness
-        }
+        ind = {"pos": x, "fitness": fitness}
         return ind

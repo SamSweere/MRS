@@ -1,3 +1,5 @@
+"""Measure performance of our robot"""
+
 from world_creator import WorldCreator
 import time
 
