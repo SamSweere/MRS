@@ -72,6 +72,23 @@ class Population:
                 
     def get_fittest_genome(self):
         return max(self.individuals, key=lambda x: x["fitness"])
+    
+    def get_max_fitness(self):
+        return self.get_fittest_genome()["fitness"]
+    
+    def get_average_fitness(self):
+        return np.mean([indiv["fitness"] for indiv in self.individuals])
+    
+    def get_average_diversity(self):
+        diversities = [self.get_diversity(indiv) for indiv in self.individuals]
+        return np.mean(diversities)
+            
+    def get_diversity(self, genome):
+        distance_sum = 0
+        for indiv in self.individuals:
+            distance_sum += np.sqrt((indiv["pos"] - genome["pos"]) ** 2)
+            
+        return distance_sum / len(self.individuals)
         
     def __generate_population__(self):
         """

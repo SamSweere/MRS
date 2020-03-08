@@ -3,6 +3,8 @@ from genetic.population import Population
 from world_creator import WorldCreator
 from gui.ann_controller import apply_action
 
+import numpy as np
+
 class ANNCoverageEvaluator:
     def __init__(self, generator, input_dims, output_dims, hidden_dims, eval_seconds=20, step_size_ms=270):
         self.generator = generator
@@ -86,16 +88,52 @@ if __name__ == "__main__":
     
     # Train
     train_steps = 100
+    max_fitness = []
+    avg_fitness = []
+    diversity = []
     for i in range(train_steps):
         population.select(0.90)
         population.crossover()
         population.mutate()
         
+        # Collect some data
         fittest_genome = population.get_fittest_genome()
-        print(f"{i}: {evaluator.evaluate(fittest_genome['pos'])}")
+        max_fitness.append(population.get_max_fitness())
+        avg_fitness.append(population.get_average_fitness())
+        diversity.append(population.get_average_diversity())
+            
+        # Early Stopping
+        if diversity[-1] < 0.08:
+            # Save the best genome
+            ann = evaluator.to_ann(fittest_genome['pos'])
+            ann.save(f'./checkpoints/model_{i}.p')
+            
+            print("Early stopping because of an low diversity")
+            break
         
+        # Output some data
+        print(f"{i}: {evaluator.evaluate(fittest_genome['pos'])}")
+        print(population.get_average_diversity())
         if i % 20 == 0 or i == train_steps - 1:
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
             ann.save(f'./checkpoints/model_{i}.p')
+            
+    # Fitnessplot
+    import matplotlib.pyplot as plt
+    plt.figure()
+    plt.title("Fitness")
+    plt.xlabel("Epoch")
+    plt.ylabel("Fitness")
+    plt.plot(max_fitness, label="Maximum")
+    plt.plot(avg_fitness, label="Average")
+    plt.legend()
+    plt.show()
+    
+    # Diversity plot
+    plt.figure()
+    plt.title("Diversity")
+    plt.xlabel("Epoch")
+    plt.ylabel("Diversity")
+    plt.plot(diversity)
     
