@@ -1,4 +1,3 @@
-import pygame
 import numpy as np
 
 def exponential_decay(x, start=1, end_factor=0.2, factor=10):

@@ -8,14 +8,14 @@ from copy import deepcopy
 # • Choose crossover & mutation
 # • Choose data analysis method
 class Population:
-    def __init__(self, pop_size, genome_size, eval_func, min_val=-2, max_val=2, crossover_rate=0.75, mutation_rate=0.1):
+    def __init__(self, pop_size, genome_size, eval_func,
+                 crossover_rate=0.75, mutation_rate=0.1, init_func=np.random.uniform):
         self.pop_size = pop_size
         self.genome_size = genome_size
         self.eval_func = eval_func
-        self.min_val = min_val
-        self.max_val= max_val
         self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
+        self.init_func = init_func
         
         self.__generate_population__()
         
@@ -65,9 +65,7 @@ class Population:
         """
         for i, p in enumerate(self.individuals):
             if np.random.uniform(0, 1) < self.mutation_rate:
-                param = np.random.choice([0, 1])
-                diff = np.random.randn() * 0.15
-                p["pos"][param] += diff
+                p["pos"] += np.random.normal(scale=0.05, size=self.genome_size)
                 p["fitness"] = self.eval_func(p["pos"])
                 
     def get_fittest_genome(self):
@@ -102,7 +100,7 @@ class Population:
             self.individuals.append(ind)
             
     def __generate_child__(self):
-        x = np.random.uniform(low=self.min_val, high=self.max_val, size=self.genome_size)
+        x = self.init_func(size=self.genome_size)
         fitness = self.eval_func(x)
         ind = {
             "pos": x,

@@ -19,7 +19,7 @@ if __name__ == "__main__":
     if use_human_controller:
         controller_func = HumanController
     else:
-        controller_func = lambda robot: ANNController(robot, ANN.load("./checkpoints/model_16.p"))
+        controller_func = lambda robot: ANNController(robot, ANN.load("./checkpoints/model_0.p"))
     
     # Game loop
     while True:

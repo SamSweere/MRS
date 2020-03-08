@@ -32,7 +32,7 @@ class ANNCoverageEvaluator:
             sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
             distance_sums.append(np.sum(sensors))
         
-        return world.dustgrid.cleaned_cells - np.sum(distance_sums) * 10
+        return -np.sum(distance_sums) * 100
         
     def get_genome_size(self):
         genome_size = 0
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     
     generator = WorldGenerator(WIDTH, HEIGHT, **robot_args)
     evaluator = ANNCoverageEvaluator(generator, robot_args["n_sensors"], 2, [32,16])
-    population = Population(POP_SIZE, evaluator.get_genome_size(), evaluator.evaluate, min_val=-1, max_val=1)
+    population = Population(POP_SIZE, evaluator.get_genome_size(), evaluator.evaluate, init_func=np.random.normal)
     
     # Train
     train_steps = 100
@@ -102,7 +102,6 @@ if __name__ == "__main__":
         
         # Collect some data
         fittest_genome = population.get_fittest_genome()
-        print(fittest_genome["id"])
         max_fitness.append(population.get_max_fitness())
         avg_fitness.append(population.get_average_fitness())
         diversity.append(population.get_average_diversity())
