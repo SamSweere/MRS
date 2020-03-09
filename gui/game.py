@@ -55,6 +55,7 @@ class MobileRobotGame:
         self.fps_tracker = FPSCounter()
         self.reset = False
         self.v_queue = V_QUEUE()
+        self.robo_lines = [[self.robot.x, self.robot.y, self.robot.x, self.robot.y]]
 
     def init(self):
         # Initialize pygame and modules that we want to use
@@ -64,9 +65,10 @@ class MobileRobotGame:
         self.fps_font = pygame.font.SysFont('Arial', 16)
         self.dust_sprite = DustGridSprite(self.robot, self.world.dustgrid)
 
-    def run(self):
+    def run(self, snapshot=False, snapshot_dir=""):
         # Main game loop
         ticks_last_frame = pygame.time.get_ticks()
+        counter = 0
         while (not self.done and not self.reset):
             self.handle_events()
 
@@ -75,8 +77,16 @@ class MobileRobotGame:
             delta_time = (t - ticks_last_frame) / 1000.0
             ticks_last_frame = t
             self.update(delta_time)
-
-            self.draw()
+            
+            if snapshot:
+                counter += 1
+                if counter > 50000:
+                    self.draw()
+                    pygame.image.save(self.screen, snapshot_dir)
+                    pygame.quit()
+                    break
+            else:
+                self.draw()
             # Pygame uses double buffers
             # This swaps the buffers so everything we've drawn will now show up on the screen
             pygame.display.flip()
@@ -88,6 +98,9 @@ class MobileRobotGame:
         self.robot_controller.update(delta_time)
         self.world.update(delta_time)
         self.dust_sprite.update(delta_time)
+        self.robo_lines[-1][-2] = self.robot.x
+        self.robo_lines[-1][-1] = self.robot.y
+        self.robo_lines.append([self.robot.x, self.robot.y, self.robot.x, self.robot.y])
 
     def draw(self):
         self.dust_sprite.draw(self.screen)
@@ -154,6 +167,9 @@ class MobileRobotGame:
         pygame.gfxdraw.line(self.screen, *ti((self.robot.x, self.robot.y)), *ti((rotated_x, rotated_y)),
                             pygame.Color('black'))
         pygame.gfxdraw.circle(self.screen, *ti((self.robot.x, self.robot.y)), self.robot.radius, pygame.Color('black'))
+
+        for i in self.robo_lines:
+            pygame.gfxdraw.line(self.screen, *ti(i), pygame.Color('black'))
 
     def handle_events(self):
         events = pygame.event.get()
