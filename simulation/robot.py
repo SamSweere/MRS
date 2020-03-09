@@ -25,6 +25,22 @@ class Robot:
         self.w = (self.vr - self.vl) / self.l
         self.R, self.icc = self.calculate_icc()
 
+    def set_vr(self, val):
+        if val < -self.max_v:
+            self.vr = -self.max_v
+        elif val > self.max_v:
+            self.vr = self.max_v
+        else:
+            self.vr = val
+
+    def set_vl(self, val):
+        if val < -self.max_v:
+            self.vl = -self.max_v
+        elif val > self.max_v:
+            self.vl = self.max_v
+        else:
+            self.vl = val
+
     def update_vr(self, direction):
         if direction == 0:
             # Stop

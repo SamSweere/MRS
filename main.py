@@ -12,7 +12,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--human", action="store_true", default=False,
         help="manual robot control")
-    parser.add_argument("--model_name", default="model_0.p", 
+    parser.add_argument("--model_name", default="model_20.p", 
         help="robot control model name in checkpoints")
     parser.add_argument("--snapshot", action="store_true", default=False,
         help="take a snapshot")

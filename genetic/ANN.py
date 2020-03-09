@@ -4,8 +4,8 @@ np.set_printoptions(suppress=True)
 
 class ANN:
 
-    def __init__(self, input_dims, output_dims, hidden_dims, step_size_ms, feedback_time,
-    eta=0.15, reg=0):
+    def __init__(self, input_dims, output_dims, hidden_dims, step_size_ms, 
+        normalization, feedback_time, eta=0.15, reg=0):
         self.input_dims = input_dims
         self.output_dims = output_dims
         self.hidden_dims = hidden_dims
@@ -13,6 +13,7 @@ class ANN:
         self.step_size_ms = step_size_ms
         self.eta = eta
         self.reg = reg
+        self.normalization = normalization
         self.feedback_time = feedback_time
         # Calculate how many steps we have to save for the feedback
         self.feedback_length = max(feedback_time//step_size_ms, 1)
@@ -41,15 +42,12 @@ class ANN:
             @param feedback: feedback of prev last hidden layer
             @return prediction
         """
+        x = x / self.normalization
         batch_size = x.shape[1]  # one column is one observation
         x = np.concatenate((np.ones((1, batch_size)), x), axis=0)
         activations = [x]
         for i, theta in enumerate(self.weight_matrices):
-
-            # TODO: check this once more
             if feedback:
-
-                #TODO: change this to a time delay
                 # for our last layer, use our prev activations
                 if i == (len(self.weight_matrices)-2):
                     num_obs = max(1, batch_size)
@@ -110,6 +108,8 @@ class ANN:
             self.weight_matrices[-i] -= self.eta * (1/batch_size) * gradient
         
     def sigmoid(self, x, deriv=False):
+        # return x
+        # TODO: dirty but works
         sig = 1/(1 + np.exp(-x))
         if deriv:
             return np.multiply(sig, 1-sig)
@@ -150,12 +150,4 @@ class ANN:
     @staticmethod
     def load(file_path):
         return pickle.load(open(file_path, "rb"))
-    
-
-if __name__ == "__main__":
-    cn = ANN(input_dims=8, output_dims=8, hidden_dims=[3])
-    cn.show()
-    x = np.eye(8)
-    y = x
-    cn.train_backprop(cn, x, y)
 

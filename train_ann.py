@@ -17,7 +17,8 @@ from pathlib import Path
 
 class ANNCoverageEvaluator:
     def __init__(self, generator, input_dims, output_dims, hidden_dims,
-                 feedback, eval_seconds, step_size_ms, feedback_time):
+                 feedback, eval_seconds, step_size_ms, feedback_time,
+                 num_eval, normalization):
         self.generator = generator
         self.input_dims = input_dims
         self.output_dims = output_dims
@@ -27,6 +28,8 @@ class ANNCoverageEvaluator:
         self.step_size_ms = step_size_ms
         self.feedback = feedback
         self.feedback_time = feedback_time
+        self.num_eval = num_eval
+        self.normalization=normalization
 
     def generate_evaluate(self, genome, random_robot):
         world, robot = self.generator.create_rect_world(random_robot=random_robot)
@@ -68,7 +71,7 @@ class ANNCoverageEvaluator:
 
             sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
             distance_sums.append(np.sum(sensors))
-
+        # 
         return world.dustgrid.cleaned_cells - np.sum(distance_sums)*20 #100
 
     def get_genome_size(self):
@@ -119,13 +122,19 @@ class ANNCoverageEvaluator:
         weight_matrices.append(matrix)
 
         # Generate the ANN
-        ann = ANN(self.input_dims, self.output_dims, self.hidden_dims, self.step_size_ms,
-                  self.feedback_time)
+        ann = ANN(
+            input_dims=self.input_dims, 
+            output_dims=self.output_dims,
+            hidden_dims=self.hidden_dims, 
+            step_size_ms=self.step_size_ms,
+            normalization=self.normalization,
+            feedback_time=self.feedback_time)
         ann.weight_matrices = weight_matrices
         return ann
 
 
-def train(iterations, generator, evaluator, population, save_modulo=20, experiment=""):
+def train(iterations, generator, evaluator, population, evaluator_args, 
+    population_args, save_modulo=20, experiment=""):
     max_fitness = []
     avg_fitness = []
     diversity = []
@@ -134,6 +143,13 @@ def train(iterations, generator, evaluator, population, save_modulo=20, experime
     experiment = os.path.join("_experiments", experiment) 
     if not os.path.isdir(experiment):
         os.mkdir(experiment)
+    
+    # save our model params
+    with open(os.path.join(experiment, "population_args.txt"), "w+") as f:
+        f.write(str(population_args))
+    with open(os.path.join(experiment, "evaluator_args.txt"), "w+") as f:
+        f.write(str(evaluator_args))
+
     for i in range(iterations):
         population.select(0.90)
         population.crossover()
@@ -165,6 +181,9 @@ def train(iterations, generator, evaluator, population, save_modulo=20, experime
             subprocess.call(["python", "main.py", "--snapshot",
                 "--snapshot_dir", f"{experiment}/{model_name}.png",
                 "--model_name", f"{model_name}.p"])
+
+        # TODO: save model params in separate df
+            
 
     history = pd.DataFrame({
         "Max_Fitness": max_fitness,
@@ -199,30 +218,40 @@ if __name__ == "__main__":
         "n_sensors": 12,
         "max_sensor_length": 100
     }
-
     generator = WorldGenerator(WIDTH, HEIGHT, 20, robot_args)
-    evaluator = ANNCoverageEvaluator(
-        generator,
-        robot_args["n_sensors"],
-        output_dims=2,
-        hidden_dims= [16, 4],
-        feedback=FEEDBACK,
-        eval_seconds=20,
-        step_size_ms=100, #270
-        feedback_time=100 #540
-    )
-    population = Population(
-        POP_SIZE,
-        evaluator.get_genome_size(),
-        evaluator.evaluate,
-        init_func=np.random.normal,
-        mutation_rate=0.1,
-        mutation_scale=0.1
-    )
+    evaluator_args = {
+        "generator": generator,
+        "input_dims": robot_args["n_sensors"],
+        "output_dims": 2,
+        "hidden_dims": [4],
+        "feedback": FEEDBACK,
+        "eval_seconds": 20,
+        "step_size_ms": 100, #270
+        "feedback_time": 100, #540
+        "num_eval": 5,
+        "normalization": robot_args["max_sensor_length"]
+    }
+    evaluator = ANNCoverageEvaluator(**evaluator_args)
+    population_args = {
+        "pop_size": POP_SIZE,
+        "genome_size": evaluator.get_genome_size(),
+        "eval_func": evaluator.evaluate,
+        "init_func": np.random.normal,
+        "mutation_rate": 0.02,
+        "mutation_scale": 0.02
+    }
+    population = Population(**population_args)
 
     # Train
-    iterations = 100
-    ann, history = train(iterations, generator, evaluator, population)
+    iterations = 10
+    ann, history = train(
+        iterations=iterations,
+        generator=generator,
+        evaluator=evaluator,
+        population=population, 
+        evaluator_args=evaluator_args,
+        population_args=population_args
+    )
     visualize.show_history(history)
 
     ann.show()

@@ -11,7 +11,7 @@ from copy import deepcopy
 class Population:
     def __init__(self, pop_size, genome_size, eval_func,
                  mutation_rate=0.1, mutation_scale=0.2,
-                 init_func=np.random.uniform):
+                 init_func=np.random.uniform(-0.1, 0.1)):
         self.pop_size = pop_size
         self.genome_size = genome_size
         self.eval_func = eval_func
@@ -68,10 +68,12 @@ class Population:
             mutate some random genomes
         """
         for p in self.individuals:
-            if np.random.uniform(0, 1) < self.mutation_rate:
-                p["pos"] += np.random.normal(scale=self.mutation_scale,
-                    size=self.genome_size)
-                p["fitness"] = self.eval_func(p["pos"])
+            probas = np.random.uniform(0, 1, size=self.genome_size)
+            mask = np.where(probas < self.mutation_rate, 1, 0)
+            mutations = np.random.normal(scale=self.mutation_scale, 
+                size=self.genome_size)
+            p["pos"] += mutations * mask
+            p["fitness"] = self.eval_func(p["pos"])
                 
     def get_fittest_genome(self):
         return max(self.individuals, key=lambda x: x["fitness"])

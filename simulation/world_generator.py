@@ -124,6 +124,7 @@ class WorldGenerator:
         max_x = self.width - self.robot_radius
         min_y = self.robot_radius
         max_y = self.height - self.robot_radius
+        margin = 50
         
         # Place robot randomly until no collisions occur
         angle = random.uniform(0, 2 * math.pi) if random_robot else 0
@@ -133,8 +134,8 @@ class WorldGenerator:
             return robot
         
         while True:
-            robot.x = random.uniform(min_x, max_x)
-            robot.y = random.uniform(min_y, max_y)
+            robot.x = random.uniform(min_x+margin, max_x-margin)
+            robot.y = random.uniform(min_y+margin, max_y-margin)
             
             collisions = world.circle_collision((robot.x, robot.y), robot.radius)
             if len(collisions) == 0:
