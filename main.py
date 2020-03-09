@@ -14,6 +14,8 @@ if __name__ == "__main__":
         help="manual robot control")
     parser.add_argument("--model_name", default="model_0.p", 
         help="robot control model name in checkpoints")
+    parser.add_argument("--snapshot", action="store_true", default=False)
+    # TODO: take a snapshot & store
     args = parser.parse_args()
 
     use_human_controller = args.human
@@ -34,6 +36,7 @@ if __name__ == "__main__":
             robot, ANN.load(model_path))
     
     # Game loop
+    counter = 0
     while True:
         world, robot = world_generator.create_rect_world(random_robot=True)
         controller = controller_func(robot)
@@ -45,5 +48,9 @@ if __name__ == "__main__":
         game.init()
         game.run()
         
+        # if args.snapshot and (counter > 20000):
+        #     pygame.image.save(game)
+
+        counter += 1
         if not game.reset:
             break
