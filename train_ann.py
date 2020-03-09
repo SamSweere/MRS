@@ -17,7 +17,7 @@ from pathlib import Path
 
 class ANNCoverageEvaluator:
     def __init__(self, generator, input_dims, output_dims, hidden_dims,
-                 feedback, eval_seconds, step_size_ms, feedback_time=540, eta=0.15, reg=0):
+                 feedback, eval_seconds, step_size_ms, feedback_time):
         self.generator = generator
         self.input_dims = input_dims
         self.output_dims = output_dims
@@ -27,8 +27,6 @@ class ANNCoverageEvaluator:
         self.step_size_ms = step_size_ms
         self.feedback = feedback
         self.feedback_time = feedback_time
-        self.eta = eta
-        self.reg = reg
 
     def generate_evaluate(self, genome, random_robot):
         world, robot = self.generator.create_rect_world(random_robot=random_robot)
@@ -71,7 +69,7 @@ class ANNCoverageEvaluator:
             sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
             distance_sums.append(np.sum(sensors))
 
-        return world.dustgrid.cleaned_cells - np.sum(distance_sums) * 10
+        return world.dustgrid.cleaned_cells - np.sum(distance_sums)*20 #100
 
     def get_genome_size(self):
         genome_size = 0
@@ -122,7 +120,7 @@ class ANNCoverageEvaluator:
 
         # Generate the ANN
         ann = ANN(self.input_dims, self.output_dims, self.hidden_dims, self.step_size_ms,
-                  self.feedback_time, self.eta, self.reg)
+                  self.feedback_time)
         ann.weight_matrices = weight_matrices
         return ann
 
@@ -147,7 +145,7 @@ def train(iterations, generator, evaluator, population, save_modulo=20, experime
         avg_fitness.append(population.get_average_fitness())
         diversity.append(population.get_average_diversity())
         # Early Stopping
-        if diversity[-1] < 0.08:
+        if diversity[-1] < 0.02: #0.08
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
             ann.save(f'./_checkpoints/model_{i}.p')
@@ -158,7 +156,11 @@ def train(iterations, generator, evaluator, population, save_modulo=20, experime
         # Print iteration data
         print(f"{i} - fitness:\t {evaluator.evaluate(fittest_genome['pos'])}")
         print("diversity:\t", population.get_average_diversity())
+<<<<<<< HEAD
         if (i % save_modulo == 0) or (i == iterations - 1):
+=======
+        if (i % 10 == 0) or (i == iterations - 1):
+>>>>>>> b89e89ad8d0d56693f3ea63ae0c7fc5087a02124
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
             model_name = f"model_{i}"
@@ -207,13 +209,11 @@ if __name__ == "__main__":
         generator,
         robot_args["n_sensors"],
         output_dims=2,
-        hidden_dims=[16, 4],
+        hidden_dims= [16, 4],
         feedback=FEEDBACK,
         eval_seconds=20,
-        step_size_ms=200, #270
-        feedback_time=540, #540
-        eta=0.15,
-        reg=0
+        step_size_ms=100, #270
+        feedback_time=100 #540
     )
     population = Population(
         POP_SIZE,

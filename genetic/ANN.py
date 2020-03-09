@@ -5,7 +5,7 @@ np.set_printoptions(suppress=True)
 class ANN:
 
     def __init__(self, input_dims, output_dims, hidden_dims, step_size_ms, feedback_time,
-    eta, reg):
+    eta=0.15, reg=0):
         self.input_dims = input_dims
         self.output_dims = output_dims
         self.hidden_dims = hidden_dims
