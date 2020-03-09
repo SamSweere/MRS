@@ -11,7 +11,7 @@ def stop_time(world, robot, num_steps=10000):
 
         if(step % 100 == 0):
             fps_e = time.time()
-            fps_dif = fps_e - fps_s
+            fps_dif = max(fps_e - fps_s, 1e-10)
             fps = 1.0/(fps_dif / 100)
             print("fps:",fps)
             fps_s = time.time()
@@ -28,8 +28,8 @@ if __name__ == "__main__":
         "env_width": WIDTH,
         "env_height": HEIGHT
     }
-    # TODO: fix
-    creator = WorldGenerator(WIDTH, HEIGHT)
+    robot_kwargs = {}
+    creator = WorldGenerator(WIDTH, HEIGHT, 20, robot_kwargs)
     world, robot = creator.create_random_world()
     
     stop_time(world, robot, num_steps=10000)
