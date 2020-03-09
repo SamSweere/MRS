@@ -127,12 +127,12 @@ class ANNCoverageEvaluator:
         return ann
 
 
-def train(iterations, generator, evaluator, population, experiment=""):
+def train(iterations, generator, evaluator, population, save_modulo=20, experiment=""):
     max_fitness = []
     avg_fitness = []
     diversity = []
     if experiment == "":
-        experiment = "new_experiment"
+        experiment = f"{datetime.now():%Y-%m-%d_%H-%S-%f}"
     experiment = os.path.join("_experiments", experiment) 
     if not os.path.isdir(experiment):
         os.mkdir(experiment)
@@ -158,7 +158,7 @@ def train(iterations, generator, evaluator, population, experiment=""):
         # Print iteration data
         print(f"{i} - fitness:\t {evaluator.evaluate(fittest_genome['pos'])}")
         print("diversity:\t", population.get_average_diversity())
-        if (i % 20 == 0) or (i == iterations - 1):
+        if (i % save_modulo == 0) or (i == iterations - 1):
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
             model_name = f"model_{i}"
