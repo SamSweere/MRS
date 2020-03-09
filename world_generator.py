@@ -64,51 +64,51 @@ class WorldGenerator:
         self.robot_radius = robot_radius
         self.robot_args = robot_kwargs
         
-    def create_rect_world(self):
+    def create_rect_world(self, random_robot=True):
         walls = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
         
         world = World(walls, self.width, self.height)
-        robot = self.__add_random_robot__(world)
+        robot = self.__add_robot__(world, random_robot=random_robot)
         return world, robot
     
-    def create_double_rect_world(self):
+    def create_double_rect_world(self, random_robot=True):
         outer_walls = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
         inner_walls = create_rect_walls(self.width / 2, self.height / 2, self.width / 2, self.height / 2)
         walls = [*outer_walls, *inner_walls]
         
         world = World(walls, self.width, self.height)
-        robot = self.__add_random_robot__(world)
+        robot = self.__add_robot__(world, random_robot=random_robot)
         return world, robot
     
-    def create_trapezoid_world(self):
+    def create_trapezoid_world(self, random_robot=True):
         border = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
         trapezoid = create_trapezoid_walls(self.width / 2, self.height / 2, self.height, self.width, self.width/ 2)
         walls = [*border, *trapezoid]
         
         world = World(walls, self.width, self.height)
-        robot = self.__add_random_robot__(world)
+        robot = self.__add_robot__(world, random_robot=random_robot)
         return world, robot
     
-    def create_double_trapezoid_world(self):
+    def create_double_trapezoid_world(self, random_robot=True):
         border = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
         outer_walls = create_trapezoid_walls(self.width / 2, self.height / 2, self.height, self.width, self.width/ 2)
         inner_walls = create_trapezoid_walls(self.width / 2, self.height / 2, self.height / 2, self.width / 2, self.width / 4)
         walls = [*border, *outer_walls, *inner_walls]
         
         world = World(walls, self.width, self.height)
-        robot = self.__add_random_robot__(world)
+        robot = self.__add_robot__(world, random_robot=random_robot)
         return world, robot
     
-    def create_star_world(self):
+    def create_star_world(self, random_robot=True):
         border = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
         star = create_star_walls(self.width / 2, self.height / 2, self.height / 4, self.height / 2)
         walls = [*border, *star]
         
         world = World(walls, self.width, self.height)
-        robot = self.__add_random_robot__(world)
+        robot = self.__add_robot__(world, random_robot=random_robot)
         return world, robot
     
-    def create_random_world(self):
+    def create_random_world(self, random_robot=True):
         world_func = random.choice([
             self.create_rect_world,
             self.create_double_rect_world,
@@ -117,18 +117,21 @@ class WorldGenerator:
             self.create_star_world
         ])
         
-        return world_func()
+        return world_func(random_robot=random_robot)
         
-    def __add_random_robot__(self, world):
+    def __add_robot__(self, world, random_robot=True):
         min_x = self.robot_radius
         max_x = self.width - self.robot_radius
         min_y = self.robot_radius
         max_y = self.height - self.robot_radius
         
         # Place robot randomly until no collisions occur
-        angle = random.uniform(0, 2 * math.pi)
-        robot = Robot(0, 0, angle, radius=self.robot_radius, **self.robot_args)
+        angle = random.uniform(0, 2 * math.pi) if random_robot else 0
+        robot = Robot(self.width / 2, self.height / 2, angle, radius=self.robot_radius, **self.robot_args)
         world.set_robot(robot)
+        if not random_robot:
+            return robot
+        
         while True:
             robot.x = random.uniform(min_x, max_x)
             robot.y = random.uniform(min_y, max_y)

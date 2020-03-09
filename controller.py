@@ -59,7 +59,7 @@ if __name__ == "__main__":
     functions = [rosenbrock, rastrigin]
     function_num = 1
     fn = functions[function_num]
-    population = Population(100, 2, lambda x: -fn(x))
+    population = Population(100, 2, lambda x: -fn(x), mutation_scale=0.2, init_func=lambda size: np.random.uniform(low=-2,high=2,size=size))
         
     history = evolve(100, population)
 
@@ -78,4 +78,3 @@ if __name__ == "__main__":
         file_name = "ae_rastrigin"
     plots.visualize_heatmap(fn, history, extent, trail_lenght=5,
         fname=os.path.join(img_dir, file_name+".gif"), output="step")
-

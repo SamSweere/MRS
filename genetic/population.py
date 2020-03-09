@@ -10,12 +10,11 @@ from copy import deepcopy
 
 class Population:
     def __init__(self, pop_size, genome_size, eval_func,
-                 crossover_rate=0.75, mutation_rate=0.1, mutation_scale=0.2,
+                 mutation_rate=0.1, mutation_scale=0.2,
                  init_func=np.random.uniform):
         self.pop_size = pop_size
         self.genome_size = genome_size
         self.eval_func = eval_func
-        self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
         self.mutation_scale = mutation_scale
         self.init_func = init_func
@@ -25,8 +24,8 @@ class Population:
         
     def select(self, percentage):
         """
-        1) Sort individuals by fitness, divide by squared number of individuals
-        2) Select <percentage> according to number obtained in 1)
+            1) Sort individuals by fitness, divide by squared number of individuals
+            2) Select <percentage> according to number obtained in 1)
         """
         sorted_individuals = sorted(self.individuals, key=lambda x: x["fitness"])
         total_rank_sum = len(self.individuals) * (len(self.individuals) + 1) / 2
@@ -48,21 +47,20 @@ class Population:
         """
         num_crossovers = (self.pop_size - len(self.individuals)) // 2
         for _ in range(num_crossovers):
-            if np.random.rand() < self.crossover_rate:
-                # choose two particles for mutation
-                p1 = self.individuals[np.random.randint(0, len(self.individuals))]
-                p2 = self.individuals[np.random.randint(0, len(self.individuals))]
-                # combine genes at "cross over point"
-                crossover_point = np.random.randint(1, self.genome_size)
-                c1_genome = np.array([*p1["pos"][:crossover_point],
-                                      *p2["pos"][crossover_point:]])
-                c2_genome = np.array([*p2["pos"][:crossover_point], 
-                                      *p1["pos"][crossover_point:]])
-                # create new individuals from resulting genes
-                c1 = {"pos": c1_genome, "fitness": self.eval_func(c1_genome)}
-                c2 = {"pos": c2_genome, "fitness": self.eval_func(c2_genome)}                
-                self.individuals.append(c1)
-                self.individuals.append(c2)
+            # choose two particles for mutation
+            p1 = self.individuals[np.random.randint(0, len(self.individuals))]
+            p2 = self.individuals[np.random.randint(0, len(self.individuals))]
+            # combine genes at "cross over point"
+            crossover_point = np.random.randint(1, self.genome_size)
+            c1_genome = np.array([*p1["pos"][:crossover_point],
+                                  *p2["pos"][crossover_point:]])
+            c2_genome = np.array([*p2["pos"][:crossover_point], 
+                                  *p1["pos"][crossover_point:]])
+            # create new individuals from resulting genes
+            c1 = {"pos": c1_genome, "fitness": self.eval_func(c1_genome)}
+            c2 = {"pos": c2_genome, "fitness": self.eval_func(c2_genome)}                
+            self.individuals.append(c1)
+            self.individuals.append(c2)
                     
     def mutate(self):
         """

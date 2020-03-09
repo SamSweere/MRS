@@ -24,7 +24,7 @@ class ANNCoverageEvaluator:
             Evaluate fitness of current genome (ANN weights)
         """
         ann = self.to_ann(genome)
-        world, robot = self.generator.create_rect_world()
+        world, robot = self.generator.create_rect_world(random_robot=False)
         # TODO: is this legit?
         # Dirty Hack - Do an update to let the robot collect sensor data
         world.update(0)
@@ -97,9 +97,9 @@ def train(iterations, generator, evaluator, population):
         max_fitness.append(population.get_max_fitness())
         avg_fitness.append(population.get_average_fitness())
         diversity.append(population.get_average_diversity())
-            
+        print(len(population.individuals))
         # Early Stopping
-        if diversity[-1] < 0.08:
+        if diversity[-1] < 0.001:
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
             ann.save(f'./checkpoints/model_{i}.p')
@@ -158,8 +158,8 @@ if __name__ == "__main__":
         POP_SIZE,
         evaluator.get_genome_size(),
         evaluator.evaluate,
-        init_func=np.random.normal,
-        mutation_rate=0.05,
+        init_func=np.random.uniform,
+        mutation_rate=0.1,
         mutation_scale=0.1
     )
     
