@@ -1,6 +1,6 @@
 import numpy as np
 
-def exponential_decay(x, start=1, end_factor=0.1, factor=30):
+def exponential_decay(x, start=1, end_factor=0.0, factor=5):
     """
         Taken from the slides, dont ask me how it works
     """
@@ -16,8 +16,8 @@ def apply_action(robot, ann, feedback):
     
     # The network outputs values between 0 and 1 for each motor
     # We treat those outputs as normalized velocities
-    robot.vl = action[0] * robot.max_v
-    robot.vr = action[1] * robot.max_v
+    robot.vl = action[1] * robot.max_v
+    robot.vr = action[2] * robot.max_v
 
 class ANNController:
     def __init__(self, robot, ann, step_size_ms=270, feedback=True):
