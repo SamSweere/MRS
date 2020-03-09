@@ -200,7 +200,7 @@ if __name__ == "__main__":
         hidden_dims=[16, 4],
         feedback=FEEDBACK,
         eval_seconds=20,
-        step_size_ms=270, #270
+        step_size_ms=200, #270
         feedback_time=540, #540
         eta=0.15,
         reg=0
