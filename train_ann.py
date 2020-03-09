@@ -10,6 +10,7 @@ import numpy as np
 import os
 from datetime import datetime
 import subprocess
+from pathlib import Path
 # import multiprocessing as mp
 # from itertools import repeat
 
@@ -144,7 +145,7 @@ def train(iterations, generator, evaluator, population):
         if diversity[-1] < 0.08:
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
-            ann.save(f'./checkpoints/model_{i}.p')
+            ann.save(f'./_checkpoints/model_{i}.p')
 
             print("Early stopping due to low diversity")
             break
@@ -156,7 +157,7 @@ def train(iterations, generator, evaluator, population):
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
             model_name = f"model_{i}.p"
-            ann.save(os.path.join("checkpoints", model_name))
+            ann.save(os.path.join("_checkpoints", model_name))
             # Take a snapshot of what robot outcomes look like
             subprocess.call(["python", "main.py", "--snapshot",
                 f"--model_name {model_name}"])
@@ -178,9 +179,7 @@ def save_history(history):
 
 if __name__ == "__main__":
     # Create folder for saving models
-    from pathlib import Path
-
-    Path("./checkpoints").mkdir(parents=True, exist_ok=True)
+    Path("_checkpoints").mkdir(parents=True, exist_ok=True)
 
     # TODO: main thing missing seems to be feedback about own motion!
     # TODO: make sure we evaluate our ANN for a sensible amount of time!

@@ -36,6 +36,7 @@ if __name__ == "__main__":
             robot, ANN.load(model_path))
     
     # Game loop
+    counter = 0
     while True:
         world, robot = world_generator.create_rect_world(random_robot=True)
         controller = controller_func(robot)
@@ -47,5 +48,9 @@ if __name__ == "__main__":
         game.init()
         game.run()
         
+        # if args.snapshot and (counter > 20000):
+        #     pygame.image.save(game)
+
+        counter += 1
         if not game.reset:
             break

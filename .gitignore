@@ -1,4 +1,6 @@
-checkpoints/
+_checkpoints/
+*.csv
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -138,5 +140,3 @@ dmypy.json
 # pycharm stuff
 .idea/I r
 .idea/
-
-*.csv
