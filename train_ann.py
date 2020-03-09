@@ -2,10 +2,14 @@ from genetic.ANN import ANN
 from genetic.population import Population
 from simulation.world_generator import WorldGenerator
 from gui.ann_controller import apply_action, exponential_decay
+import _experiments.visualize as visualize
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import numpy as np
+import os
+from datetime import datetime
+import subprocess
 
 
 class ANNCoverageEvaluator:
@@ -135,7 +139,11 @@ def train(iterations, generator, evaluator, population):
         if (i % 20 == 0) or (i == iterations - 1):
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
-            ann.save(f'./checkpoints/model_{i}.p')
+            model_name = f"model_{i}.p"
+            ann.save(os.path.join("checkpoints", model_name))
+            # Take a snapshot of what robot outcomes look like
+            subprocess.call(["python", "main.py", "--snapshot",
+                f"--model_name {model_name}"])
 
     history = pd.DataFrame({
         "max_fitness": max_fitness,
@@ -146,14 +154,10 @@ def train(iterations, generator, evaluator, population):
     return ann, history
 
 
-def show_history(history):
-    long_df = history.melt(
-        value_vars=["max_fitness", "avg_fitness", "diversity"],
-        id_vars=["iteration"]
-    )
-    g = sns.FacetGrid(long_df, row="variable", sharey=False)
-    g.map(plt.plot, "iteration", "value").add_legend()
-    plt.show()
+def save_history(history):
+    timestamp = f"{datetime.now():%Y-%m-%d_%H-%S-%f}"
+    file_name = os.path.join("_experiments", "files", f"{timestamp}.csv")
+    history.to_csv(file_name)
 
 
 if __name__ == "__main__":
@@ -199,9 +203,10 @@ if __name__ == "__main__":
     )
 
     # Train
-    iterations = 100
+    iterations = 3
     ann, history = train(iterations, generator, evaluator, population)
-    show_history(history)
+    save_history(history)
+    visualize.show_history(history)
 
     ann.show()
 

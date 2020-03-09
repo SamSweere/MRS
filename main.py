@@ -14,6 +14,8 @@ if __name__ == "__main__":
         help="manual robot control")
     parser.add_argument("--model_name", default="model_0.p", 
         help="robot control model name in checkpoints")
+    parser.add_argument("--snapshot", action="store_true", default=False)
+    # TODO: take a snapshot & store
     args = parser.parse_args()
 
     use_human_controller = args.human

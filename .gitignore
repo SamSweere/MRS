@@ -138,3 +138,5 @@ dmypy.json
 # pycharm stuff
 .idea/I r
 .idea/
+
+*.csv
