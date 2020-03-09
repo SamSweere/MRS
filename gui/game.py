@@ -137,7 +137,7 @@ class MobileRobotGame:
         R, icc = self.robot.R, self.robot.icc
         if (max(icc) < 10e8 and min(icc) > -10e8):
             # In bounds
-            pygame.draw.circle(self.screen, pygame.Color('orange'), ti(icc), 1)
+            pygame.draw.circle(self.screen, pygame.Color('orange'), ti(icc), 5)
 
         # Draw sensors
         for hit, dist in self.robot.sensor_data:

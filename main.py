@@ -3,27 +3,35 @@ from gui.human_controller import HumanController
 from gui.ann_controller import ANNController
 from genetic.ANN import ANN
 from world_generator import WorldGenerator
+import argparse
+import os
+
 
 if __name__ == "__main__":
-    use_human_controller = False
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--human", action="store_true", default=False,
+        help="manual robot control")
+    parser.add_argument("--model_name", default="model_0.p", 
+        help="robot control model name in checkpoints")
+    args = parser.parse_args()
+
+    use_human_controller = args.human
+    print(args.human)
     
-    # Setup
+    # set up environment
     WIDTH = 500
     HEIGHT = 325
-    env_params = {
-        "env_width": WIDTH,
-        "env_height": HEIGHT
-    }
-    robot_kwargs = {
-        "n_sensors": 12
-    }
+    env_params = {"env_width": WIDTH, "env_height": HEIGHT}
+    robot_kwargs = {"n_sensors": 12}
     world_generator = WorldGenerator(WIDTH, HEIGHT, 20, robot_kwargs)
     
     if use_human_controller:
         controller_func = HumanController
     else:
+        model_path = os.path.join("checkpoints", args.model_name)
         controller_func = lambda robot: ANNController(
-            robot, ANN.load("./checkpoints/model_60.p"))
+            robot, ANN.load(model_path))
     
     # Game loop
     while True:

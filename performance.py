@@ -1,6 +1,6 @@
 """Measure performance of our robot"""
 
-from world_creator import WorldCreator
+from world_generator import WorldGenerator
 import time
 
 def stop_time(world, robot, num_steps=10000):
