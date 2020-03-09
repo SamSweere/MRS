@@ -10,7 +10,7 @@ import numpy as np
 
 class ANNCoverageEvaluator:
     def __init__(self, generator, input_dims, output_dims, hidden_dims, 
-        feedback=True, eval_seconds=20, step_size_ms=270):
+        feedback, eval_seconds, step_size_ms):
         self.generator = generator
         self.input_dims = input_dims
         self.output_dims = output_dims
@@ -97,7 +97,7 @@ class ANNCoverageEvaluator:
         weight_matrices.append(matrix)
         
         # Generate the ANN
-        ann = ANN(self.input_dims,self.output_dims, self.hidden_dims)
+        ann = ANN(self.input_dims,self.output_dims, self.hidden_dims, self.step_size_ms)
         ann.weight_matrices = weight_matrices
         return ann
 
@@ -176,7 +176,9 @@ if __name__ == "__main__":
         robot_args["n_sensors"], 
         output_dims = 2, 
         hidden_dims = [16, 4],
-        feedback=FEEDBACK
+        feedback=FEEDBACK,
+        eval_seconds=20,
+        step_size_ms=250
     )
     population = Population(
         POP_SIZE,
@@ -188,7 +190,7 @@ if __name__ == "__main__":
     )
     
     # Train
-    iterations = 100
+    iterations = 10
     ann, history = train(iterations, generator, evaluator, population)
     show_history(history)
 

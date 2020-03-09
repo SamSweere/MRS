@@ -4,14 +4,16 @@ np.set_printoptions(suppress=True)
 
 class ANN:
 
-    def __init__(self, input_dims, output_dims, hidden_dims,
-    eta=0.15, reg=0):
+    def __init__(self, input_dims, output_dims, hidden_dims, step_size_ms,
+    eta=0.15, reg=0, feedback_time=0.1):
         self.input_dims = input_dims
         self.output_dims = output_dims
         self.hidden_dims = hidden_dims
         self.weight_matrices = []
+        self.step_size_ms = step_size_ms
         self.eta = eta
         self.reg = reg
+        self.feedback_time = feedback_time
         self.create_architecture()
         self.prev_activations = []
 
@@ -42,6 +44,7 @@ class ANN:
 
             # TODO: check this once more
             if feedback:
+                #TODO: change this to a time delay
                 # for our last layer, use our prev activations
                 if i == (len(self.weight_matrices)-2):
                     num_obs = max(1, batch_size)
