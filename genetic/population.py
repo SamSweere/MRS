@@ -10,24 +10,26 @@ from copy import deepcopy
 
 class Population:
     def __init__(self, pop_size, genome_size, eval_func,
-                 crossover_rate=0.75, mutation_rate=0.1, init_func=np.random.uniform):
+                 crossover_rate=0.75, mutation_rate=0.1, mutation_scale=0.2,
+                 init_func=np.random.uniform):
         self.pop_size = pop_size
         self.genome_size = genome_size
         self.eval_func = eval_func
         self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
+        self.mutation_scale = mutation_scale
         self.init_func = init_func
+        self.individuals = []
         
         self.__generate_population__()
         
     def select(self, percentage):
-        # TODO: seems more complicated than necessary
         """
         1) Sort individuals by fitness, divide by squared number of individuals
         2) Select <percentage> according to number obtained in 1)
         """
         sorted_individuals = sorted(self.individuals, key=lambda x: x["fitness"])
-        total_rank_sum = (len(self.individuals) * (len(self.individuals) + 1)) / 2
+        total_rank_sum = len(self.individuals) * (len(self.individuals) + 1) / 2
         probabilities = [(i+1)/total_rank_sum for i in range(len(sorted_individuals))]
         num = int(len(sorted_individuals) * percentage)
         self.individuals = np.random.choice(sorted_individuals, num, p=probabilities).tolist()
@@ -52,8 +54,10 @@ class Population:
                 p2 = self.individuals[np.random.randint(0, len(self.individuals))]
                 # combine genes at "cross over point"
                 crossover_point = np.random.randint(1, self.genome_size)
-                c1_genome = np.array([*p1["pos"][:crossover_point], *p2["pos"][crossover_point:]])
-                c2_genome = np.array([*p2["pos"][:crossover_point], *p1["pos"][crossover_point:]])
+                c1_genome = np.array([*p1["pos"][:crossover_point],
+                                      *p2["pos"][crossover_point:]])
+                c2_genome = np.array([*p2["pos"][:crossover_point], 
+                                      *p1["pos"][crossover_point:]])
                 # create new individuals from resulting genes
                 c1 = {"pos": c1_genome, "fitness": self.eval_func(c1_genome)}
                 c2 = {"pos": c2_genome, "fitness": self.eval_func(c2_genome)}                
@@ -66,7 +70,8 @@ class Population:
         """
         for p in self.individuals:
             if np.random.uniform(0, 1) < self.mutation_rate:
-                p["pos"] += np.random.normal(scale=0.05, size=self.genome_size)
+                p["pos"] += np.random.normal(scale=self.mutation_scale,
+                    size=self.genome_size)
                 p["fitness"] = self.eval_func(p["pos"])
                 
     def get_fittest_genome(self):
@@ -88,6 +93,10 @@ class Population:
             distance_sum += np.sqrt((indiv["pos"] - genome["pos"]) ** 2)
             
         return distance_sum / len(self.individuals)
+
+    def show(self):
+        for i in self.individuals:
+            print(f"{i}\n")
         
     def __generate_population__(self):
         self.individuals = []

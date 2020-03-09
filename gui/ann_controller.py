@@ -5,7 +5,7 @@ def exponential_decay(x, start=1, end_factor=0.2, factor=10):
         Taken from the slides, dont ask me how it works
     """
     x = np.array(x)
-    return start + (start * end_factor - start)*(1 - np.exp(-x/factor))
+    return start + (start * end_factor - start) * (1 - np.exp(-x/factor))
 
 def get_action(robot, ann):
     inp = exponential_decay([dist for hit, dist in robot.sensor_data])

@@ -5,25 +5,29 @@ from genetic.ANN import ANN
 from world_generator import WorldGenerator
 
 if __name__ == "__main__":
-    use_human_controller = True
+    use_human_controller = False
     
     # Setup
-    WIDTH = 1000
-    HEIGHT = 650
+    WIDTH = 500
+    HEIGHT = 325
     env_params = {
         "env_width": WIDTH,
         "env_height": HEIGHT
     }
-    creator = WorldGenerator(WIDTH, HEIGHT)
+    robot_kwargs = {
+        "n_sensors": 6
+    }
+    world_generator = WorldGenerator(WIDTH, HEIGHT, 20, robot_kwargs)
     
     if use_human_controller:
         controller_func = HumanController
     else:
-        controller_func = lambda robot: ANNController(robot, ANN.load("./checkpoints/model_0.p"))
+        controller_func = lambda robot: ANNController(
+            robot, ANN.load("./checkpoints/model_430.p"))
     
     # Game loop
     while True:
-        world, robot = creator.create_random_world()
+        world, robot = world_generator.create_rect_world()
         controller = controller_func(robot)
         env_params["world"] = world
         env_params["robot"] = robot

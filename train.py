@@ -3,25 +3,28 @@ from genetic.population import Population
 from world_generator import WorldGenerator
 from gui.ann_controller import apply_action, exponential_decay
 import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
 import numpy as np
 
 
 class ANNCoverageEvaluator:
-    def __init__(self, generator, input_dims, output_dims, hidden_dims, eval_seconds=20, step_size_ms=270):
+    def __init__(self, generator, input_dims, output_dims, hidden_dims,
+        eval_seconds=20, step_size_ms=270):
         self.generator = generator
         self.input_dims = input_dims
         self.output_dims = output_dims
         self.hidden_dims = hidden_dims
         self.eval_seconds = eval_seconds
-        # According to the internetz humans have a reaction time of somewhat 200ms to 300ms
+        # According to the internetz humans have a reaction time of 200ms to 300ms
         self.step_size_ms = step_size_ms
         
     def evaluate(self, genome):
         """
-            Let the ANN perform an action and collect sensor data
+            Evaluate fitness of current genome (ANN weights)
         """
         ann = self.to_ann(genome)
-        world, robot = self.generator.create_random_world()
+        world, robot = self.generator.create_rect_world()
         # TODO: is this legit?
         # Dirty Hack - Do an update to let the robot collect sensor data
         world.update(0)
@@ -30,14 +33,14 @@ class ANNCoverageEvaluator:
         steps = int((self.eval_seconds * 1000) / self.step_size_ms) + 1
         delta_time = self.step_size_ms / 1000
         distance_sums = []
-        for i in range(steps):
+        for _ in range(steps):
             apply_action(robot, ann)
             world.update(delta_time)
             
             sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
             distance_sums.append(np.sum(sensors))
-        
-        return -np.sum(distance_sums) * 100
+            
+        return world.dustgrid.cleaned_cells - np.sum(distance_sums) * 10
         
     def get_genome_size(self):
         genome_size = 0
@@ -105,62 +108,67 @@ def train(iterations, generator, evaluator, population):
             break
         
         # Print iteration data
-        print(f"{i}: {evaluator.evaluate(fittest_genome['pos'])}")
-        print(population.get_average_diversity())
-        if i % 20 == 0 or i == iterations - 1:
+        print(f"{i} - fitness:\t {evaluator.evaluate(fittest_genome['pos'])}")
+        print("diversity:\t", population.get_average_diversity())
+        if (i % 20 == 0) or (i == iterations - 1):
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
             ann.save(f'./checkpoints/model_{i}.p')
-    history = {
+
+    history = pd.DataFrame({
         "max_fitness": max_fitness,
         "avg_fitness": avg_fitness,
-        "diversity": diversity
-    }
+        "diversity": diversity,
+        "iteration": [i for i in range(len(max_fitness))]
+    })
     return ann, history
 
 
 def show_history(history):
-    # Fitness plot
-    plt.figure()
-    plt.title("Fitness")
-    plt.xlabel("Epoch")
-    plt.ylabel("Fitness")
-    plt.plot(history["max_fitness"], label="Maximum")
-    plt.plot(history["avg_fitness"], label="Average")
-    plt.legend()
+    long_df = history.melt(
+        value_vars=["max_fitness", "avg_fitness", "diversity"],
+        id_vars=["iteration"]
+    )
+    g = sns.FacetGrid(long_df, row="variable", sharey=False)
+    g.map(plt.plot, "iteration", "value").add_legend()
     plt.show()
-    
-    # Diversity plot
-    plt.figure()
-    plt.title("Diversity")
-    plt.xlabel("Epoch")
-    plt.ylabel("Diversity")
-    plt.plot(history["diversity"])
+
     
 if __name__ == "__main__":
     # Create folder for saving models
     from pathlib import Path
     Path("./checkpoints").mkdir(parents=True, exist_ok=True)
+
+    # TODO: main thing missing seems to be feedback about own motion!
+    # TODO: make sure we evaluate our ANN for a sensible amount of time!
     
     # Initialization
-    WIDTH = 1000
-    HEIGHT = 650
+    WIDTH = 500
+    HEIGHT = 325
     POP_SIZE = 100
     
     robot_args = {
-        "n_sensors": 12,
+        "n_sensors": 6,
         "max_sensor_length": 100
     }
     
-    generator = WorldGenerator(WIDTH, HEIGHT, **robot_args)
-    evaluator = ANNCoverageEvaluator(generator, robot_args["n_sensors"], 2, [32,16])
-    population = Population(POP_SIZE, evaluator.get_genome_size(), evaluator.evaluate, init_func=np.random.normal)
+    generator = WorldGenerator(WIDTH, HEIGHT, 20, robot_args)
+    evaluator = ANNCoverageEvaluator(generator, robot_args["n_sensors"], 2, [16, 8])
+    population = Population(
+        POP_SIZE,
+        evaluator.get_genome_size(),
+        evaluator.evaluate,
+        init_func=np.random.normal,
+        mutation_rate=0.05,
+        mutation_scale=0.1
+    )
     
     # Train
-    iterations = 100
-
+    iterations = 1000
     ann, history = train(iterations, generator, evaluator, population)
     show_history(history)
 
+    ann.show()
 
-            
+    # # let's look into our ANN
+    # a = evaluator.to_ann(population.individuals[0]["pos"])

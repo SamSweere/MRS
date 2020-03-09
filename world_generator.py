@@ -58,7 +58,7 @@ def create_star_walls(x, y, inner_radius, outer_radius, num_points = 5):
     
     
 class WorldGenerator:
-    def __init__(self, width, height, robot_radius=20, **robot_kwargs):
+    def __init__(self, width, height, robot_radius, robot_kwargs):
         self.width = width
         self.height = height
         self.robot_radius = robot_radius
