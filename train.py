@@ -9,8 +9,8 @@ import numpy as np
 
 
 class ANNCoverageEvaluator:
-    def __init__(self, generator, input_dims, output_dims, hidden_dims,
-        eval_seconds=20, step_size_ms=270, feedback=True):
+    def __init__(self, generator, input_dims, output_dims, hidden_dims, 
+        feedback=True, eval_seconds=20, step_size_ms=270):
         self.generator = generator
         self.input_dims = input_dims
         self.output_dims = output_dims
@@ -35,7 +35,7 @@ class ANNCoverageEvaluator:
         delta_time = self.step_size_ms / 1000
         distance_sums = []
         for _ in range(steps):
-            apply_action(robot, ann)
+            apply_action(robot, ann, self.feedback)
             world.update(delta_time)
             
             sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
@@ -157,6 +157,7 @@ if __name__ == "__main__":
     WIDTH = 500
     HEIGHT = 325
     POP_SIZE = 100
+    FEEDBACK = True
     
     robot_args = {
         "n_sensors": 6,
@@ -168,7 +169,8 @@ if __name__ == "__main__":
         generator,
         robot_args["n_sensors"], 
         output_dims = 2, 
-        hidden_dims = [16, 4]
+        hidden_dims = [16, 4],
+        feedback=FEEDBACK
     )
     population = Population(
         POP_SIZE,

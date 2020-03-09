@@ -7,12 +7,12 @@ def exponential_decay(x, start=1, end_factor=0.1, factor=30):
     x = np.array(x)
     return start + (start * end_factor - start) * (1 - np.exp(-x/factor))
 
-def get_action(robot, ann):
+def get_action(robot, ann, feedback):
     inp = exponential_decay([dist for hit, dist in robot.sensor_data])
-    return ann.predict(inp.reshape(-1, 1)).reshape(-1)
+    return ann.predict(inp.reshape(-1, 1), feedback).reshape(-1)
 
-def apply_action(robot, ann):
-    action = get_action(robot, ann)
+def apply_action(robot, ann, feedback):
+    action = get_action(robot, ann, feedback)
     
     # The network outputs values between 0 and 1 for each motor
     # We treat those outputs as normalized velocities
