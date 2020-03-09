@@ -167,10 +167,10 @@ def train(iterations, generator, evaluator, population, save_modulo=20, experime
                 "--model_name", f"{model_name}.p"])
 
     history = pd.DataFrame({
-        "max_fitness": max_fitness,
-        "avg_fitness": avg_fitness,
-        "diversity": diversity,
-        "iteration": [i for i in range(len(max_fitness))]
+        "Max_Fitness": max_fitness,
+        "Avg_Fitness": avg_fitness,
+        "Diversity": diversity,
+        "Iteration": [i for i in range(len(max_fitness))]
     })
     save_history(history, experiment)
     return ann, history

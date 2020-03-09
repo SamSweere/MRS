@@ -5,12 +5,11 @@ import os
 
 def show_history(history):
     long_df = history.melt(
-        value_vars=["max_fitness", "avg_fitness", "diversity"],
-        id_vars=["iteration"]
+        value_vars=["Max_Fitness", "Avg_Fitness", "Diversity"],
+        id_vars=["Iteration"], var_name="variable", value_name="value"
     )
     g = sns.FacetGrid(long_df, row="variable", sharey=False, height=2, aspect=3)
-    g.map(plt.plot, "iteration", "value").add_legend()
-    plt.show()
+    g.map(plt.plot, "Iteration", "value").add_legend()
     return g
 
 
