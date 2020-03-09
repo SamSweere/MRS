@@ -1,5 +1,6 @@
 _checkpoints/
 _snapshots/
+_experiments/
 *.csv
 
 

@@ -127,10 +127,15 @@ class ANNCoverageEvaluator:
         return ann
 
 
-def train(iterations, generator, evaluator, population):
+def train(iterations, generator, evaluator, population, experiment=""):
     max_fitness = []
     avg_fitness = []
     diversity = []
+    if experiment == "":
+        experiment = "new_experiment"
+    experiment = os.path.join("_experiments", experiment) 
+    if not os.path.isdir(experiment):
+        os.mkdir(experiment)
     for i in range(iterations):
         population.select(0.90)
         population.crossover()
@@ -160,7 +165,7 @@ def train(iterations, generator, evaluator, population):
             ann.save(os.path.join("_checkpoints", f"{model_name}.p"))
             # Take a snapshot of what robot outcomes look like
             subprocess.call(["python", "main.py", "--snapshot",
-                "--snapshot_dir", f"_snapshots/{model_name}.png",
+                "--snapshot_dir", f"{experiment}/{model_name}.png",
                 "--model_name", f"{model_name}.p"])
 
     history = pd.DataFrame({
@@ -169,12 +174,13 @@ def train(iterations, generator, evaluator, population):
         "diversity": diversity,
         "iteration": [i for i in range(len(max_fitness))]
     })
+    save_history(history, experiment)
     return ann, history
 
 
-def save_history(history):
+def save_history(history, experiment):
     timestamp = f"{datetime.now():%Y-%m-%d_%H-%S-%f}"
-    file_name = os.path.join("_experiments", "files", f"{timestamp}.csv")
+    file_name = os.path.join(experiment, f"{timestamp}.csv")
     history.to_csv(file_name)
 
 
@@ -221,7 +227,6 @@ if __name__ == "__main__":
     # Train
     iterations = 100
     ann, history = train(iterations, generator, evaluator, population)
-    save_history(history)
     visualize.show_history(history)
 
     ann.show()
