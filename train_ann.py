@@ -156,11 +156,7 @@ def train(iterations, generator, evaluator, population, save_modulo=20, experime
         # Print iteration data
         print(f"{i} - fitness:\t {evaluator.evaluate(fittest_genome['pos'])}")
         print("diversity:\t", population.get_average_diversity())
-<<<<<<< HEAD
         if (i % save_modulo == 0) or (i == iterations - 1):
-=======
-        if (i % 10 == 0) or (i == iterations - 1):
->>>>>>> b89e89ad8d0d56693f3ea63ae0c7fc5087a02124
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
             model_name = f"model_{i}"
