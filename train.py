@@ -97,9 +97,8 @@ def train(iterations, generator, evaluator, population):
         max_fitness.append(population.get_max_fitness())
         avg_fitness.append(population.get_average_fitness())
         diversity.append(population.get_average_diversity())
-        print(len(population.individuals))
         # Early Stopping
-        if diversity[-1] < 0.001:
+        if diversity[-1] < 0.08:
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
             ann.save(f'./checkpoints/model_{i}.p')
