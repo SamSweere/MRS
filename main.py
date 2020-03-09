@@ -29,7 +29,7 @@ if __name__ == "__main__":
     if use_human_controller:
         controller_func = HumanController
     else:
-        model_path = os.path.join("checkpoints", args.model_name)
+        model_path = os.path.join("_checkpoints", args.model_name)
         controller_func = lambda robot: ANNController(
             robot, ANN.load(model_path))
     

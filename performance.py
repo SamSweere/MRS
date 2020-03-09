@@ -28,7 +28,7 @@ if __name__ == "__main__":
         "env_width": WIDTH,
         "env_height": HEIGHT
     }
-    creator = WorldCreator(WIDTH, HEIGHT)
+    creator = WorldGenerator(WIDTH, HEIGHT)
     world, robot = creator.create_random_world()
     
     stop_time(world, robot, num_steps=10000)
