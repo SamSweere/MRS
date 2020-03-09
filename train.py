@@ -10,7 +10,7 @@ import numpy as np
 
 class ANNCoverageEvaluator:
     def __init__(self, generator, input_dims, output_dims, hidden_dims,
-        eval_seconds=20, step_size_ms=270):
+        eval_seconds=20, step_size_ms=270, feedback=True):
         self.generator = generator
         self.input_dims = input_dims
         self.output_dims = output_dims
@@ -18,6 +18,7 @@ class ANNCoverageEvaluator:
         self.eval_seconds = eval_seconds
         # According to the internetz humans have a reaction time of 200ms to 300ms
         self.step_size_ms = step_size_ms
+        self.feedback = feedback
         
     def evaluate(self, genome):
         """
@@ -40,13 +41,17 @@ class ANNCoverageEvaluator:
             sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
             distance_sums.append(np.sum(sensors))
             
-        return world.dustgrid.cleaned_cells - np.sum(distance_sums) * 10
+        return world.dustgrid.cleaned_cells*0.05 - np.sum(distance_sums) * 10
         
     def get_genome_size(self):
         genome_size = 0
         
         prev_dim = self.input_dims
-        for hidden_dim in self.hidden_dims:
+        for i, hidden_dim in enumerate(self.hidden_dims):
+            # for the last layer, add the weights for feedback
+            if self.feedback:
+                if i == len(self.hidden_dims) - 1:
+                    genome_size += hidden_dim * hidden_dim
             genome_size += hidden_dim * (prev_dim + 1)
             prev_dim = hidden_dim
         
@@ -55,21 +60,28 @@ class ANNCoverageEvaluator:
         
     def to_ann(self, genome):
         """
-            Initialize ANN with genome weights
+            Initialize ANN manually with genome weights
             @param genome: flattened ANN weights
         """
         prev_dim = self.input_dims
         prev_index = 0
         
         weight_matrices = []
-        for hidden_dim in self.hidden_dims:
-            num_units = hidden_dim * (prev_dim + 1)
+        for i, hidden_dim in enumerate(self.hidden_dims):
+
+            # Generate weight matrix based on genome
+            if i == (len(self.hidden_dims)-1):  # feedback layer
+                num_units = hidden_dim * (hidden_dim + prev_dim + 1)
+                matrix = genome[prev_index:(prev_index + num_units)]
+                matrix = matrix.reshape((hidden_dim, hidden_dim + prev_dim + 1))
+                # TODO: we need to put feedback in genome!
+            else:  # any other layer
+                num_units = hidden_dim * (prev_dim + 1)
+                # Generate the matrix based on the weights in the genome
+                matrix = genome[prev_index:prev_index+num_units]
+                matrix = matrix.reshape((hidden_dim, prev_dim+1))
             
-            # Generate the matrix based on the weights in the genome
-            matrix = genome[prev_index:prev_index+num_units]
-            matrix = matrix.reshape((hidden_dim, prev_dim+1))
             weight_matrices.append(matrix)
-            
             prev_dim = hidden_dim
             prev_index = prev_index + num_units
             
@@ -152,7 +164,12 @@ if __name__ == "__main__":
     }
     
     generator = WorldGenerator(WIDTH, HEIGHT, 20, robot_args)
-    evaluator = ANNCoverageEvaluator(generator, robot_args["n_sensors"], 2, [16, 8])
+    evaluator = ANNCoverageEvaluator(
+        generator,
+        robot_args["n_sensors"], 
+        output_dims = 2, 
+        hidden_dims = [16, 4]
+    )
     population = Population(
         POP_SIZE,
         evaluator.get_genome_size(),
@@ -163,7 +180,7 @@ if __name__ == "__main__":
     )
     
     # Train
-    iterations = 1000
+    iterations = 100
     ann, history = train(iterations, generator, evaluator, population)
     show_history(history)
 

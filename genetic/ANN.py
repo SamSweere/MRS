@@ -13,6 +13,7 @@ class ANN:
         self.eta = eta
         self.reg = reg
         self.create_architecture()
+        self.prev_activations = []
 
     def create_architecture(self):
         prev_dim = self.input_dims
@@ -29,19 +30,40 @@ class ANN:
             print(f"Weights {i} with shape {l.shape}")
             print(f"{np.round(l, 2)}\n")
 
-    def predict(self, x):
-        batch_size = x.shape[1]
+    def predict(self, x, feedback=True):
+        """
+            @param x: observation to predict on
+            @param feedback: feedback of prev last hidden layer
+        """
+        batch_size = x.shape[1]  # one column is one observation
         x = np.concatenate((np.ones((1, batch_size)), x), axis=0)
         activations = [x]
-        for theta in self.weight_matrices:
+        for i, theta in enumerate(self.weight_matrices):
+
+            # TODO: check this once more
+            if feedback:
+                # for our last layer, use our prev activations
+                if i == (len(self.weight_matrices)-2):
+                    num_obs = max(1, batch_size)
+                    if len(self.prev_activations) > 0:
+                        last_hidden = self.prev_activations[-2]
+                    else:  # initialize with random activations
+                        missing = theta.shape[1] - x.shape[0]
+                        last_hidden = np.random.uniform(0, 1, size=missing).reshape(-1, 1)
+                        last_hidden = np.repeat(last_hidden, num_obs, axis=1)
+
+                    x = np.concatenate((x, last_hidden), axis=0)
+
             z = np.dot(theta, x).reshape(-1, max(1, batch_size))
             z = self.sigmoid(z, deriv=False)
             x = np.concatenate((np.ones((1, batch_size)), z), axis=0)
             activations.append(x)
-            
-        return activations[-1][1:, :]
+        
+        self.prev_activations = [i[1:, :] for i in activations]
+        return self.prev_activations[-1]
 
     def backpropagate(self, x, y):
+        # TODO: wont work with feedback just yet
         batch_size = x.shape[1]
         activations = self.predict(x)
         error_deriv = np.subtract(activations[-1], y)
