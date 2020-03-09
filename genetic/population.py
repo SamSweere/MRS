@@ -57,6 +57,7 @@ class Population:
             c2_genome = np.array([*p2["pos"][:crossover_point], 
                                   *p1["pos"][crossover_point:]])
             # create new individuals from resulting genes
+            # This is where the actual evaluation is called
             c1 = {"pos": c1_genome, "fitness": self.eval_func(c1_genome)}
             c2 = {"pos": c2_genome, "fitness": self.eval_func(c2_genome)}                
             self.individuals.append(c1)

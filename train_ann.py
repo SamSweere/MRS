@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import numpy as np
+# import multiprocessing as mp
+# from itertools import repeat
 
 
 class ANNCoverageEvaluator:
@@ -23,13 +25,27 @@ class ANNCoverageEvaluator:
         self.eta = eta
         self.reg = reg
 
+    def generate_evaluate(self, genome, random_robot):
+        world, robot = self.generator.create_rect_world(random_robot=random_robot)
+        return self.evaluate_in_world(world, robot, genome)
+
     def evaluate(self, genome):
         scores = []
+
         for step in range(10):
-            world, robot = self.generator.create_rect_world(random_robot=True)
-            scores.append(self.evaluate_in_world(world, robot, genome))
+            scores.append(self.generate_evaluate(genome, True))
 
         return np.mean(scores)
+
+        # Interesting result, not pooling is faster
+        # setup multitreath poolling
+        # threads = mp.cpu_count()
+        # self.pool = mp.Pool(threads)
+        #
+        # scores = [self.pool.apply(self.generate_evaluate, args=(genome, True)) for step in range(10)]
+        # print(scores)
+        # pool.close()
+
 
     def evaluate_in_world(self, world, robot, genome):
         """
@@ -184,8 +200,8 @@ if __name__ == "__main__":
         hidden_dims=[16, 4],
         feedback=FEEDBACK,
         eval_seconds=20,
-        step_size_ms=270,
-        feedback_time=540,
+        step_size_ms=270, #270
+        feedback_time=540, #540
         eta=0.15,
         reg=0
     )
@@ -204,4 +220,3 @@ if __name__ == "__main__":
     show_history(history)
 
     ann.show()
-
