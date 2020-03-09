@@ -20,16 +20,17 @@ def apply_action(robot, ann, feedback):
     robot.vr = action[1] * robot.max_v
 
 class ANNController:
-    def __init__(self, robot, ann, step_size_ms=270):
+    def __init__(self, robot, ann, step_size_ms=270, feedback=True):
         self.robot = robot
         self.ann = ann
+        self.feedback = feedback
         self.step_size = step_size_ms / 1000
         self.passed_time = 0.0
         
     def update(self, delta_time):
         self.passed_time += delta_time
         if self.passed_time > self.step_size:
-            apply_action(self.robot, self.ann)
+            apply_action(self.robot, self.ann, self.feedback)
             self.passed_time = 0
                     
     def handle_events(self, events):

@@ -21,12 +21,18 @@ class ANNCoverageEvaluator:
         self.feedback = feedback
         
     def evaluate(self, genome):
+        scores = []
+        for step in range(10):
+            world, robot = self.generator.create_rect_world(random_robot=True)
+            scores.append(self.evaluate_in_world(world, robot, genome))
+            
+        return np.mean(scores)
+        
+    def evaluate_in_world(self, world, robot, genome):
         """
             Evaluate fitness of current genome (ANN weights)
         """
         ann = self.to_ann(genome)
-        world, robot = self.generator.create_rect_world(random_robot=False)
-        # TODO: is this legit?
         # Dirty Hack - Do an update to let the robot collect sensor data
         world.update(0)
         
@@ -41,7 +47,7 @@ class ANNCoverageEvaluator:
             sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
             distance_sums.append(np.sum(sensors))
             
-        return world.dustgrid.cleaned_cells*0.05 - np.sum(distance_sums) * 10
+        return world.dustgrid.cleaned_cells - np.sum(distance_sums) * 10
         
     def get_genome_size(self):
         genome_size = 0
@@ -160,7 +166,7 @@ if __name__ == "__main__":
     FEEDBACK = True
     
     robot_args = {
-        "n_sensors": 6,
+        "n_sensors": 12,
         "max_sensor_length": 100
     }
     
@@ -176,7 +182,7 @@ if __name__ == "__main__":
         POP_SIZE,
         evaluator.get_genome_size(),
         evaluator.evaluate,
-        init_func=np.random.uniform,
+        init_func=np.random.normal,
         mutation_rate=0.1,
         mutation_scale=0.1
     )

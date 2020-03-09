@@ -15,7 +15,7 @@ if __name__ == "__main__":
         "env_height": HEIGHT
     }
     robot_kwargs = {
-        "n_sensors": 6
+        "n_sensors": 12
     }
     world_generator = WorldGenerator(WIDTH, HEIGHT, 20, robot_kwargs)
     
@@ -23,11 +23,11 @@ if __name__ == "__main__":
         controller_func = HumanController
     else:
         controller_func = lambda robot: ANNController(
-            robot, ANN.load("./checkpoints/model_40.p"))
+            robot, ANN.load("./checkpoints/model_60.p"))
     
     # Game loop
     while True:
-        world, robot = world_generator.create_rect_world(random_robot=False)
+        world, robot = world_generator.create_rect_world(random_robot=True)
         controller = controller_func(robot)
         env_params["world"] = world
         env_params["robot"] = robot
