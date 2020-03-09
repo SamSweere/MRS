@@ -80,12 +80,13 @@ class MobileRobotGame:
             
             if snapshot:
                 counter += 1
-                if counter > 200:
+                if counter > 50000:
+                    self.draw()
                     pygame.image.save(self.screen, snapshot_dir)
                     pygame.quit()
                     break
-
-            self.draw()
+            else:
+                self.draw()
             # Pygame uses double buffers
             # This swaps the buffers so everything we've drawn will now show up on the screen
             pygame.display.flip()

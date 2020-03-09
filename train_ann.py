@@ -219,7 +219,7 @@ if __name__ == "__main__":
     )
 
     # Train
-    iterations = 3
+    iterations = 100
     ann, history = train(iterations, generator, evaluator, population)
     save_history(history)
     visualize.show_history(history)
