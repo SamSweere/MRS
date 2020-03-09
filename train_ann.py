@@ -32,7 +32,7 @@ class ANNCoverageEvaluator:
     def evaluate(self, genome):
         scores = []
 
-        for step in range(10):
+        for step in range(5):
             scores.append(self.generate_evaluate(genome, True))
 
         return np.mean(scores)
@@ -197,13 +197,11 @@ if __name__ == "__main__":
         generator,
         robot_args["n_sensors"],
         output_dims=2,
-        hidden_dims=[16, 4],
+        hidden_dims= [4], #[16, 4],
         feedback=FEEDBACK,
         eval_seconds=20,
-        step_size_ms=200, #270
-        feedback_time=540, #540
-        eta=0.15,
-        reg=0
+        step_size_ms=100, #270
+        feedback_time=200 #540
     )
     population = Population(
         POP_SIZE,
