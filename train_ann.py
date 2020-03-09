@@ -1,6 +1,6 @@
 from genetic.ANN import ANN
 from genetic.population import Population
-from world_generator import WorldGenerator
+from simulation.world_generator import WorldGenerator
 from gui.ann_controller import apply_action, exponential_decay
 import matplotlib.pyplot as plt
 import seaborn as sns

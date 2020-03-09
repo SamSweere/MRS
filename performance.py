@@ -1,6 +1,6 @@
 """Measure performance of our robot"""
 
-from world_generator import WorldGenerator
+from simulation.world_generator import WorldGenerator
 import time
 
 def stop_time(world, robot, num_steps=10000):
@@ -28,6 +28,7 @@ if __name__ == "__main__":
         "env_width": WIDTH,
         "env_height": HEIGHT
     }
+    # TODO: fix
     creator = WorldGenerator(WIDTH, HEIGHT)
     world, robot = creator.create_random_world()
     

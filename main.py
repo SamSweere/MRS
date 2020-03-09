@@ -2,7 +2,7 @@ from gui.game import MobileRobotGame
 from gui.human_controller import HumanController
 from gui.ann_controller import ANNController
 from genetic.ANN import ANN
-from world_generator import WorldGenerator
+from simulation.world_generator import WorldGenerator
 import argparse
 import os
 
