@@ -156,11 +156,12 @@ def train(iterations, generator, evaluator, population):
         if (i % 20 == 0) or (i == iterations - 1):
             # Save the best genome
             ann = evaluator.to_ann(fittest_genome['pos'])
-            model_name = f"model_{i}.p"
-            ann.save(os.path.join("_checkpoints", model_name))
+            model_name = f"model_{i}"
+            ann.save(os.path.join("_checkpoints", f"{model_name}.p"))
             # Take a snapshot of what robot outcomes look like
             subprocess.call(["python", "main.py", "--snapshot",
-                f"--model_name {model_name}"])
+                "--snapshot_dir", f"_snapshots/{model_name}.png",
+                "--model_name", f"{model_name}.p"])
 
     history = pd.DataFrame({
         "max_fitness": max_fitness,

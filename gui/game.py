@@ -64,9 +64,10 @@ class MobileRobotGame:
         self.fps_font = pygame.font.SysFont('Arial', 16)
         self.dust_sprite = DustGridSprite(self.robot, self.world.dustgrid)
 
-    def run(self):
+    def run(self, snapshot=False, snapshot_dir=""):
         # Main game loop
         ticks_last_frame = pygame.time.get_ticks()
+        counter = 0
         while (not self.done and not self.reset):
             self.handle_events()
 
@@ -75,6 +76,13 @@ class MobileRobotGame:
             delta_time = (t - ticks_last_frame) / 1000.0
             ticks_last_frame = t
             self.update(delta_time)
+            
+            if snapshot:
+                counter += 1
+                if counter > 200:
+                    pygame.image.save(self.screen, snapshot_dir)
+                    pygame.quit()
+                    break
 
             self.draw()
             # Pygame uses double buffers
