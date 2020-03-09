@@ -15,7 +15,7 @@ class ANN:
         self.reg = reg
         self.feedback_time = feedback_time
         # Calculate how many steps we have to save for the feedback
-        self.feedback_length = feedback_time//step_size_ms
+        self.feedback_length = feedback_time/step_size_ms
 
         self.create_architecture()
         self.prev_activations = []

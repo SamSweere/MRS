@@ -205,5 +205,3 @@ if __name__ == "__main__":
 
     ann.show()
 
-    # # let's look into our ANN
-    # a = evaluator.to_ann(population.individuals[0]["pos"])
