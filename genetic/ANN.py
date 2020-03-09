@@ -4,8 +4,8 @@ np.set_printoptions(suppress=True)
 
 class ANN:
 
-    def __init__(self, input_dims, output_dims, hidden_dims, step_size_ms,
-    eta=0.15, reg=0, feedback_time=0.1):
+    def __init__(self, input_dims, output_dims, hidden_dims, step_size_ms, feedback_time,
+    eta, reg):
         self.input_dims = input_dims
         self.output_dims = output_dims
         self.hidden_dims = hidden_dims
@@ -14,6 +14,9 @@ class ANN:
         self.eta = eta
         self.reg = reg
         self.feedback_time = feedback_time
+        # Calculate how many steps we have to save for the feedback
+        self.feedback_length = feedback_time//step_size_ms
+
         self.create_architecture()
         self.prev_activations = []
 
@@ -36,6 +39,7 @@ class ANN:
         """
             @param x: observation to predict on
             @param feedback: feedback of prev last hidden layer
+            @return prediction
         """
         batch_size = x.shape[1]  # one column is one observation
         x = np.concatenate((np.ones((1, batch_size)), x), axis=0)
@@ -44,12 +48,14 @@ class ANN:
 
             # TODO: check this once more
             if feedback:
+
                 #TODO: change this to a time delay
                 # for our last layer, use our prev activations
                 if i == (len(self.weight_matrices)-2):
                     num_obs = max(1, batch_size)
-                    if len(self.prev_activations) > 0:
-                        last_hidden = self.prev_activations[-2]
+                    if len(self.prev_activations) == self.feedback_length:
+                        # Get the first out of the prev_activations queue and remove it
+                        last_hidden = self.prev_activations.pop(0)[-2]
                     else:  # initialize with random activations
                         missing = theta.shape[1] - x.shape[0]
                         last_hidden = np.random.uniform(0, 1, size=missing).reshape(-1, 1)
@@ -62,8 +68,8 @@ class ANN:
             x = np.concatenate((np.ones((1, batch_size)), z), axis=0)
             activations.append(x)
         
-        self.prev_activations = [i[1:, :] for i in activations]
-        return self.prev_activations[-1]
+        self.prev_activations.append([i[1:, :] for i in activations])
+        return activations[-1]
 
     def backpropagate(self, x, y):
         # TODO: wont work with feedback just yet
