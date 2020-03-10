@@ -222,7 +222,7 @@ if __name__ == "__main__":
     FEEDBACK = True
     world_names = ["rect_world", "double_rect_world", "trapezoid_world", "double_trapezoid_world", "star_world",
                    "random"]
-    world_num = 2
+    world_num = 0
     world_name = world_names[world_num]
 
     robot_args = {
@@ -264,7 +264,7 @@ if __name__ == "__main__":
         eval_func=population_args["eval_func"],
         mutation_rate=population_args["mutation_rate"],
         mutation_scale=population_args["mutation_scale"],
-        init_func=np.random.uniform
+        init_func=np.random.normal
     )
 
     # Train
