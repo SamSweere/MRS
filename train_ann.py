@@ -66,7 +66,7 @@ class ANNCoverageEvaluator:
             sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
             distance_sums.append(np.sum(sensors))
         # 
-        return world.dustgrid.cleaned_cells - (1.5 * np.sum(distance_sums) ** 1)  # 100
+        return world.dustgrid.cleaned_cells - (0.5 * np.sum(distance_sums) ** 1)  # 100
 
     def get_genome_size(self):
         genome_size = 0
