@@ -223,6 +223,7 @@ if __name__ == "__main__":
     world_names = ["rect_world", "double_rect_world", "trapezoid_world", "double_trapezoid_world", "star_world",
                    "random"]
     world_num = 4
+    world_num = 5
     world_name = world_names[world_num]
 
     robot_args = {
