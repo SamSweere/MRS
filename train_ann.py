@@ -191,6 +191,7 @@ def train(iterations, generator, evaluator, population, evaluator_args,
         "Diversity": diversity,
         "Iteration": [i for i in range(len(max_fitness))]
     })
+    g = visualize.show_history(history, path=os.path.join(experiment, "ev_algo.png"))
     save_history(history, experiment)
     return ann, history
 
@@ -252,6 +253,7 @@ if __name__ == "__main__":
         evaluator_args=evaluator_args,
         population_args=population_args
     )
-    visualize.show_history(history)
+    g = visualize.show_history(history)
+    plt.show()
 
     ann.show()

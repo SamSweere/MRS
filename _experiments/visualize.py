@@ -3,13 +3,15 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 
-def show_history(history):
+def show_history(history, path=""):
     long_df = history.melt(
         value_vars=["Max_Fitness", "Avg_Fitness", "Diversity"],
         id_vars=["Iteration"], var_name="variable", value_name="value"
     )
     g = sns.FacetGrid(long_df, row="variable", sharey=False, height=2, aspect=3)
     g.map(plt.plot, "Iteration", "value").add_legend()
+    if path != "":
+        g.savefig(path)
     return g
 
 
