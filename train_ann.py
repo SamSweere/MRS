@@ -11,6 +11,8 @@ import os
 from datetime import datetime
 import subprocess
 from pathlib import Path
+
+
 # import multiprocessing as mp
 # from itertools import repeat
 
@@ -29,7 +31,7 @@ class ANNCoverageEvaluator:
         self.feedback = feedback
         self.feedback_time = feedback_time
         self.num_eval = num_eval
-        self.normalization=normalization
+        self.normalization = normalization
 
     def generate_evaluate(self, genome, random_robot):
         world, robot = self.generator.create_rect_world(random_robot=random_robot)
@@ -52,7 +54,6 @@ class ANNCoverageEvaluator:
         # print(scores)
         # pool.close()
 
-
     def evaluate_in_world(self, world, robot, genome):
         """
             Evaluate fitness of current genome (ANN weights)
@@ -72,7 +73,7 @@ class ANNCoverageEvaluator:
             sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
             distance_sums.append(np.sum(sensors))
         # 
-        return world.dustgrid.cleaned_cells - np.sum(distance_sums)*20 #100
+        return world.dustgrid.cleaned_cells - np.sum(distance_sums) * 100  # 100
 
     def get_genome_size(self):
         genome_size = 0
@@ -105,7 +106,6 @@ class ANNCoverageEvaluator:
                 num_units = hidden_dim * (hidden_dim + prev_dim + 1)
                 matrix = genome[prev_index:(prev_index + num_units)]
                 matrix = matrix.reshape((hidden_dim, hidden_dim + prev_dim + 1))
-                # TODO: we need to put feedback in genome!
             else:  # any other layer
                 num_units = hidden_dim * (prev_dim + 1)
                 # Generate the matrix based on the weights in the genome
@@ -123,9 +123,9 @@ class ANNCoverageEvaluator:
 
         # Generate the ANN
         ann = ANN(
-            input_dims=self.input_dims, 
+            input_dims=self.input_dims,
             output_dims=self.output_dims,
-            hidden_dims=self.hidden_dims, 
+            hidden_dims=self.hidden_dims,
             step_size_ms=self.step_size_ms,
             normalization=self.normalization,
             feedback_time=self.feedback_time)
@@ -133,17 +133,19 @@ class ANNCoverageEvaluator:
         return ann
 
 
-def train(iterations, generator, evaluator, population, evaluator_args, 
-    population_args, save_modulo=20, experiment=""):
+def train(iterations, generator, evaluator, population, evaluator_args,
+          population_args, save_modulo=5, experiment=""):
     max_fitness = []
     avg_fitness = []
     diversity = []
     if experiment == "":
         experiment = f"{datetime.now():%Y-%m-%d_%H-%S-%f}"
-    experiment = os.path.join("_experiments", experiment) 
+    experiment = os.path.join("_experiments", experiment)
     if not os.path.isdir(experiment):
         os.mkdir(experiment)
-    
+
+    print("Start training experiment:", experiment)
+
     # save our model params
     with open(os.path.join(experiment, "population_args.txt"), "w+") as f:
         f.write(str(population_args))
@@ -151,7 +153,7 @@ def train(iterations, generator, evaluator, population, evaluator_args,
         f.write(str(evaluator_args))
 
     for i in range(iterations):
-        population.select(0.90)
+        population.select(population_args["selection_rate"])
         population.crossover()
         population.mutate()
 
@@ -160,14 +162,14 @@ def train(iterations, generator, evaluator, population, evaluator_args,
         max_fitness.append(population.get_max_fitness())
         avg_fitness.append(population.get_average_fitness())
         diversity.append(population.get_average_diversity())
-        # Early Stopping
-        if diversity[-1] < 0.02: #0.08
-            # Save the best genome
-            ann = evaluator.to_ann(fittest_genome['pos'])
-            ann.save(f'./_checkpoints/model_{i}.p')
-
-            print("Early stopping due to low diversity")
-            break
+        # # Early Stopping
+        # if diversity[-1] < 0.02: #0.08
+        #     # Save the best genome
+        #     ann = evaluator.to_ann(fittest_genome['pos'])
+        #     ann.save(f'./_checkpoints/model_{i}.p')
+        #
+        #     print("Early stopping due to low diversity")
+        #     break
 
         # Print iteration data
         print(f"{i} - fitness:\t {evaluator.evaluate(fittest_genome['pos'])}")
@@ -177,13 +179,11 @@ def train(iterations, generator, evaluator, population, evaluator_args,
             ann = evaluator.to_ann(fittest_genome['pos'])
             model_name = f"model_{i}"
             ann.save(os.path.join("_checkpoints", f"{model_name}.p"))
+            ann.save(os.path.join(experiment, f"{model_name}.p"))
             # Take a snapshot of what robot outcomes look like
             subprocess.call(["python3", "main.py", "--snapshot",
-                "--snapshot_dir", f"{experiment}/{model_name}.png",
-                "--model_name", f"{model_name}.p"])
-
-        # TODO: save model params in separate df
-            
+                             "--snapshot_dir", f"{experiment}/{model_name}.png",
+                             "--model_name", f"{model_name}.p"])
 
     history = pd.DataFrame({
         "Max_Fitness": max_fitness,
@@ -224,11 +224,11 @@ if __name__ == "__main__":
         "generator": generator,
         "input_dims": robot_args["n_sensors"],
         "output_dims": 2,
-        "hidden_dims": [16,4],
+        "hidden_dims": [8],
         "feedback": FEEDBACK,
         "eval_seconds": 20,
-        "step_size_ms": 100, #270
-        "feedback_time": 100, #540
+        "step_size_ms": 100,  # 270
+        "feedback_time": 300,  # 540
         "num_eval": 5,
         "normalization": robot_args["max_sensor_length"]
     }
@@ -238,18 +238,19 @@ if __name__ == "__main__":
         "genome_size": evaluator.get_genome_size(),
         "eval_func": evaluator.evaluate,
         "init_func": np.random.normal,
-        "mutation_rate": 0.1,
-        "mutation_scale": 0.5
+        "mutation_rate": 0.02,
+        "mutation_scale": 0.02,
+        "selection_rate": 0.9
     }
     population = Population(**population_args)
 
     # Train
-    iterations = 100
+    iterations = 20
     ann, history = train(
         iterations=iterations,
         generator=generator,
         evaluator=evaluator,
-        population=population, 
+        population=population,
         evaluator_args=evaluator_args,
         population_args=population_args
     )

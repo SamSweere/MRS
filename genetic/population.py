@@ -10,13 +10,14 @@ from copy import deepcopy
 
 class Population:
     def __init__(self, pop_size, genome_size, eval_func,
-                 mutation_rate=0.1, mutation_scale=0.2,
+                 mutation_rate, mutation_scale, selection_rate,
                  init_func=np.random.uniform(-0.1, 0.1)):
         self.pop_size = pop_size
         self.genome_size = genome_size
         self.eval_func = eval_func
         self.mutation_rate = mutation_rate
         self.mutation_scale = mutation_scale
+        self.selection_rate = selection_rate
         self.init_func = init_func
         self.individuals = []
         

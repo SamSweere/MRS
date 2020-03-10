@@ -24,8 +24,8 @@ if __name__ == "__main__":
     use_human_controller = args.human
     
     # set up environment
-    WIDTH = 500
-    HEIGHT = 325
+    WIDTH = 400
+    HEIGHT = 400
     env_params = {"env_width": WIDTH, "env_height": HEIGHT}
     robot_kwargs = {"n_sensors": 12}
     world_generator = WorldGenerator(WIDTH, HEIGHT, 20, robot_kwargs)
@@ -39,7 +39,12 @@ if __name__ == "__main__":
     
     # Game loop
     while True:
-        world, robot = world_generator.create_rect_world(random_robot=True)
+        # world, robot = world_generator.create_rect_world(random_robot=True)
+        # world, robot = world_generator.create_double_rect_world(random_robot=True)
+        # world, robot = world_generator.create_trapezoid_world(random_robot=True)
+        # world, robot = world_generator.create_double_trapezoid_world(random_robot=True)
+        world, robot = world_generator.create_star_world(random_robot=True)
+
         controller = controller_func(robot)
         env_params["world"] = world
         env_params["robot"] = robot

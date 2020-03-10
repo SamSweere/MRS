@@ -5,7 +5,7 @@ from .fps_counter import FPSCounter
 import numpy as np
 from gui.dustgrid_sprite import DustGridSprite
 from statistics import median
-
+import time
 
 def ti(arr):
     """
@@ -50,7 +50,8 @@ class MobileRobotGame:
         
         self.world = world
         self.robot = robot
-        self.robot_controller = robot_controller        
+        self.robot_controller = robot_controller
+        self.start_time = time.time()
         
         self.fps_tracker = FPSCounter()
         self.reset = False
@@ -95,8 +96,8 @@ class MobileRobotGame:
         pygame.quit()
 
     def update(self, delta_time):
-        self.robot_controller.update(delta_time)
         self.world.update(delta_time)
+        self.robot_controller.update(delta_time)
         self.dust_sprite.update(delta_time)
         self.robo_lines[-1][-2] = self.robot.x
         self.robo_lines[-1][-1] = self.robot.y
@@ -111,39 +112,46 @@ class MobileRobotGame:
             pygame.draw.line(self.screen, pygame.Color('black'), wall.start, wall.end, 1)
 
         # Draw text displays
-        fps = self.fps_tracker.get_fps()
-        fps_surface = self.fps_font.render(f"FPS: {fps:3.0f}", False,
+        elapsed_time = time.time() - self.start_time
+        time_surface = self.fps_font.render(time.strftime("%M:%S", time.gmtime(elapsed_time)), False,
                                            pygame.Color('red'))
-        self.screen.blit(fps_surface, (30, 20))
+        self.screen.blit(time_surface, (30, 20))
 
-        vl_surface = self.fps_font.render(f"Vl: {self.robot.vl}",
-                                          False, pygame.Color('red'))
-        # print(self.robot.vr)
-        # print(self.robot.vl)
-        self.screen.blit(vl_surface, (30, 50))
-        vr_surface = self.fps_font.render(f"Vr: {self.robot.vr}",
-                                          False, pygame.Color('red'))
-        self.screen.blit(vr_surface, (30, 70))
 
-        self.v_queue.update(self.robot.v)
-        v_surface = self.fps_font.render(f"V: {round(self.v_queue.median() * 500, 1)}",
-                                         False, pygame.Color('red'))
-        self.screen.blit(v_surface, (30, 90))
 
-        self.screen.blit(v_surface, (30, 90))
-        v_test_surface = self.fps_font.render(f"x: {self.robot.x}",
-                                              False, pygame.Color('red'))
-        self.screen.blit(v_test_surface, (30, 130))
-
-        self.screen.blit(v_surface, (30, 90))
-        v_test_surface = self.fps_font.render(f"y: {self.robot.y}",
-                                              False, pygame.Color('red'))
-        self.screen.blit(v_test_surface, (30, 150))
-
-        self.screen.blit(v_surface, (30, 90))
-        v_test_surface = self.fps_font.render(f"angle: {self.robot.angle}",
-                                              False, pygame.Color('red'))
-        self.screen.blit(v_test_surface, (30, 170))
+        # fps = self.fps_tracker.get_fps()
+        # fps_surface = self.fps_font.render(f"FPS: {fps:3.0f}", False,
+        #                                    pygame.Color('red'))
+        # self.screen.blit(fps_surface, (30, 20))
+        #
+        # vl_surface = self.fps_font.render(f"Vl: {self.robot.vl}",
+        #                                   False, pygame.Color('red'))
+        # # print(self.robot.vr)
+        # # print(self.robot.vl)
+        # self.screen.blit(vl_surface, (30, 50))
+        # vr_surface = self.fps_font.render(f"Vr: {self.robot.vr}",
+        #                                   False, pygame.Color('red'))
+        # self.screen.blit(vr_surface, (30, 70))
+        #
+        # self.v_queue.update(self.robot.v)
+        # v_surface = self.fps_font.render(f"V: {round(self.v_queue.median() * 500, 1)}",
+        #                                  False, pygame.Color('red'))
+        # self.screen.blit(v_surface, (30, 90))
+        #
+        # self.screen.blit(v_surface, (30, 90))
+        # v_test_surface = self.fps_font.render(f"x: {self.robot.x}",
+        #                                       False, pygame.Color('red'))
+        # self.screen.blit(v_test_surface, (30, 130))
+        #
+        # self.screen.blit(v_surface, (30, 90))
+        # v_test_surface = self.fps_font.render(f"y: {self.robot.y}",
+        #                                       False, pygame.Color('red'))
+        # self.screen.blit(v_test_surface, (30, 150))
+        #
+        # self.screen.blit(v_surface, (30, 90))
+        # v_test_surface = self.fps_font.render(f"angle: {self.robot.angle}",
+        #                                       False, pygame.Color('red'))
+        # self.screen.blit(v_test_surface, (30, 170))
 
     def __draw_robot__(self):
         # draw ICC
