@@ -68,13 +68,22 @@ class Population:
         """
             mutate some random genomes
         """
+        # old mutation: don't mutate every guy
+        # for p in self.individuals:
         for p in self.individuals:
-            probas = np.random.uniform(0, 1, size=self.genome_size)
-            mask = np.where(probas < self.mutation_rate, 1, 0)
-            mutations = np.random.normal(scale=self.mutation_scale, 
+            if np.random.uniform(0, 1) < self.mutation_rate:
+                p["pos"] += np.random.normal(scale=self.mutation_scale, 
                 size=self.genome_size)
-            p["pos"] += mutations * mask
-            p["fitness"] = self.eval_func(p["pos"])
+                p["fitness"] = self.eval_func(p["pos"])
+        
+        # # different mutation:
+        # for p in self.individuals:
+        #     probas = np.random.uniform(0, 1, size=self.genome_size)
+        #     mask = np.where(probas < self.mutation_rate, 1, 0)
+        #     mutations = np.random.normal(scale=self.mutation_scale, 
+        #         size=self.genome_size)
+        #     p["pos"] += mutations * mask
+        #     p["fitness"] = self.eval_func(p["pos"])
                 
     def get_fittest_genome(self):
         return max(self.individuals, key=lambda x: x["fitness"])

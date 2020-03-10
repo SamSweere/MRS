@@ -46,14 +46,6 @@ class ANNCoverageEvaluator:
 
         return np.mean(scores)
 
-        # Interesting result, not pooling is faster
-        # setup multitreath poolling
-        # threads = mp.cpu_count()
-        # self.pool = mp.Pool(threads)
-        #
-        # scores = [self.pool.apply(self.generate_evaluate, args=(genome, True)) for step in range(10)]
-        # print(scores)
-        # pool.close()
 
     def evaluate_in_world(self, world, robot, genome):
         """
@@ -74,7 +66,7 @@ class ANNCoverageEvaluator:
             sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
             distance_sums.append(np.sum(sensors))
         # 
-        return world.dustgrid.cleaned_cells - np.sum(distance_sums) * 100  # 100
+        return world.dustgrid.cleaned_cells - (1.5 * np.sum(distance_sums) ** 1)  # 100
 
     def get_genome_size(self):
         genome_size = 0
@@ -164,12 +156,12 @@ def train(iterations, generator, evaluator, population, evaluator_args,
         max_fitness.append(population.get_max_fitness())
         avg_fitness.append(population.get_average_fitness())
         diversity.append(population.get_average_diversity())
-        # # Early Stopping
+        # Early Stopping
         # if diversity[-1] < 0.02: #0.08
         #     # Save the best genome
         #     ann = evaluator.to_ann(fittest_genome['pos'])
         #     ann.save(f'./_checkpoints/model_{i}.p')
-        #
+        
         #     print("Early stopping due to low diversity")
         #     break
 
@@ -183,9 +175,9 @@ def train(iterations, generator, evaluator, population, evaluator_args,
             ann.save(os.path.join("_checkpoints", f"{model_name}.p"))
             ann.save(os.path.join(experiment, f"{model_name}.p"))
             # Take a snapshot of what robot outcomes look like
-            subprocess.call(["python3", "main.py", "--snapshot",
+            subprocess.call(["python", "main.py", "--snapshot",
                              "--snapshot_dir", f"{experiment}/{model_name}.png",
-                             "--model_name", f"{model_name}.p", "--world_name", world_name])
+                             "--model_name", f"{experiment}/{model_name}.p", "--world_name", world_name])
 
     history = pd.DataFrame({
         "Max_Fitness": max_fitness,
@@ -215,7 +207,7 @@ if __name__ == "__main__":
     FEEDBACK = True
     world_names = ["rect_world", "double_rect_world", "trapezoid_world", "double_trapezoid_world", "star_world",
                    "random"]
-    world_num = 5
+    world_num = 0
     world_name = world_names[world_num]
 
     robot_args = {
@@ -228,7 +220,7 @@ if __name__ == "__main__":
         "generator": generator,
         "input_dims": robot_args["n_sensors"],
         "output_dims": 2,
-        "hidden_dims": [16, 4],
+        "hidden_dims": [5],
         "feedback": FEEDBACK,
         "eval_seconds": 20,
         "step_size_ms": 100,  # 270
@@ -242,14 +234,14 @@ if __name__ == "__main__":
         "genome_size": evaluator.get_genome_size(),
         "eval_func": evaluator.evaluate,
         "init_func": np.random.normal,
-        "mutation_rate": 0.01,
+        "mutation_rate": 0.02,
         "mutation_scale": 0.02,
         "selection_rate": 0.9
     }
     population = Population(**population_args)
 
     # Train
-    iterations = 100
+    iterations = 300
     ann, history = train(
         iterations=iterations,
         generator=generator,
