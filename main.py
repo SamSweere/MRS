@@ -14,6 +14,9 @@ if __name__ == "__main__":
         help="manual robot control")
     parser.add_argument("--model_name", default="model_20.p", 
         help="robot control model name in checkpoints")
+    parser.add_argument("--world_name", default="rect_world",
+                        help="world name of the environment, options: rect_world, double_rect_world, trapezoid_world, "
+                             "double_trapezoid_world, star_world")
     parser.add_argument("--snapshot", action="store_true", default=False,
         help="take a snapshot")
     parser.add_argument("--snapshot_dir", default="_snapshots/latest.png",
@@ -28,7 +31,7 @@ if __name__ == "__main__":
     HEIGHT = 400
     env_params = {"env_width": WIDTH, "env_height": HEIGHT}
     robot_kwargs = {"n_sensors": 12}
-    world_generator = WorldGenerator(WIDTH, HEIGHT, 20, robot_kwargs)
+    world_generator = WorldGenerator(WIDTH, HEIGHT, 20, args.world_name)
     
     if use_human_controller:
         controller_func = HumanController
@@ -39,11 +42,7 @@ if __name__ == "__main__":
     
     # Game loop
     while True:
-        # world, robot = world_generator.create_rect_world(random_robot=True)
-        # world, robot = world_generator.create_double_rect_world(random_robot=True)
-        # world, robot = world_generator.create_trapezoid_world(random_robot=True)
-        # world, robot = world_generator.create_double_trapezoid_world(random_robot=True)
-        world, robot = world_generator.create_star_world(random_robot=True)
+        world, robot = world_generator.create_world(random_robot=True)
 
         controller = controller_func(robot)
         env_params["world"] = world
