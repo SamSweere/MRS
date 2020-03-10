@@ -1,0 +1,1 @@
+{'pop_size': 100, 'genome_size': 302, 'eval_func': <bound method ANNCoverageEvaluator.evaluate of <__main__.ANNCoverageEvaluator object at 0x7fc4c29fb588>>, 'init_func': <built-in method normal of numpy.random.mtrand.RandomState object at 0x7fc499d07a98>, 'mutation_rate': 0.02, 'mutation_scale': 0.02, 'selection_rate': 0.9}
