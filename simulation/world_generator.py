@@ -1,0 +1,237 @@
+from simulation.world import World
+from simulation.robot import Robot
+from simulation.line_wall import LineWall
+import numpy as np
+import math
+import random
+
+
+def create_rect_walls(x, y, width, height):
+    bottomLeft = (x - width / 2, y - height / 2)
+    topLeft = (x - width / 2, y + height / 2)
+    topRight = (x + width / 2, y + height / 2)
+    bottomRight = (x + width / 2, y - height / 2)
+
+    return [
+        LineWall(bottomLeft, topLeft),
+        LineWall(topLeft, topRight),
+        LineWall(topRight, bottomRight),
+        LineWall(bottomRight, bottomLeft)
+    ]
+
+
+def create_trapezoid_walls(x, y, height, bottom_width, top_width):
+    leftBottom = (x - bottom_width / 2, y + height / 2)
+    leftTop = (x - top_width / 2, y - height / 2)
+    rightBottom = (x + bottom_width / 2, y + height / 2)
+    rightTop = (x + top_width / 2, y - height / 2)
+
+    return [
+        LineWall(leftTop, rightTop),
+        LineWall(rightTop, rightBottom),
+        LineWall(rightBottom, leftBottom),
+        LineWall(leftBottom, leftTop)
+    ]
+
+
+def create_star_walls(x, y, inner_radius, outer_radius, num_points=5):
+    delta_angle = (math.pi * 2) / (num_points * 2)
+    prev_x = x + math.cos(math.pi * 2 - delta_angle) * inner_radius
+    prev_y = y + math.sin(math.pi * 2 - delta_angle) * inner_radius
+    prev_radius = inner_radius
+    curr_radius = outer_radius
+
+    walls = []
+
+    for i in range(num_points * 2):
+        # Generate a wall
+        new_x = x + math.cos(delta_angle * i) * curr_radius
+        new_y = y + math.sin(delta_angle * i) * curr_radius
+
+        walls.append(LineWall((prev_x, prev_y), (new_x, new_y)))
+        prev_x = new_x
+        prev_y = new_y
+
+        # Swap the radius so we alternate between inner and outer radius
+        tmp = curr_radius
+        curr_radius = prev_radius
+        prev_radius = tmp
+
+    return walls
+
+
+class WorldGenerator:
+    def __init__(self, width, height, robot_radius, world_name):
+        self.width = width
+        self.height = height
+        self.robot_radius = robot_radius
+        self.world_name = world_name
+
+    def create_rect_world(self, random_robot=True):
+        walls = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
+
+        world = World(walls, self.width, self.height)
+
+        min_x = self.robot_radius
+        max_x = self.width - self.robot_radius
+        min_y = self.robot_radius
+        max_y = self.height - self.robot_radius
+        margin = 20
+        x = random.uniform(min_x + margin, max_x - margin)
+        y = random.uniform(min_y + margin, max_y - margin)
+        robot_start_loc = (x, y)
+
+        robot = self.__add_robot__(world, random_robot=random_robot, robot_start_loc=robot_start_loc)
+        return world, robot
+
+    def create_double_rect_world(self, random_robot=True):
+        outer_walls = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
+        inner_walls = create_rect_walls(self.width / 2, self.height / 2, self.width / 2, self.height / 2)
+        walls = [*outer_walls, *inner_walls]
+
+        world = World(walls, self.width, self.height)
+
+        x_left = self.width / 2 - self.width * 3 / 8
+        x_right = self.width / 2 + self.width * 3 / 8
+        y_up = self.height / 2 + self.height * 3 / 8
+        y_down = self.height / 2 - self.height * 3 / 8
+
+        robot_start_loc = []
+        x_options = np.linspace(x_left, x_right, 100)
+        for x in x_options:
+            robot_start_loc.append((x, y_up))
+            robot_start_loc.append((x, y_down))
+
+        y_options = np.linspace(y_down, y_up, 100)
+        for y in y_options:
+            robot_start_loc.append((x_left, y))
+            robot_start_loc.append((x_right, y))
+
+        robot_start_loc = random.choice(robot_start_loc)
+
+        robot = self.__add_robot__(world, random_robot=random_robot, robot_start_loc=robot_start_loc)
+        return world, robot
+
+    def create_trapezoid_world(self, random_robot=True):
+        border = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
+        trapezoid = create_trapezoid_walls(self.width / 2, self.height / 2, self.height, self.width, self.width / 2)
+        walls = [*border, *trapezoid]
+
+        world = World(walls, self.width, self.height)
+
+        min_x = self.robot_radius
+        max_x = self.width - self.robot_radius
+        min_y = self.robot_radius
+        max_y = self.height - self.robot_radius
+        margin_x = self.width / 3
+        margin_y = 20
+        x = random.uniform(min_x + margin_x, max_x - margin_x)
+        y = random.uniform(min_y + margin_y, max_y - margin_y)
+        robot_start_loc = (x, y)
+
+        robot = self.__add_robot__(world, random_robot=random_robot, robot_start_loc=robot_start_loc)
+        return world, robot
+
+    def create_double_trapezoid_world(self, random_robot=True):
+        border = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
+        outer_walls = create_trapezoid_walls(self.width / 2, self.height / 2, self.height, self.width, self.width / 2)
+        inner_walls = create_trapezoid_walls(self.width / 2, self.height / 2, self.height / 2, self.width / 2,
+                                             self.width / 4)
+        walls = [*border, *outer_walls, *inner_walls]
+
+        world = World(walls, self.width, self.height)
+
+        x_left_down = self.width / 2 - self.width * 3 / 8
+        x_right_down = self.width / 2 + self.width * 3 / 8
+        x_left_up = self.width / 2 - self.width * 1 / 5
+        x_right_up = self.width / 2 + self.width * 1 / 5
+        y_up = self.height / 2 + self.height * 3 / 8
+        y_down = self.height / 2 - self.height * 3 / 8
+
+        robot_start_loc = []
+        x_options = np.linspace(x_left_down, x_right_down, 100)
+        for x in x_options:
+            robot_start_loc.append((x, y_up))
+
+        x_options = np.linspace(x_left_up, x_right_up, 100)
+        for x in x_options:
+            robot_start_loc.append((x, y_down))
+
+        robot_start_loc = random.choice(robot_start_loc)
+
+        robot = self.__add_robot__(world, random_robot=random_robot, robot_start_loc=robot_start_loc)
+        return world, robot
+
+    def create_star_world(self, random_robot=True):
+        border = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
+        star = create_star_walls(self.width / 2, self.height / 2, self.height / 4, self.height / 2)
+        walls = [*border, *star]
+
+        world = World(walls, self.width, self.height)
+
+        radius = min(self.width / 6, self.height / 6)
+        radius = random.random() * radius
+        angle = random.random() * 2 * math.pi
+
+        robot_start_loc = (
+        int(self.width / 2 + radius * math.cos(angle)), int(self.height / 2 + radius * math.sin(angle)))
+
+        robot = self.__add_robot__(world, random_robot=random_robot, robot_start_loc=robot_start_loc)
+        return world, robot
+
+    def create_random_world(self, random_robot=True):
+        world_func = random.choice([
+            self.create_rect_world,
+            self.create_double_rect_world,
+            self.create_trapezoid_world,
+            self.create_double_trapezoid_world,
+            self.create_star_world
+        ])
+
+        return world_func(random_robot=random_robot)
+
+    def create_world(self, random_robot=True):
+        if self.world_name == "rect_world":
+            return self.create_rect_world(random_robot)
+        elif self.world_name == "double_rect_world":
+            return self.create_double_rect_world(random_robot)
+        elif self.world_name == "trapezoid_world":
+            return self.create_trapezoid_world(random_robot)
+        elif self.world_name == "double_trapezoid_world":
+            return self.create_double_trapezoid_world(random_robot)
+        elif self.world_name == "star_world":
+            return self.create_star_world(random_robot)
+        elif self.world_name == "random":
+            return self.create_random_world(random_robot)
+        else:
+            raise ValueError("Wrong world name")
+
+    def __add_robot__(self, world, random_robot=True, robot_start_loc=None):
+        min_x = self.robot_radius
+        max_x = self.width - self.robot_radius
+        min_y = self.robot_radius
+        max_y = self.height - self.robot_radius
+        margin = 20
+
+        # Place robot randomly until no collisions occur
+        angle = random.uniform(0, 2 * math.pi) if random_robot else 0
+        robot = Robot(self.width / 2, self.height / 2, angle, radius=self.robot_radius)
+        world.set_robot(robot)
+        if not random_robot:
+            return robot
+        if random_robot and robot_start_loc is not None:
+            robot.x = robot_start_loc[0]
+            robot.y = robot_start_loc[1]
+            robot.angle = np.random.uniform(0, 2 * np.pi)
+            return robot
+
+        while True:
+            robot.x = random.uniform(min_x + margin, max_x - margin)
+            robot.y = random.uniform(min_y + margin, max_y - margin)
+            robot.angle = np.random.uniform(0, 2 * np.pi)
+
+            collisions = world.circle_collision((robot.x, robot.y), robot.radius)
+            if len(collisions) == 0:
+                break
+
+        return robot
