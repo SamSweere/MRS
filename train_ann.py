@@ -178,7 +178,7 @@ def train(iterations, generator, evaluator, population, evaluator_args,
             model_name = f"model_{i}"
             ann.save(os.path.join("_checkpoints", f"{model_name}.p"))
             # Take a snapshot of what robot outcomes look like
-            subprocess.call(["python", "main.py", "--snapshot",
+            subprocess.call(["python3", "main.py", "--snapshot",
                 "--snapshot_dir", f"{experiment}/{model_name}.png",
                 "--model_name", f"{model_name}.p"])
 
@@ -223,7 +223,7 @@ if __name__ == "__main__":
         "generator": generator,
         "input_dims": robot_args["n_sensors"],
         "output_dims": 2,
-        "hidden_dims": [4],
+        "hidden_dims": [16,4],
         "feedback": FEEDBACK,
         "eval_seconds": 20,
         "step_size_ms": 100, #270
@@ -237,13 +237,13 @@ if __name__ == "__main__":
         "genome_size": evaluator.get_genome_size(),
         "eval_func": evaluator.evaluate,
         "init_func": np.random.normal,
-        "mutation_rate": 0.02,
-        "mutation_scale": 0.02
+        "mutation_rate": 0.1,
+        "mutation_scale": 0.5
     }
     population = Population(**population_args)
 
     # Train
-    iterations = 10
+    iterations = 100
     ann, history = train(
         iterations=iterations,
         generator=generator,
