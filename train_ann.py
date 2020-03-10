@@ -20,7 +20,7 @@ from pathlib import Path
 class ANNCoverageEvaluator:
     def __init__(self, generator, input_dims, output_dims, hidden_dims,
                  feedback, eval_seconds, step_size_ms, feedback_time,
-                 num_eval, normalization):
+                 num_eval, normalization, world_name):
         self.generator = generator
         self.input_dims = input_dims
         self.output_dims = output_dims
@@ -32,9 +32,10 @@ class ANNCoverageEvaluator:
         self.feedback_time = feedback_time
         self.num_eval = num_eval
         self.normalization = normalization
+        self.world_name = world_name
 
     def generate_evaluate(self, genome, random_robot):
-        world, robot = self.generator.create_rect_world(random_robot=random_robot)
+        world, robot = self.generator.create_world(random_robot=random_robot)
         return self.evaluate_in_world(world, robot, genome)
 
     def evaluate(self, genome):
@@ -134,12 +135,13 @@ class ANNCoverageEvaluator:
 
 
 def train(iterations, generator, evaluator, population, evaluator_args,
-          population_args, save_modulo=5, experiment=""):
+          population_args, world_name, save_modulo=5, experiment=""):
     max_fitness = []
     avg_fitness = []
     diversity = []
     if experiment == "":
         experiment = f"{datetime.now():%Y-%m-%d_%H-%S-%f}"
+        experiment += "-" + world_name
     experiment = os.path.join("_experiments", experiment)
     if not os.path.isdir(experiment):
         os.mkdir(experiment)
@@ -206,21 +208,22 @@ if __name__ == "__main__":
     # Create folder for saving models
     Path("_checkpoints").mkdir(parents=True, exist_ok=True)
 
-    # TODO: main thing missing seems to be feedback about own motion!
-    # TODO: make sure we evaluate our ANN for a sensible amount of time!
-
     # Initialization
-    WIDTH = 500
-    HEIGHT = 325
+    WIDTH = 400
+    HEIGHT = 400
     POP_SIZE = 100
     FEEDBACK = True
+    world_names = ["rect_world", "double_rect_world", "trapezoid_world", "double_trapezoid_world", "star_world"]
+    world_num = 0
+    world_name = world_names[world_num]
 
     robot_args = {
         "n_sensors": 12,
         "max_sensor_length": 100
     }
-    generator = WorldGenerator(WIDTH, HEIGHT, 20, robot_args)
+    generator = WorldGenerator(WIDTH, HEIGHT, 20, world_name)
     evaluator_args = {
+        "world_name": world_name,
         "generator": generator,
         "input_dims": robot_args["n_sensors"],
         "output_dims": 2,
@@ -251,6 +254,7 @@ if __name__ == "__main__":
         generator=generator,
         evaluator=evaluator,
         population=population,
+        world_name=world_name,
         evaluator_args=evaluator_args,
         population_args=population_args
     )
