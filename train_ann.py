@@ -185,7 +185,7 @@ def train(iterations, generator, evaluator, population, evaluator_args,
             # Take a snapshot of what robot outcomes look like
             subprocess.call(["python3", "main.py", "--snapshot",
                              "--snapshot_dir", f"{experiment}/{model_name}.png",
-                             "--model_name", f"{model_name}.p"], "--world_name", world_name)
+                             "--model_name", f"{model_name}.p", "--world_name", world_name])
 
     history = pd.DataFrame({
         "Max_Fitness": max_fitness,
@@ -242,7 +242,7 @@ if __name__ == "__main__":
         "genome_size": evaluator.get_genome_size(),
         "eval_func": evaluator.evaluate,
         "init_func": np.random.normal,
-        "mutation_rate": 0.02,
+        "mutation_rate": 0.01,
         "mutation_scale": 0.02,
         "selection_rate": 0.9
     }
