@@ -111,11 +111,11 @@ class MobileRobotGame:
         for wall in self.world.walls:
             pygame.draw.line(self.screen, pygame.Color('black'), wall.start, wall.end, 1)
 
-        # Draw text displays
-        elapsed_time = time.time() - self.start_time
-        time_surface = self.fps_font.render(time.strftime("%M:%S", time.gmtime(elapsed_time)), False,
-                                           pygame.Color('red'))
-        self.screen.blit(time_surface, (30, 20))
+        # # Draw text displays
+        # elapsed_time = time.time() - self.start_time
+        # time_surface = self.fps_font.render(time.strftime("%M:%S", time.gmtime(elapsed_time)), False,
+        #                                    pygame.Color('red'))
+        # self.screen.blit(time_surface, (30, 20))
 
 
 

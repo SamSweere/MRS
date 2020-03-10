@@ -135,7 +135,7 @@ class ANNCoverageEvaluator:
 
 
 def train(iterations, generator, evaluator, population, evaluator_args,
-          population_args, world_name, save_modulo=5, experiment=""):
+          population_args, world_name, save_modulo=20, experiment=""):
     max_fitness = []
     avg_fitness = []
     diversity = []
@@ -185,7 +185,7 @@ def train(iterations, generator, evaluator, population, evaluator_args,
             # Take a snapshot of what robot outcomes look like
             subprocess.call(["python3", "main.py", "--snapshot",
                              "--snapshot_dir", f"{experiment}/{model_name}.png",
-                             "--model_name", f"{model_name}.p"])
+                             "--model_name", f"{model_name}.p"], "--world_name", world_name)
 
     history = pd.DataFrame({
         "Max_Fitness": max_fitness,
@@ -213,8 +213,9 @@ if __name__ == "__main__":
     HEIGHT = 400
     POP_SIZE = 100
     FEEDBACK = True
-    world_names = ["rect_world", "double_rect_world", "trapezoid_world", "double_trapezoid_world", "star_world"]
-    world_num = 0
+    world_names = ["rect_world", "double_rect_world", "trapezoid_world", "double_trapezoid_world", "star_world",
+                   "random"]
+    world_num = 5
     world_name = world_names[world_num]
 
     robot_args = {
@@ -227,7 +228,7 @@ if __name__ == "__main__":
         "generator": generator,
         "input_dims": robot_args["n_sensors"],
         "output_dims": 2,
-        "hidden_dims": [8],
+        "hidden_dims": [16, 4],
         "feedback": FEEDBACK,
         "eval_seconds": 20,
         "step_size_ms": 100,  # 270
@@ -248,7 +249,7 @@ if __name__ == "__main__":
     population = Population(**population_args)
 
     # Train
-    iterations = 20
+    iterations = 100
     ann, history = train(
         iterations=iterations,
         generator=generator,

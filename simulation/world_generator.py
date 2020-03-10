@@ -201,6 +201,8 @@ class WorldGenerator:
             return self.create_double_trapezoid_world(random_robot)
         elif self.world_name == "star_world":
             return self.create_star_world(random_robot)
+        elif self.world_name == "random":
+            return self.create_random_world(random_robot)
         else:
             raise ValueError("Wrong world name")
 

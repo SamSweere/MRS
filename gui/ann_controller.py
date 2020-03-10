@@ -1,6 +1,6 @@
 import numpy as np
 
-def exponential_decay(x, start=100, end_factor=0.0, factor=1):
+def exponential_decay(x, start=100, end_factor=0.0, factor=0.2):
     """
         exponential decay function
     """

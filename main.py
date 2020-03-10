@@ -14,9 +14,9 @@ if __name__ == "__main__":
         help="manual robot control")
     parser.add_argument("--model_name", default="model_20.p", 
         help="robot control model name in checkpoints")
-    parser.add_argument("--world_name", default="rect_world",
+    parser.add_argument("--world_name", default="random",
                         help="world name of the environment, options: rect_world, double_rect_world, trapezoid_world, "
-                             "double_trapezoid_world, star_world")
+                             "double_trapezoid_world, star_world, random")
     parser.add_argument("--snapshot", action="store_true", default=False,
         help="take a snapshot")
     parser.add_argument("--snapshot_dir", default="_snapshots/latest.png",
