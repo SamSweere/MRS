@@ -23,11 +23,11 @@ if __name__ == "__main__":
         controller_func = HumanController
     else:
         controller_func = lambda robot: ANNController(
-            robot, ANN.load("./checkpoints/model_60.p"))
+            robot, ANN.load("./checkpoints/model_300.p"))
     
     # Game loop
     while True:
-        world, robot = world_generator.create_rect_world(random_robot=True)
+        world, robot = world_generator.create_random_world(random_robot=True)
         controller = controller_func(robot)
         env_params["world"] = world
         env_params["robot"] = robot

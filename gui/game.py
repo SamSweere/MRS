@@ -98,6 +98,7 @@ class MobileRobotGame:
             pygame.draw.line(self.screen, pygame.Color('black'), wall.start, wall.end, 1)
 
         # Draw text displays
+        """
         fps = self.fps_tracker.get_fps()
         fps_surface = self.fps_font.render(f"FPS: {fps:3.0f}", False,
                                            pygame.Color('red'))
@@ -131,6 +132,7 @@ class MobileRobotGame:
         v_test_surface = self.fps_font.render(f"angle: {self.robot.angle}",
                                               False, pygame.Color('red'))
         self.screen.blit(v_test_surface, (30, 170))
+        """
 
     def __draw_robot__(self):
         # draw ICC

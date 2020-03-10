@@ -9,7 +9,7 @@ def exponential_decay(x, start=1, end_factor=0.1, factor=30):
 
 def get_action(robot, ann, feedback):
     inp = exponential_decay([dist for hit, dist in robot.sensor_data])
-    return ann.predict(inp.reshape(-1, 1), feedback).reshape(-1)
+    return ann.predict(inp.reshape(-1, 1), feedback).reshape(-1) * 2 - 1
 
 def apply_action(robot, ann, feedback):
     action = get_action(robot, ann, feedback)

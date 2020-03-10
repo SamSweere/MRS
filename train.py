@@ -188,7 +188,7 @@ if __name__ == "__main__":
     )
     
     # Train
-    iterations = 100
+    iterations = 1000
     ann, history = train(iterations, generator, evaluator, population)
     show_history(history)
 
