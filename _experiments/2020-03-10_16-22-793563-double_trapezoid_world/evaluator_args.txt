@@ -1,0 +1,1 @@
+{'world_name': 'double_trapezoid_world', 'generator': <simulation.world_generator.WorldGenerator object at 0x00000167F3A9CC88>, 'input_dims': 12, 'output_dims': 2, 'hidden_dims': [16, 4], 'feedback': True, 'eval_seconds': 20, 'step_size_ms': 270, 'feedback_time': 270, 'num_eval': 10, 'normalization': 100}
