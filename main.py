@@ -50,7 +50,9 @@ if __name__ == "__main__":
 
         game = MobileRobotGame(**env_params)
         game.init()
-        game.run()
+        game.run(args.snapshot, args.snapshot_dir)
 
         if not game.reset:
             break
+
+
