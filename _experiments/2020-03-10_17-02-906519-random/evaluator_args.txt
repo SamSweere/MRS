@@ -1,0 +1,1 @@
+{'world_name': 'random', 'generator': <simulation.world_generator.WorldGenerator object at 0x000002408AA9E488>, 'input_dims': 12, 'output_dims': 2, 'hidden_dims': [12, 4], 'feedback': True, 'eval_seconds': 20, 'step_size_ms': 100, 'feedback_time': 300, 'num_eval': 5, 'normalization': 100}

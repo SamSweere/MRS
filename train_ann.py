@@ -58,15 +58,15 @@ class ANNCoverageEvaluator:
         # We round up so that we'd rather overestimate evaluation time
         steps = int((self.eval_seconds * 1000) / self.step_size_ms) + 1
         delta_time = self.step_size_ms / 1000
-        distance_sums = []
+        max_distances = []
         for _ in range(steps):
             apply_action(robot, ann, self.feedback)
             world.update(delta_time)
 
             sensors = exponential_decay([dist for hit, dist in robot.sensor_data])
-            distance_sums.append(np.sum(sensors))
+            max_distances.append(np.max(sensors))
         # 
-        return world.dustgrid.cleaned_cells - (0.5 * np.sum(distance_sums) ** 1)  # 100
+        return world.dustgrid.cleaned_cells - (0.5 * np.sum(max_distances) ** 1)  # 100
 
     def get_genome_size(self):
         genome_size = 0
@@ -220,7 +220,7 @@ if __name__ == "__main__":
         "generator": generator,
         "input_dims": robot_args["n_sensors"],
         "output_dims": 2,
-        "hidden_dims": [5],
+        "hidden_dims": [12, 4],
         "feedback": FEEDBACK,
         "eval_seconds": 20,
         "step_size_ms": 100,  # 270

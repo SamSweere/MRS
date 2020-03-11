@@ -59,7 +59,9 @@ if __name__ == "__main__":
     functions = [rosenbrock, rastrigin]
     function_num = 1
     fn = functions[function_num]
-    population = Population(100, 2, lambda x: -fn(x), mutation_scale=0.2, init_func=lambda size: np.random.uniform(low=-2,high=2,size=size))
+    population = Population(100, 2, lambda x: -fn(x), mutation_scale=0.2,
+        init_func=lambda size: np.random.uniform(low=-2,high=2,size=size),
+        mutation_rate=0.02, selection_rate=0.02)
         
     history = evolve(100, population)
 
