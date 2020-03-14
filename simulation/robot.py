@@ -25,15 +25,21 @@ class Robot:
             self.max_sensor_length = max_sensor_length
             self.sensor_data = []
 
-
             self.l = 2 * self.radius
             self.vl = 0
             self.vr = 0
-            self.v = (self.vr - self.vl / 2)
+            self.velocity = (self.vr - self.vl / 2)
             self.w = (self.vr - self.vl) / self.l
             self.R, self.icc = self.calculate_icc()
+        elif self.motion_model == "vel_drive":
+            self.max_angle_change = 0.001*math.pi # This is the speed at which the robot rotates if a human controls it
+            self.angle_change = 0
+            self.v = 0
+            self.rotate_left = False
+            self.rotate_right = False
 
     def update_vr(self, direction):
+        # Used in the diff_drive scenario
         if direction == 0:
             # Stop
             self.vr = 0
@@ -48,6 +54,7 @@ class Robot:
             pass
 
     def update_vl(self, direction):
+        # Used in the diff_drive scenario
         if direction == 0:
             # Stop
             self.vl = 0
@@ -60,6 +67,19 @@ class Robot:
         else:
             # Over speed limit
             pass
+
+    def update_v(self, v):
+        # Used in the vel_drive scenario
+        if abs(v) > self.max_v:
+            # Over max v set to max v
+            self.v = v/abs(v)*self.max_v
+        else:
+            # within speed limit
+            self.v = v
+
+    def update_angle(self, angle_change):
+        # Used in the vel_drive scenario
+        self.angle_change = angle_change
 
     def calculate_icc(self):
         """Returns the radius and the (x,y) coordinates of the center of rotation"""
@@ -100,10 +120,21 @@ class Robot:
         return r_x, r_y, r_angle
 
     def velocity_based_drive(self, delta_time):
+        r_x = self.x + self.v * math.cos(self.angle) * delta_time
+        r_y = self.y + self.v * math.sin(self.angle) * delta_time
 
-        r_x = 12
-        r_y = 12
-        r_angle = 12
+        # Make use of booleans such that pressing the other direction does not cancel the button press
+        if self.rotate_left and self.rotate_right:
+            # No change
+            self.angle_change = 0
+        elif self.rotate_left:
+            self.angle_change = -1
+        elif self.rotate_right:
+            self.angle_change = 1
+        else:
+            self.angle_change = 0
+
+        r_angle = (self.angle + (self.angle_change*self.max_angle_change)*1000*max(delta_time, 0.00000001)) % (2*math.pi)
 
         return r_x, r_y, r_angle
 
@@ -124,7 +155,7 @@ class Robot:
             self.collect_sensor_data()
 
         # To calculate the actual speed
-        self.v = math.sqrt((x_tmp - self.x) ** 2 + (y_tmp - self.y) ** 2)
+        self.velocity = math.sqrt((x_tmp - self.x) ** 2 + (y_tmp - self.y) ** 2)
 
     def check_collision(self, r_x, r_y, r_angle):
         """

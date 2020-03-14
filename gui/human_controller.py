@@ -1,3 +1,5 @@
+import math
+
 import pygame
 import numpy as np
 
@@ -11,8 +13,8 @@ class HumanController:
                     
     def handle_events(self, events):
         for event in events:
-            if event.type == pygame.KEYDOWN:
-                if self.scenario == "evolutionary":
+            if self.scenario == "evolutionary":
+                if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_w:
                         self.robot.update_vr(1)
                     if event.key == pygame.K_o:
@@ -27,5 +29,28 @@ class HumanController:
                     if event.key == pygame.K_x:
                         self.robot.update_vr(0)
                         self.robot.update_vl(0)
-                elif self.scenario == "localization":
-                    pass
+            elif self.scenario == "localization":
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_w:
+                        # Set a big number, will be limited by max v
+                        self.robot.update_v(1000)
+                    if event.key == pygame.K_s:
+                        self.robot.update_v(-1000)
+                    if event.key == pygame.K_a:
+                        self.robot.rotate_left = True
+                        # self.robot.update_angle(-1)
+                    if event.key == pygame.K_d:
+                        self.robot.rotate_right = True
+                        # self.robot.update_angle(1)
+                if event.type == pygame.KEYUP:
+                    # Stop
+                    if event.key == pygame.K_w:
+                        self.robot.update_v(0)
+                    if event.key == pygame.K_s:
+                        self.robot.update_v(0)
+                    if event.key == pygame.K_a:
+                        self.robot.rotate_left = False
+                        # self.robot.update_angle(0)
+                    if event.key == pygame.K_d:
+                        self.robot.rotate_right = False
+                        # self.robot.update_angle(0)

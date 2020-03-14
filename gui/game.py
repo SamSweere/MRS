@@ -139,7 +139,7 @@ class MobileRobotGame:
                 self.screen.blit(vr_surface, (30, text_y))
                 text_y += 20
 
-            self.v_queue.update(self.robot.v)
+            self.v_queue.update(self.robot.velocity)
             v_surface = self.fps_font.render(f"V: {round(self.v_queue.median() * 500, 1)}",
                                              False, pygame.Color('red'))
             self.screen.blit(v_surface, (30, text_y))
