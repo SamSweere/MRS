@@ -3,27 +3,35 @@ import math
 
 
 class Robot:
-    def __init__(self, start_x, start_y, start_angle, radius=20,
+    def __init__(self, start_x, start_y, start_angle, scenario, radius=20,
                  max_v=100, v_step=10, n_sensors=12, max_sensor_length=100):
         self.x = start_x
         self.y = start_y
+        self.scenario = scenario
+        if scenario == "evolutionary":
+            self.motion_model = "diff_drive"
+        elif scenario == "localization":
+            self.motion_model = "vel_drive"
+        else:
+            raise NameError("Invalid scenario name")
+
         self.radius = radius
         self.max_v = max_v
-        self.v_step = v_step
-        self.n_sensors = n_sensors  # The amount of sensors used for collecting environment data
-        self.max_sensor_length = max_sensor_length
-
-        self.change_angle = 0
-        self.speed = 0
         self.angle = start_angle  # In radians
-        self.sensor_data = []
 
-        self.l = 2 * self.radius
-        self.vl = 0
-        self.vr = 0
-        self.v = (self.vr - self.vl / 2)
-        self.w = (self.vr - self.vl) / self.l
-        self.R, self.icc = self.calculate_icc()
+        if self.motion_model == "diff_drive":
+            self.v_step = v_step
+            self.n_sensors = n_sensors  # The amount of sensors used for collecting environment data
+            self.max_sensor_length = max_sensor_length
+            self.sensor_data = []
+
+
+            self.l = 2 * self.radius
+            self.vl = 0
+            self.vr = 0
+            self.v = (self.vr - self.vl / 2)
+            self.w = (self.vr - self.vl) / self.l
+            self.R, self.icc = self.calculate_icc()
 
     def update_vr(self, direction):
         if direction == 0:
@@ -64,7 +72,7 @@ class Robot:
         )
         return R, icc
 
-    def update(self, delta_time):
+    def differential_drive(self, delta_time):
         # Get the new center of rotation and speed
         self.R, self.icc = self.calculate_icc()
         self.w = (self.vr - self.vl) / self.l
@@ -89,12 +97,31 @@ class Robot:
 
         r_angle = (self.angle + angle_change) % (2 * math.pi)
 
+        return r_x, r_y, r_angle
+
+    def velocity_based_drive(self, delta_time):
+
+        r_x = 12
+        r_y = 12
+        r_angle = 12
+
+        return r_x, r_y, r_angle
+
+    def update(self, delta_time):
+
+        if self.motion_model == "diff_drive":
+            r_x, r_y, r_angle = self.differential_drive(delta_time)
+        elif self.motion_model == "vel_drive":
+            r_x, r_y, r_angle = self.velocity_based_drive(delta_time)
+
         # Save the x and y for the speed calculation
         x_tmp = self.x
         y_tmp = self.y
 
         self.check_collision(r_x, r_y, r_angle)
-        self.collect_sensor_data()
+
+        if self.motion_model == "diff_drive":
+            self.collect_sensor_data()
 
         # To calculate the actual speed
         self.v = math.sqrt((x_tmp - self.x) ** 2 + (y_tmp - self.y) ** 2)

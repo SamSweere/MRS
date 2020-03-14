@@ -61,11 +61,12 @@ def create_star_walls(x, y, inner_radius, outer_radius, num_points=5):
 
 
 class WorldGenerator:
-    def __init__(self, width, height, robot_radius, world_name):
+    def __init__(self, width, height, robot_radius, world_name, scenario):
         self.width = width
         self.height = height
         self.robot_radius = robot_radius
         self.world_name = world_name
+        self.scenario = scenario
 
     def create_rect_world(self, random_robot=True):
         walls = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
@@ -215,7 +216,7 @@ class WorldGenerator:
 
         # Place robot randomly until no collisions occur
         angle = random.uniform(0, 2 * math.pi) if random_robot else 0
-        robot = Robot(self.width / 2, self.height / 2, angle, radius=self.robot_radius)
+        robot = Robot(self.width / 2, self.height / 2, angle, scenario=self.scenario, radius=self.robot_radius)
         world.set_robot(robot)
         if not random_robot:
             return robot

@@ -1,7 +1,7 @@
 checkpoints/
 _checkpoints/
 _snapshots/
-#_experiments/
+_experiments/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -41,8 +41,10 @@ class V_QUEUE:
 
 class MobileRobotGame:
 
-    def __init__(self, env_width, env_height, world, robot, robot_controller):
+    def __init__(self, env_width, env_height, world, robot, robot_controller, scenario, debug=False):
         self.done = False
+        self.debug = debug
+        self.scenario = scenario
 
         self.env_width = env_width
         self.env_height = env_height
@@ -112,58 +114,65 @@ class MobileRobotGame:
         for wall in self.world.walls:
             pygame.draw.line(self.screen, pygame.Color('black'), wall.start, wall.end, 1)
 
-        # # Draw text displays
-        # elapsed_time = time.time() - self.start_time
-        # time_surface = self.fps_font.render(time.strftime("%M:%S", time.gmtime(elapsed_time)), False,
-        #                                    pygame.Color('red'))
-        # self.screen.blit(time_surface, (30, 20))
+        if self.debug:
+            # Draw text displays
+            text_y = 20
+            elapsed_time = time.time() - self.start_time
+            time_surface = self.fps_font.render(time.strftime("%M:%S", time.gmtime(elapsed_time)), False,
+                                                pygame.Color('red'))
+            self.screen.blit(time_surface, (self.env_width - 60, text_y))
 
-        # fps = self.fps_tracker.get_fps()
-        # fps_surface = self.fps_font.render(f"FPS: {fps:3.0f}", False,
-        #                                    pygame.Color('red'))
-        # self.screen.blit(fps_surface, (30, 20))
-        #
-        # vl_surface = self.fps_font.render(f"Vl: {self.robot.vl}",
-        #                                   False, pygame.Color('red'))
-        # # print(self.robot.vr)
-        # # print(self.robot.vl)
-        # self.screen.blit(vl_surface, (30, 50))
-        # vr_surface = self.fps_font.render(f"Vr: {self.robot.vr}",
-        #                                   False, pygame.Color('red'))
-        # self.screen.blit(vr_surface, (30, 70))
-        #
-        # self.v_queue.update(self.robot.v)
-        # v_surface = self.fps_font.render(f"V: {round(self.v_queue.median() * 500, 1)}",
-        #                                  False, pygame.Color('red'))
-        # self.screen.blit(v_surface, (30, 90))
-        #
-        # self.screen.blit(v_surface, (30, 90))
-        # v_test_surface = self.fps_font.render(f"x: {self.robot.x}",
-        #                                       False, pygame.Color('red'))
-        # self.screen.blit(v_test_surface, (30, 130))
-        #
-        # self.screen.blit(v_surface, (30, 90))
-        # v_test_surface = self.fps_font.render(f"y: {self.robot.y}",
-        #                                       False, pygame.Color('red'))
-        # self.screen.blit(v_test_surface, (30, 150))
-        #
-        # self.screen.blit(v_surface, (30, 90))
-        # v_test_surface = self.fps_font.render(f"angle: {self.robot.angle}",
-        #                                       False, pygame.Color('red'))
-        # self.screen.blit(v_test_surface, (30, 170))
+            fps = self.fps_tracker.get_fps()
+            fps_surface = self.fps_font.render(f"FPS: {fps:3.0f}", False,
+                                               pygame.Color('red'))
+            self.screen.blit(fps_surface, (30, text_y))
+
+            text_y += 20
+
+            if self.scenario == "evolutionary":
+                vl_surface = self.fps_font.render(f"Vl: {round(self.robot.vl, 2)}",
+                                                  False, pygame.Color('red'))
+                self.screen.blit(vl_surface, (30, text_y))
+                text_y += 20
+                vr_surface = self.fps_font.render(f"Vr: {round(self.robot.vr, 2)}",
+                                                  False, pygame.Color('red'))
+                self.screen.blit(vr_surface, (30, text_y))
+                text_y += 20
+
+            self.v_queue.update(self.robot.v)
+            v_surface = self.fps_font.render(f"V: {round(self.v_queue.median() * 500, 1)}",
+                                             False, pygame.Color('red'))
+            self.screen.blit(v_surface, (30, text_y))
+            text_y += 20
+
+            v_test_surface = self.fps_font.render(f"x: {round(self.robot.x, 2)}",
+                                                  False, pygame.Color('red'))
+            self.screen.blit(v_test_surface, (30, text_y))
+            text_y += 20
+
+            v_test_surface = self.fps_font.render(f"y: {round(self.robot.y, 2)}",
+                                                  False, pygame.Color('red'))
+            self.screen.blit(v_test_surface, (30, text_y))
+            text_y += 20
+
+            v_test_surface = self.fps_font.render(f"angle: {round(self.robot.angle, 2)}",
+                                                  False, pygame.Color('red'))
+            self.screen.blit(v_test_surface, (30, text_y))
+            text_y += 20
 
     def __draw_robot__(self):
-        # draw ICC
-        R, icc = self.robot.R, self.robot.icc
-        if (max(icc) < 10e8 and min(icc) > -10e8):
-            # In bounds
-            pygame.draw.circle(self.screen, pygame.Color('orange'), ti(icc), 5)
+        if self.scenario == "evolutionary":
+            # draw ICC
+            R, icc = self.robot.R, self.robot.icc
+            if (max(icc) < 10e8 and min(icc) > -10e8):
+                # In bounds
+                pygame.draw.circle(self.screen, pygame.Color('orange'), ti(icc), 5)
 
-        # Draw sensors
-        for hit, dist in self.robot.sensor_data:
-            if hit is None:
-                continue
-            pygame.gfxdraw.line(self.screen, *ti((self.robot.x, self.robot.y)), *ti(hit), pygame.Color('red'))
+            # Draw sensors
+            for hit, dist in self.robot.sensor_data:
+                if hit is None:
+                    continue
+                pygame.gfxdraw.line(self.screen, *ti((self.robot.x, self.robot.y)), *ti(hit), pygame.Color('red'))
 
         # Draw the shape of the robot as an circle with an line marking its rotation
         rotated_x = self.robot.x + math.cos(self.robot.angle) * (self.robot.radius - 1)
@@ -190,4 +199,3 @@ class MobileRobotGame:
                     return
 
         self.robot_controller.handle_events(events)
-
