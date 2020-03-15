@@ -59,7 +59,16 @@ class MobileRobotGame:
         self.fps_tracker = FPSCounter()
         self.reset = False
         self.v_queue = V_QUEUE()
-        self.robo_lines = [[self.robot.x, self.robot.y, self.robot.x, self.robot.y]]
+
+        if scenario == "evolutionary":
+            self.robo_lines = [[self.robot.x, self.robot.y, self.robot.x, self.robot.y]]
+
+        if scenario == "localization":
+            self.surface = pygame.Surface((env_width, env_height))
+            self.surface.fill(pygame.Color('white'))
+            self.robo_lines_color = pygame.Color('black')
+            self.robo_line_buffer = (self.robot.x, self.robot.y) # This is an faster implementation
+
 
     def init(self):
         # Initialize pygame and modules that we want to use
@@ -67,7 +76,8 @@ class MobileRobotGame:
         pygame.font.init()
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.fps_font = pygame.font.SysFont('Arial', 16)
-        self.dust_sprite = DustGridSprite(self.robot, self.world.dustgrid)
+        if self.scenario == "evolutionary":
+            self.dust_sprite = DustGridSprite(self.robot, self.world.dustgrid)
 
     def run(self, snapshot=False, snapshot_dir=""):
         # Main game loop
@@ -101,13 +111,28 @@ class MobileRobotGame:
     def update(self, delta_time):
         self.world.update(delta_time)
         self.robot_controller.update(delta_time)
-        self.dust_sprite.update(delta_time)
-        self.robo_lines[-1][-2] = self.robot.x
-        self.robo_lines[-1][-1] = self.robot.y
-        self.robo_lines.append([self.robot.x, self.robot.y, self.robot.x, self.robot.y])
+        if self.scenario == "evolutionary":
+            self.dust_sprite.update(delta_time)
+            self.robo_lines[-1][-2] = self.robot.x
+            self.robo_lines[-1][-1] = self.robot.y
+            self.robo_lines.append([self.robot.x, self.robot.y, self.robot.x, self.robot.y])
+
+
+        if self.scenario == "localization": # Not to break the evolutionary part
+            pygame.draw.line(self.surface, self.robo_lines_color, self.robo_line_buffer, (self.robot.x, self.robot.y))
+            self.robo_line_buffer = (self.robot.x, self.robot.y)
+
+
+
+
 
     def draw(self):
-        self.dust_sprite.draw(self.screen)
+        if self.scenario == "evolutionary":
+            self.dust_sprite.draw(self.screen)
+        elif self.scenario == "localization":
+            # Fix the screen updating
+            self.screen.blit(self.surface, (0,0), (0,0, self.screen_width, self.screen_height))
+
         self.__draw_robot__()
 
         # Draw walls
@@ -184,8 +209,9 @@ class MobileRobotGame:
                             pygame.Color('black'))
         pygame.gfxdraw.circle(self.screen, *ti((self.robot.x, self.robot.y)), self.robot.radius, pygame.Color('black'))
 
-        for i in self.robo_lines:
-            pygame.gfxdraw.line(self.screen, *ti(i), pygame.Color('black'))
+        if self.scenario == "evolutionary":
+            for i in self.robo_lines:
+                pygame.gfxdraw.line(self.screen, *ti(i), pygame.Color('black'))
 
     def handle_events(self):
         events = pygame.event.get()

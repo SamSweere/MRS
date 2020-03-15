@@ -35,17 +35,18 @@ if __name__ == "__main__":
 
     if scenario == "localization":
         # set up environment
-        WIDTH = 1280 // 2
-        HEIGHT = 720 // 2
+        WIDTH = 400
+        HEIGHT = 600
+        world_name = "localization_maze"
         env_params = {"env_width": WIDTH, "env_height": HEIGHT}
-        world_generator = WorldGenerator(WIDTH, HEIGHT, 20, args.world_name, scenario)
+        world_generator = WorldGenerator(WIDTH, HEIGHT, 20, world_name, scenario)
 
         if use_human_controller:
             controller_func = HumanController
 
         # Game loop
         while True:
-            world, robot = world_generator.create_world(random_robot=True)
+            world, robot = world_generator.create_world(random_robot=False)
 
             controller = controller_func(robot, scenario)
             env_params["world"] = world

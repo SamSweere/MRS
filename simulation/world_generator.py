@@ -71,7 +71,7 @@ class WorldGenerator:
     def create_rect_world(self, random_robot=True):
         walls = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
 
-        world = World(walls, self.width, self.height)
+        world = World(walls, self.width, self.height, self.scenario)
 
         min_x = self.robot_radius
         max_x = self.width - self.robot_radius
@@ -80,7 +80,7 @@ class WorldGenerator:
         margin = 20
         x = random.uniform(min_x + margin, max_x - margin)
         y = random.uniform(min_y + margin, max_y - margin)
-        robot_start_loc = (x, y)
+        robot_start_loc = (x, y, np.random.uniform(0, 2 * np.pi))
 
         robot = self.__add_robot__(world, random_robot=random_robot, robot_start_loc=robot_start_loc)
         return world, robot
@@ -90,7 +90,7 @@ class WorldGenerator:
         inner_walls = create_rect_walls(self.width / 2, self.height / 2, self.width / 2, self.height / 2)
         walls = [*outer_walls, *inner_walls]
 
-        world = World(walls, self.width, self.height)
+        world = World(walls, self.width, self.height, self.scenario)
 
         x_left = self.width / 2 - self.width * 3 / 8
         x_right = self.width / 2 + self.width * 3 / 8
@@ -100,13 +100,13 @@ class WorldGenerator:
         robot_start_loc = []
         x_options = np.linspace(x_left, x_right, 100)
         for x in x_options:
-            robot_start_loc.append((x, y_up))
-            robot_start_loc.append((x, y_down))
+            robot_start_loc.append((x, y_up, np.random.uniform(0, 2 * np.pi)))
+            robot_start_loc.append((x, y_down, np.random.uniform(0, 2 * np.pi)))
 
         y_options = np.linspace(y_down, y_up, 100)
         for y in y_options:
-            robot_start_loc.append((x_left, y))
-            robot_start_loc.append((x_right, y))
+            robot_start_loc.append((x_left, y, np.random.uniform(0, 2 * np.pi)))
+            robot_start_loc.append((x_right, y, np.random.uniform(0, 2 * np.pi)))
 
         robot_start_loc = random.choice(robot_start_loc)
 
@@ -118,7 +118,7 @@ class WorldGenerator:
         trapezoid = create_trapezoid_walls(self.width / 2, self.height / 2, self.height, self.width, self.width / 2)
         walls = [*border, *trapezoid]
 
-        world = World(walls, self.width, self.height)
+        world = World(walls, self.width, self.height, self.scenario)
 
         min_x = self.robot_radius
         max_x = self.width - self.robot_radius
@@ -128,7 +128,7 @@ class WorldGenerator:
         margin_y = 20
         x = random.uniform(min_x + margin_x, max_x - margin_x)
         y = random.uniform(min_y + margin_y, max_y - margin_y)
-        robot_start_loc = (x, y)
+        robot_start_loc = (x, y, np.random.uniform(0, 2 * np.pi))
 
         robot = self.__add_robot__(world, random_robot=random_robot, robot_start_loc=robot_start_loc)
         return world, robot
@@ -140,7 +140,7 @@ class WorldGenerator:
                                              self.width / 4)
         walls = [*border, *outer_walls, *inner_walls]
 
-        world = World(walls, self.width, self.height)
+        world = World(walls, self.width, self.height, self.scenario)
 
         x_left_down = self.width / 2 - self.width * 3 / 8
         x_right_down = self.width / 2 + self.width * 3 / 8
@@ -152,11 +152,11 @@ class WorldGenerator:
         robot_start_loc = []
         x_options = np.linspace(x_left_down, x_right_down, 100)
         for x in x_options:
-            robot_start_loc.append((x, y_up))
+            robot_start_loc.append((x, y_up, np.random.uniform(0, 2 * np.pi)))
 
         x_options = np.linspace(x_left_up, x_right_up, 100)
         for x in x_options:
-            robot_start_loc.append((x, y_down))
+            robot_start_loc.append((x, y_down, np.random.uniform(0, 2 * np.pi)))
 
         robot_start_loc = random.choice(robot_start_loc)
 
@@ -168,15 +168,25 @@ class WorldGenerator:
         star = create_star_walls(self.width / 2, self.height / 2, self.height / 4, self.height / 2)
         walls = [*border, *star]
 
-        world = World(walls, self.width, self.height)
+        world = World(walls, self.width, self.height, self.scenario)
 
         radius = min(self.width / 6, self.height / 6)
         radius = random.random() * radius
         angle = random.random() * 2 * math.pi
 
         robot_start_loc = (
-        int(self.width / 2 + radius * math.cos(angle)), int(self.height / 2 + radius * math.sin(angle)))
+            int(self.width / 2 + radius * math.cos(angle)), int(self.height / 2 + radius * math.sin(angle)),
+            np.random.uniform(0, 2 * np.pi))
 
+        robot = self.__add_robot__(world, random_robot=random_robot, robot_start_loc=robot_start_loc)
+        return world, robot
+
+    def create_localization_maze(self, random_robot=False):
+        border = create_rect_walls(self.width / 2, self.height / 2, self.width - 20, self.height - 20)
+        walls = [*border]
+
+        world = World(walls, self.width, self.height, self.scenario)
+        robot_start_loc = (self.width / 2, self.height / 2, 0)
         robot = self.__add_robot__(world, random_robot=random_robot, robot_start_loc=robot_start_loc)
         return world, robot
 
@@ -204,6 +214,8 @@ class WorldGenerator:
             return self.create_star_world(random_robot)
         elif self.world_name == "random":
             return self.create_random_world(random_robot)
+        elif self.world_name == "localization_maze":
+            return self.create_localization_maze(random_robot)
         else:
             raise ValueError("Wrong world name")
 
@@ -218,12 +230,18 @@ class WorldGenerator:
         angle = random.uniform(0, 2 * math.pi) if random_robot else 0
         robot = Robot(self.width / 2, self.height / 2, angle, scenario=self.scenario, radius=self.robot_radius)
         world.set_robot(robot)
-        if not random_robot:
+
+        if not random_robot and robot_start_loc is None:
             return robot
-        if random_robot and robot_start_loc is not None:
+        elif not random_robot and robot_start_loc is not None:
             robot.x = robot_start_loc[0]
             robot.y = robot_start_loc[1]
-            robot.angle = np.random.uniform(0, 2 * np.pi)
+            robot.angle = robot_start_loc[2]
+            return robot
+        elif random_robot and robot_start_loc is not None:
+            robot.x = robot_start_loc[0]
+            robot.y = robot_start_loc[1]
+            robot.angle = robot_start_loc[2]
             return robot
 
         while True:

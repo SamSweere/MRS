@@ -6,9 +6,11 @@ import math
 
 
 class World:
-    def __init__(self, walls, width, height):
-    	self.walls = walls
-    	self.dustgrid = DustGrid(width, height, 5)
+    def __init__(self, walls, width, height, scenario):
+        self.walls = walls
+        self.scenario = scenario
+        if scenario == "evolutionary":
+            self.dustgrid = DustGrid(width, height, 5)
 
     def set_robot(self, robot):
         self.robot = robot
@@ -17,7 +19,8 @@ class World:
 
     def update(self, delta_time):
         self.robot.update(delta_time)
-        self.dustgrid.clean_circle_area(self.robot.x, self.robot.y, self.robot.radius)
+        if self.scenario == "evolutionary":
+            self.dustgrid.clean_circle_area(self.robot.x, self.robot.y, self.robot.radius)
 
     def raycast(self, x, y, angle, max_length):
         # angle is in radians
