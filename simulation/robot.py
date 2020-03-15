@@ -33,10 +33,13 @@ class Robot:
             self.R, self.icc = self.calculate_icc()
         elif self.motion_model == "vel_drive":
             self.max_angle_change = 0.001*math.pi # This is the speed at which the robot rotates if a human controls it
+            self.angle_step = 0.05*math.pi
             self.angle_change = 0
             self.v = 0
+            self.v_step = v_step
             self.rotate_left = False
             self.rotate_right = False
+            self.pressed_arrows = False
 
     def update_vr(self, direction):
         # Used in the diff_drive scenario
@@ -68,18 +71,33 @@ class Robot:
             # Over speed limit
             pass
 
-    def update_v(self, v):
+    def update_v(self, direction):
         # Used in the vel_drive scenario
-        if abs(v) > self.max_v:
+        if direction == 0:
+            # Stop
+            self.v = 0
+            return
+        if abs(direction) == 1:
+            # WSAD keys
+            r_v = self.v + direction * self.v_step
+        else:
+            r_v = direction
+
+        if abs(r_v) > self.max_v:
             # Over max v set to max v
-            self.v = v/abs(v)*self.max_v
+            self.v = r_v/abs(r_v)*self.max_v
         else:
             # within speed limit
-            self.v = v
+            self.v = r_v
 
-    def update_angle(self, angle_change):
+    def update_angle(self, direction):
+        if direction == 0:
+            # Stop
+            self.angle_change = 0
+            return
+
         # Used in the vel_drive scenario
-        self.angle_change = angle_change
+        self.angle_change += direction*self.angle_step
 
     def calculate_icc(self):
         """Returns the radius and the (x,y) coordinates of the center of rotation"""
@@ -123,16 +141,22 @@ class Robot:
         r_x = self.x + self.v * math.cos(self.angle) * delta_time
         r_y = self.y + self.v * math.sin(self.angle) * delta_time
 
+
         # Make use of booleans such that pressing the other direction does not cancel the button press
         if self.rotate_left and self.rotate_right:
             # No change
             self.angle_change = 0
+            self.pressed_arrows = True
         elif self.rotate_left:
             self.angle_change = -1
+            self.pressed_arrows = True
         elif self.rotate_right:
             self.angle_change = 1
+            self.pressed_arrows = True
         else:
-            self.angle_change = 0
+            if self.pressed_arrows:
+                self.angle_change = 0
+                self.pressed_arrows = False
 
         r_angle = (self.angle + (self.angle_change*self.max_angle_change)*1000*max(delta_time, 0.00000001)) % (2*math.pi)
 
