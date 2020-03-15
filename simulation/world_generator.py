@@ -59,6 +59,15 @@ def create_star_walls(x, y, inner_radius, outer_radius, num_points=5):
 
     return walls
 
+def create_localization_maze_walls(width, height, offset):
+    walls = []
+    walls.append(LineWall((0+offset, height/5+offset),(width*2/3+offset, height/5+offset)))
+    walls.append(LineWall((width/3+offset, height*2/5+offset),(width+offset, height*2/5+offset)))
+    walls.append(LineWall((width/3+offset, height*2/5+offset),(width/3+offset, height*4/5+offset)))
+    walls.append(LineWall((width*2/3+offset, height*3/5+offset),(width*2/3+offset, height+offset)))
+
+
+    return walls
 
 class WorldGenerator:
     def __init__(self, width, height, robot_radius, world_name, scenario):
@@ -182,11 +191,16 @@ class WorldGenerator:
         return world, robot
 
     def create_localization_maze(self, random_robot=False):
-        border = create_rect_walls(self.width / 2, self.height / 2, self.width - 20, self.height - 20)
-        walls = [*border]
+        border_buffer = 10
+        effective_width = self.width - border_buffer*2
+        effective_height = self.height - border_buffer*2
+        border = create_rect_walls(self.width / 2, self.height / 2, effective_width, effective_height)
+        internal_Walls = create_localization_maze_walls(effective_width, effective_height, border_buffer)
+
+        walls = [*border, *internal_Walls]
 
         world = World(walls, self.width, self.height, self.scenario)
-        robot_start_loc = (self.width / 2, self.height / 2, 0)
+        robot_start_loc = ((effective_width/6) + border_buffer, (effective_height/10) + border_buffer, 0)
         robot = self.__add_robot__(world, random_robot=random_robot, robot_start_loc=robot_start_loc)
         return world, robot
 
