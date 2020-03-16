@@ -143,10 +143,11 @@ class MobileRobotGame:
             pygame.draw.line(self.screen, pygame.Color('black'), wall.start, wall.end, 1)
 
         # Draw beacons
-        if self.world.beacons is not None:
-            for beacon in self.world.beacons:
-                pygame.draw.circle(self.screen, pygame.Color('blue'),
-                                   (int(beacon.location[0]),int(beacon.location[1])), 5)
+        if self.scenario == "localization":
+            if self.world.beacons is not None:
+                for beacon in self.world.beacons:
+                    pygame.draw.circle(self.screen, pygame.Color('blue'),
+                                       (int(beacon.location[0]),int(beacon.location[1])), 5)
 
         if self.debug:
             # Draw text displays

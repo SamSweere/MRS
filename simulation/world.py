@@ -11,7 +11,7 @@ class World:
         self.scenario = scenario
         if scenario == "evolutionary":
             self.dustgrid = DustGrid(width, height, 5)
-        if beacons is not None:
+        if scenario == "localization":
             self.beacons = beacons
 
     def set_robot(self, robot):

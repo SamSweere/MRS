@@ -13,14 +13,14 @@ if __name__ == "__main__":
     parser.add_argument("--scenario", default="localization", choices=["localization", "evolutionary"],
                         help="Select a scenario: 'localization' or 'evolutionary'")
 
-    parser.add_argument("--human", action="store_true", default=False,
+    parser.add_argument("--human", action="store_true", default=True,
                         help="manual robot control")
 
     parser.add_argument("--collision", action="store_true", default=False, help="collision with the walls")
 
     parser.add_argument("--model_name", default="pre_trained_models/model_random.p",
                         help="robot control model name")
-    parser.add_argument("--world_name", default="rect_world",
+    parser.add_argument("--world_name", default="random",
                         help="world name of the environment, options: rect_world, double_rect_world, trapezoid_world, "
                              "double_trapezoid_world, star_world, random")
     parser.add_argument("--snapshot", action="store_true", default=False,
