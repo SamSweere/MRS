@@ -139,6 +139,12 @@ class MobileRobotGame:
         for wall in self.world.walls:
             pygame.draw.line(self.screen, pygame.Color('black'), wall.start, wall.end, 1)
 
+        # Draw beacons
+        if self.world.beacons is not None:
+            for beacon in self.world.beacons:
+                pygame.draw.circle(self.screen, pygame.Color('blue'),
+                                   (int(beacon.location[0]),int(beacon.location[1])), 5)
+
         if self.debug:
             # Draw text displays
             text_y = 20
@@ -223,5 +229,7 @@ class MobileRobotGame:
                 if event.key == pygame.K_r:
                     self.reset = True
                     return
+                if event.key == pygame.K_t:
+                    self.debug = not self.debug
 
         self.robot_controller.handle_events(events)

@@ -1,6 +1,7 @@
 from simulation.world import World
 from simulation.robot import Robot
 from simulation.line_wall import LineWall
+from simulation.beacon import Beacon
 import numpy as np
 import math
 import random
@@ -59,15 +60,27 @@ def create_star_walls(x, y, inner_radius, outer_radius, num_points=5):
 
     return walls
 
-def create_localization_maze_walls(width, height, offset):
+def create_localization_maze_walls_and_beacons(width, height, offset):
     walls = []
     walls.append(LineWall((0+offset, height/5+offset),(width*2/3+offset, height/5+offset)))
     walls.append(LineWall((width/3+offset, height*2/5+offset),(width+offset, height*2/5+offset)))
     walls.append(LineWall((width/3+offset, height*2/5+offset),(width/3+offset, height*4/5+offset)))
     walls.append(LineWall((width*2/3+offset, height*3/5+offset),(width*2/3+offset, height+offset)))
 
+    beacons = []
+    beacons.append(Beacon((0+offset, 0+offset), identifier=0))
+    beacons.append(Beacon((width+offset, 0 + offset), identifier=1))
+    beacons.append(Beacon((0+offset, height/5 + offset), identifier=2))
+    beacons.append(Beacon((width*2/3+offset, height/5 + offset), identifier=3))
+    beacons.append(Beacon((width*1/3+offset, height*2/5 + offset), identifier=4))
+    beacons.append(Beacon((width+offset, height*2/5 + offset), identifier=5))
+    beacons.append(Beacon((width*2/3+offset, height*3/5 + offset), identifier=6))
+    beacons.append(Beacon((width*1/3+offset, height*4/5 + offset), identifier=7))
+    beacons.append(Beacon((0+offset, height + offset), identifier=8))
+    beacons.append(Beacon((width*2/3+offset, height + offset), identifier=9))
+    beacons.append(Beacon((width+offset, height + offset), identifier=10))
 
-    return walls
+    return walls, beacons
 
 class WorldGenerator:
     def __init__(self, width, height, robot_radius, world_name, scenario, collision):
@@ -196,11 +209,13 @@ class WorldGenerator:
         effective_width = self.width - border_buffer*2
         effective_height = self.height - border_buffer*2
         border = create_rect_walls(self.width / 2, self.height / 2, effective_width, effective_height)
-        internal_Walls = create_localization_maze_walls(effective_width, effective_height, border_buffer)
+        internal_walls, internal_beacons = create_localization_maze_walls_and_beacons(effective_width, effective_height, border_buffer)
 
-        walls = [*border, *internal_Walls]
+        walls = [*border, *internal_walls]
 
-        world = World(walls, self.width, self.height, self.scenario)
+        beacons = [*internal_beacons]
+
+        world = World(walls, self.width, self.height, self.scenario, beacons=beacons)
         robot_start_loc = ((effective_width/6) + border_buffer, (effective_height/10) + border_buffer, 0)
         robot = self.__add_robot__(world, random_robot=random_robot, robot_start_loc=robot_start_loc)
         return world, robot

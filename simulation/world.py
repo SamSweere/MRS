@@ -6,11 +6,13 @@ import math
 
 
 class World:
-    def __init__(self, walls, width, height, scenario):
+    def __init__(self, walls, width, height, scenario, beacons=None):
         self.walls = walls
         self.scenario = scenario
         if scenario == "evolutionary":
             self.dustgrid = DustGrid(width, height, 5)
+        if beacons is not None:
+            self.beacons = beacons
 
     def set_robot(self, robot):
         self.robot = robot
@@ -54,13 +56,13 @@ class World:
             offset = wall.check_circle_intercept(circle_position, radius)
             if offset is not None:
                 collisions.append((wall, offset))
-            
+
         return collisions
-    
+
     def slide_collision(self, circle_position, r_circle_position, radius):
         circle_position = Vector2(circle_position)
         r_circle_position = Vector2(r_circle_position)
-        
+
         collisions = self.circle_collision(r_circle_position, radius)
         if len(collisions) == 0:
             return None
@@ -69,7 +71,7 @@ class World:
         # an intercept
         for wall, offset in collisions:
             slide_loc = wall.calculate_sliding(r_circle_position, radius)
-            
+
             free_from_all = True
             for wall in self.walls:
                 intercept = wall.check_circle_intercept(slide_loc, radius)
