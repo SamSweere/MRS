@@ -70,12 +70,13 @@ def create_localization_maze_walls(width, height, offset):
     return walls
 
 class WorldGenerator:
-    def __init__(self, width, height, robot_radius, world_name, scenario):
+    def __init__(self, width, height, robot_radius, world_name, scenario, collision):
         self.width = width
         self.height = height
         self.robot_radius = robot_radius
         self.world_name = world_name
         self.scenario = scenario
+        self.collision = collision
 
     def create_rect_world(self, random_robot=True):
         walls = create_rect_walls(self.width / 2, self.height / 2, self.width, self.height)
@@ -242,7 +243,8 @@ class WorldGenerator:
 
         # Place robot randomly until no collisions occur
         angle = random.uniform(0, 2 * math.pi) if random_robot else 0
-        robot = Robot(self.width / 2, self.height / 2, angle, scenario=self.scenario, radius=self.robot_radius)
+        robot = Robot(self.width / 2, self.height / 2, angle, scenario=self.scenario, radius=self.robot_radius,
+                      collision=self.collision)
         world.set_robot(robot)
 
         if not random_robot and robot_start_loc is None:

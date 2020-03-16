@@ -16,6 +16,8 @@ if __name__ == "__main__":
     parser.add_argument("--human", action="store_true", default=False,
                         help="manual robot control")
 
+    parser.add_argument("--collision", action="store_true", default=False, help="collision with the walls")
+
     parser.add_argument("--model_name", default="pre_trained_models/model_random.p",
                         help="robot control model name")
     parser.add_argument("--world_name", default="rect_world",
@@ -32,6 +34,7 @@ if __name__ == "__main__":
     use_human_controller = args.human
     debug = args.debug
     scenario = args.scenario
+    collision = args.collision
 
     if scenario == "localization":
         # set up environment
@@ -39,7 +42,7 @@ if __name__ == "__main__":
         HEIGHT = 600
         world_name = "localization_maze"
         env_params = {"env_width": WIDTH, "env_height": HEIGHT}
-        world_generator = WorldGenerator(WIDTH, HEIGHT, 20, world_name, scenario)
+        world_generator = WorldGenerator(WIDTH, HEIGHT, 20, world_name, scenario, collision)
 
         if use_human_controller:
             controller_func = HumanController
@@ -68,7 +71,7 @@ if __name__ == "__main__":
         HEIGHT = 400
         env_params = {"env_width": WIDTH, "env_height": HEIGHT}
         robot_kwargs = {"n_sensors": 12}
-        world_generator = WorldGenerator(WIDTH, HEIGHT, 20, args.world_name, scenario)
+        world_generator = WorldGenerator(WIDTH, HEIGHT, 20, args.world_name, scenario, collision)
 
         if use_human_controller:
             controller_func = HumanController

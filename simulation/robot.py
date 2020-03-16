@@ -3,7 +3,7 @@ import math
 
 
 class Robot:
-    def __init__(self, start_x, start_y, start_angle, scenario, radius=20,
+    def __init__(self, start_x, start_y, start_angle, scenario, collision, radius=20,
                  max_v=100, v_step=10, n_sensors=12, max_sensor_length=100):
         self.x = start_x
         self.y = start_y
@@ -15,6 +15,7 @@ class Robot:
         else:
             raise NameError("Invalid scenario name")
 
+        self.collision = collision
         self.radius = radius
         self.max_v = max_v
         self.angle = start_angle  # In radians
@@ -173,7 +174,13 @@ class Robot:
         x_tmp = self.x
         y_tmp = self.y
 
-        self.check_collision(r_x, r_y, r_angle)
+        if self.collision:
+            self.check_collision(r_x, r_y, r_angle)
+        else:
+            # No reason to have the requested location and angle refused
+            self.x = r_x
+            self.y = r_y
+            self.angle = r_angle
 
         if self.motion_model == "diff_drive":
             self.collect_sensor_data()
