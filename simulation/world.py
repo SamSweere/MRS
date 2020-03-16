@@ -24,6 +24,23 @@ class World:
         if self.scenario == "evolutionary":
             self.dustgrid.clean_circle_area(self.robot.x, self.robot.y, self.robot.radius)
 
+    def get_beacons(self, x, y, r):
+        # Return the beacons in range
+        beacons_in_range = []
+        for beacon in self.beacons:
+            b_x = beacon.location[0]
+            b_y = beacon.location[1]
+            # Check if in range
+            distance_from_robot = math.sqrt((b_x - x) ** 2 + (b_y - y) ** 2)
+            if distance_from_robot <= r:
+                # Beacon is in range, check if the sensor collides with a wall. We cannot see beacons through walls
+                hit = self.raycast_beacon((x, y), (b_x, b_y))
+                if not hit:
+                    # No walls in the way
+                    beacons_in_range.append((beacon, distance_from_robot))
+
+        return beacons_in_range
+
     def raycast(self, x, y, angle, max_length):
         # angle is in radians
         # Calculate the start from x and y
@@ -46,6 +63,28 @@ class World:
                 closest_line = line
 
         return closest_inter, closest_dist, closest_line
+
+    def raycast_beacon(self, start, beacon_loc):
+        # angle is in radians
+        # Calculate the start from x and y
+        start = Vector2(start)
+        beacon_loc = Vector2(beacon_loc)
+
+        for wall in self.walls:
+            inter, dist, line = wall.check_line_intercept(start, beacon_loc)
+
+
+            if inter is not None:
+                # Check if the intersect is at the beacon location +- some error
+                margin = 0.001
+                if math.sqrt((inter[0] - beacon_loc[0])**2 + (inter[1] - beacon_loc[1])**2) < margin:
+                    # Beacon is at the intersection
+                    continue
+                else:
+                    # Beacon not in line of sight
+                    return True
+
+        return False
 
     def circle_collision(self, circle_position, radius):
         circle_position = Vector2(circle_position)

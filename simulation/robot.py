@@ -4,14 +4,17 @@ import math
 
 class Robot:
     def __init__(self, start_x, start_y, start_angle, scenario, collision, radius=20,
-                 max_v=100, v_step=10, n_sensors=12, max_sensor_length=100):
+                 max_v=100, v_step=10, n_sensors=12, max_sensor_length=100, omni_sensor_range=200):
         self.x = start_x
         self.y = start_y
         self.scenario = scenario
+        self.omni_sensor_range = omni_sensor_range
+
         if scenario == "evolutionary":
             self.motion_model = "diff_drive"
         elif scenario == "localization":
             self.motion_model = "vel_drive"
+            self.beacons = [] # beacons have format (beacon, distance)
         else:
             raise NameError("Invalid scenario name")
 
@@ -185,6 +188,11 @@ class Robot:
         if self.motion_model == "diff_drive":
             self.collect_sensor_data()
 
+        if self.scenario == "localization":
+            # Scan for beacons
+            # TODO: no error implemented yet, do this in scan for beacons method
+            self.scan_for_beacons()
+
         # To calculate the actual speed
         self.velocity = math.sqrt((x_tmp - self.x) ** 2 + (y_tmp - self.y) ** 2)
 
@@ -205,6 +213,16 @@ class Robot:
             self.y = collision.y
 
         self.angle = r_angle
+
+    def scan_for_beacons(self):
+        beacons_in_range = self.world.get_beacons(self.x, self.y, self.omni_sensor_range)
+
+        for i in range(len(beacons_in_range)):
+            error = 0
+            # TODO: introduce error here
+            beacons_in_range[i] = (beacons_in_range[i][0], beacons_in_range[i][1] + error)
+
+        self.beacons = beacons_in_range
 
     def collect_sensor_data(self):
         raycast_length = self.radius + self.max_sensor_length

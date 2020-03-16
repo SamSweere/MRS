@@ -132,6 +132,9 @@ class MobileRobotGame:
         elif self.scenario == "localization":
             # Fix the screen updating
             self.screen.blit(self.surface, (0,0), (0,0, self.screen_width, self.screen_height))
+            # Draw the beacon lines
+            for beacon in self.robot.beacons:
+                pygame.draw.line(self.screen, pygame.Color('orange'), beacon[0].location, (self.robot.x, self.robot.y), 2)
 
         self.__draw_robot__()
 
