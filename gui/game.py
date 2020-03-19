@@ -4,7 +4,7 @@ import math
 from .fps_counter import FPSCounter
 import numpy as np
 from gui.dustgrid_sprite import DustGridSprite
-from statistics import median
+from gui.debug_display import DebugDisplay
 import time
 
 
@@ -14,30 +14,6 @@ def ti(arr):
     Since pygame doesnt accept floats on its own
     """
     return np.rint(arr).astype(int).tolist()
-
-
-class V_QUEUE:
-    # Class to get the mean q value for printing
-    def __init__(self):
-        self.v_queue = list()
-        self.v_queue_length = 20
-
-    def median(self):
-        if (len(self.v_queue) < 1):
-            return 0.0
-
-        return median(self.v_queue)
-
-    def update(self, v):
-        self.v_queue.insert(0, v)
-        if len(self.v_queue) > self.v_queue_length:
-            self.dequeue()
-
-    def dequeue(self):
-        if len(self.v_queue) > 0:
-            return self.v_queue.pop()
-        return ("Queue Empty!")
-
 
 class MobileRobotGame:
 
@@ -58,7 +34,6 @@ class MobileRobotGame:
 
         self.fps_tracker = FPSCounter()
         self.reset = False
-        self.v_queue = V_QUEUE()
 
         if scenario == "evolutionary":
             self.robo_lines = [[self.robot.x, self.robot.y, self.robot.x, self.robot.y]]
@@ -76,6 +51,9 @@ class MobileRobotGame:
         pygame.font.init()
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.fps_font = pygame.font.SysFont('Arial', 16)
+        
+        # Initialize sprites
+        self.debug_display = DebugDisplay(self)
         if self.scenario == "evolutionary":
             self.dust_sprite = DustGridSprite(self.robot, self.world.dustgrid)
 
@@ -117,14 +95,9 @@ class MobileRobotGame:
             self.robo_lines[-1][-1] = self.robot.y
             self.robo_lines.append([self.robot.x, self.robot.y, self.robot.x, self.robot.y])
 
-
         if self.scenario == "localization": # Not to break the evolutionary part
             pygame.draw.line(self.surface, self.robo_lines_color, self.robo_line_buffer, (self.robot.x, self.robot.y))
             self.robo_line_buffer = (self.robot.x, self.robot.y)
-
-
-
-
 
     def draw(self):
         if self.scenario == "evolutionary":
@@ -150,50 +123,7 @@ class MobileRobotGame:
                                        (int(beacon.location[0]),int(beacon.location[1])), 5)
 
         if self.debug:
-            # Draw text displays
-            text_y = 20
-            elapsed_time = time.time() - self.start_time
-            time_surface = self.fps_font.render(time.strftime("%M:%S", time.gmtime(elapsed_time)), False,
-                                                pygame.Color('red'))
-            self.screen.blit(time_surface, (self.env_width - 60, text_y))
-
-            fps = self.fps_tracker.get_fps()
-            fps_surface = self.fps_font.render(f"FPS: {fps:3.0f}", False,
-                                               pygame.Color('red'))
-            self.screen.blit(fps_surface, (30, text_y))
-
-            text_y += 20
-
-            if self.scenario == "evolutionary":
-                vl_surface = self.fps_font.render(f"Vl: {round(self.robot.vl, 2)}",
-                                                  False, pygame.Color('red'))
-                self.screen.blit(vl_surface, (30, text_y))
-                text_y += 20
-                vr_surface = self.fps_font.render(f"Vr: {round(self.robot.vr, 2)}",
-                                                  False, pygame.Color('red'))
-                self.screen.blit(vr_surface, (30, text_y))
-                text_y += 20
-
-            self.v_queue.update(self.robot.velocity)
-            v_surface = self.fps_font.render(f"V: {round(self.v_queue.median() * 500, 1)}",
-                                             False, pygame.Color('red'))
-            self.screen.blit(v_surface, (30, text_y))
-            text_y += 20
-
-            v_test_surface = self.fps_font.render(f"x: {round(self.robot.x, 2)}",
-                                                  False, pygame.Color('red'))
-            self.screen.blit(v_test_surface, (30, text_y))
-            text_y += 20
-
-            v_test_surface = self.fps_font.render(f"y: {round(self.robot.y, 2)}",
-                                                  False, pygame.Color('red'))
-            self.screen.blit(v_test_surface, (30, text_y))
-            text_y += 20
-
-            v_test_surface = self.fps_font.render(f"angle: {round(self.robot.angle, 2)}",
-                                                  False, pygame.Color('red'))
-            self.screen.blit(v_test_surface, (30, text_y))
-            text_y += 20
+            self.debug_display.draw(self.screen)
 
     def __draw_robot__(self):
         if self.scenario == "evolutionary":
