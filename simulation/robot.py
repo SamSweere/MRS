@@ -1,6 +1,15 @@
 import numpy as np
 import math
+from simulation.kf_localizer import KFLocalizer
 
+def vel_motion_model(state, action, delta_time):
+    x, y, angle = state
+    v, w = action
+    
+    new_x = x + v * math.cos(angle) * delta_time
+    new_y = y + v * math.sin(angle) * delta_time
+    new_angle = angle + delta_time * w
+    return (new_x, new_y, new_angle)
 
 class Robot:
     def __init__(self, start_x, start_y, start_angle, scenario, collision, radius=20,
@@ -35,15 +44,21 @@ class Robot:
             self.velocity = (self.vr - self.vl / 2)
             self.w = (self.vr - self.vl) / self.l
             self.R, self.icc = self.calculate_icc()
+            
         elif self.motion_model == "vel_drive":
-            self.max_angle_change = 0.001*math.pi # This is the speed at which the robot rotates if a human controls it
-            self.angle_step = 0.05*math.pi
+            self.angle_step = 0.20*math.pi
             self.angle_change = 0
             self.v = 0
             self.v_step = v_step
             self.rotate_left = False
             self.rotate_right = False
             self.pressed_arrows = False
+            
+            # Initialize localization
+            state_mu = (self.x, self.y, self.angle)
+            state_std = np.identity(3) * 0.01
+            motion_noise = np.identity(3) * 0.01
+            self.localizer = KFLocalizer(state_mu, state_std, vel_motion_model, motion_noise)
 
     def update_vr(self, direction):
         # Used in the diff_drive scenario
@@ -142,10 +157,6 @@ class Robot:
         return r_x, r_y, r_angle
 
     def velocity_based_drive(self, delta_time):
-        r_x = self.x + self.v * math.cos(self.angle) * delta_time
-        r_y = self.y + self.v * math.sin(self.angle) * delta_time
-
-
         # Make use of booleans such that pressing the other direction does not cancel the button press
         if self.rotate_left and self.rotate_right:
             # No change
@@ -162,16 +173,16 @@ class Robot:
                 self.angle_change = 0
                 self.pressed_arrows = False
 
-        r_angle = (self.angle + (self.angle_change*self.max_angle_change)*1000*max(delta_time, 0.00000001)) % (2*math.pi)
-
-        return r_x, r_y, r_angle
+        state = (self.x, self.y, self.angle)
+        action = (self.v, self.angle_change)
+        return vel_motion_model(state, action, delta_time)
 
     def update(self, delta_time):
-
         if self.motion_model == "diff_drive":
             r_x, r_y, r_angle = self.differential_drive(delta_time)
         elif self.motion_model == "vel_drive":
             r_x, r_y, r_angle = self.velocity_based_drive(delta_time)
+            self.localizer.predict((self.v, self.angle_change), delta_time)
 
         # Save the x and y for the speed calculation
         x_tmp = self.x

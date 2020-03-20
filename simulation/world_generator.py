@@ -250,38 +250,26 @@ class WorldGenerator:
             raise ValueError("Wrong world name")
 
     def __add_robot__(self, world, random_robot=True, robot_start_loc=None):
-        min_x = self.robot_radius
-        max_x = self.width - self.robot_radius
-        min_y = self.robot_radius
-        max_y = self.height - self.robot_radius
-        margin = 20
+        if random_robot and (robot_start_loc is None):
+            min_x = self.robot_radius
+            max_x = self.width - self.robot_radius
+            min_y = self.robot_radius
+            max_y = self.height - self.robot_radius
+            margin = 20
+            
+            while True:
+                rand_x = random.uniform(min_x + margin, max_x - margin)
+                rand_y = random.uniform(min_y + margin, max_y - margin)
+    
+                collisions = world.circle_collision((rand_x, rand_y), self.robot_radius)
+                if len(collisions) == 0:
+                    break
+        elif robot_start_loc is None:
+            robot_start_loc = (self.width / 2, self.height / 2, 0)
+            robot_start_loc = (rand_x, rand_y, np.random.uniform(0, 2 * np.pi))
 
         # Place robot randomly until no collisions occur
-        angle = random.uniform(0, 2 * math.pi) if random_robot else 0
-        robot = Robot(self.width / 2, self.height / 2, angle, scenario=self.scenario, radius=self.robot_radius,
-                      collision=self.collision)
+        robot = Robot(*robot_start_loc, scenario=self.scenario, radius=self.robot_radius,collision=self.collision)
         world.set_robot(robot)
-
-        if not random_robot and robot_start_loc is None:
-            return robot
-        elif not random_robot and robot_start_loc is not None:
-            robot.x = robot_start_loc[0]
-            robot.y = robot_start_loc[1]
-            robot.angle = robot_start_loc[2]
-            return robot
-        elif random_robot and robot_start_loc is not None:
-            robot.x = robot_start_loc[0]
-            robot.y = robot_start_loc[1]
-            robot.angle = robot_start_loc[2]
-            return robot
-
-        while True:
-            robot.x = random.uniform(min_x + margin, max_x - margin)
-            robot.y = random.uniform(min_y + margin, max_y - margin)
-            robot.angle = np.random.uniform(0, 2 * np.pi)
-
-            collisions = world.circle_collision((robot.x, robot.y), robot.radius)
-            if len(collisions) == 0:
-                break
-
+        
         return robot

@@ -5,6 +5,7 @@ from .fps_counter import FPSCounter
 import numpy as np
 from gui.dustgrid_sprite import DustGridSprite
 from gui.debug_display import DebugDisplay
+from gui.localization_path import LocalizationPath
 import time
 
 
@@ -56,6 +57,8 @@ class MobileRobotGame:
         self.debug_display = DebugDisplay(self)
         if self.scenario == "evolutionary":
             self.dust_sprite = DustGridSprite(self.robot, self.world.dustgrid)
+        elif self.scenario == "localization":
+            self.localization_path = LocalizationPath(self)
 
     def run(self, snapshot=False, snapshot_dir=""):
         # Main game loop
@@ -98,6 +101,7 @@ class MobileRobotGame:
         if self.scenario == "localization": # Not to break the evolutionary part
             pygame.draw.line(self.surface, self.robo_lines_color, self.robo_line_buffer, (self.robot.x, self.robot.y))
             self.robo_line_buffer = (self.robot.x, self.robot.y)
+            self.localization_path.update(delta_time)
 
     def draw(self):
         if self.scenario == "evolutionary":
@@ -121,6 +125,8 @@ class MobileRobotGame:
                 for beacon in self.world.beacons:
                     pygame.draw.circle(self.screen, pygame.Color('blue'),
                                        (int(beacon.location[0]),int(beacon.location[1])), 5)
+            
+            self.localization_path.draw(self.screen)
 
         if self.debug:
             self.debug_display.draw(self.screen)
