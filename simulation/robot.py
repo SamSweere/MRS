@@ -58,6 +58,7 @@ class Robot:
             state_mu = (self.x, self.y, self.angle)
             state_std = np.identity(3) * 0.01
             motion_noise = np.identity(3) * 0.01
+            motion_noise[0,0] *= 0.5
             self.localizer = KFLocalizer(state_mu, state_std, vel_motion_model, motion_noise)
 
     def update_vr(self, direction):
