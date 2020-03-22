@@ -111,8 +111,9 @@ class MobileRobotGame:
             self.screen.blit(self.surface, (0, 0), (0, 0, self.screen_width, self.screen_height))
             # Draw the beacon lines
             for beacon in self.robot.beacons:
-                pygame.draw.line(self.screen, pygame.Color('green'), beacon[0].location, (self.robot.x, self.robot.y),
-                                 2)
+                pygame.draw.line(self.screen, pygame.Color('green'), beacon[0].location, (self.robot.x, self.robot.y),2)
+                
+            self.localization_path.draw(self.screen)
 
         self.__draw_robot__()
 
@@ -126,8 +127,6 @@ class MobileRobotGame:
                 for beacon in self.world.beacons:
                     pygame.draw.circle(self.screen, pygame.Color('blue'),
                                        (int(beacon.location[0]), int(beacon.location[1])), 5)
-
-            self.localization_path.draw(self.screen)
 
         if self.debug:
             self.debug_display.draw(self.screen)
