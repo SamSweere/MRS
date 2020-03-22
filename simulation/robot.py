@@ -17,13 +17,17 @@ class Robot:
         self.x = start_x
         self.y = start_y
         self.scenario = scenario
-        self.omni_sensor_range = omni_sensor_range
+
 
         if scenario == "evolutionary":
             self.motion_model = "diff_drive"
         elif scenario == "localization":
+            self.omni_sensor_range = omni_sensor_range
             self.motion_model = "vel_drive"
             self.beacons = [] # beacons have format (beacon, distance)
+            # Define variables fot the predicted location
+            self.p_x = self.x
+            self.p_y = self.y
         else:
             raise NameError("Invalid scenario name")
 

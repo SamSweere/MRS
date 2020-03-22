@@ -16,6 +16,7 @@ def ti(arr):
     """
     return np.rint(arr).astype(int).tolist()
 
+
 class MobileRobotGame:
 
     def __init__(self, env_width, env_height, world, robot, robot_controller, scenario, debug=False):
@@ -43,8 +44,7 @@ class MobileRobotGame:
             self.surface = pygame.Surface((env_width, env_height))
             self.surface.fill(pygame.Color('white'))
             self.robo_lines_color = pygame.Color('black')
-            self.robo_line_buffer = (self.robot.x, self.robot.y) # This is an faster implementation
-
+            self.robo_line_buffer = (self.robot.x, self.robot.y)  # This is an faster implementation
 
     def init(self):
         # Initialize pygame and modules that we want to use
@@ -52,7 +52,7 @@ class MobileRobotGame:
         pygame.font.init()
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.fps_font = pygame.font.SysFont('Arial', 16)
-        
+
         # Initialize sprites
         self.debug_display = DebugDisplay(self)
         if self.scenario == "evolutionary":
@@ -98,7 +98,7 @@ class MobileRobotGame:
             self.robo_lines[-1][-1] = self.robot.y
             self.robo_lines.append([self.robot.x, self.robot.y, self.robot.x, self.robot.y])
 
-        if self.scenario == "localization": # Not to break the evolutionary part
+        if self.scenario == "localization":  # Not to break the evolutionary part
             pygame.draw.line(self.surface, self.robo_lines_color, self.robo_line_buffer, (self.robot.x, self.robot.y))
             self.robo_line_buffer = (self.robot.x, self.robot.y)
             self.localization_path.update(delta_time)
@@ -108,10 +108,11 @@ class MobileRobotGame:
             self.dust_sprite.draw(self.screen)
         elif self.scenario == "localization":
             # Fix the screen updating
-            self.screen.blit(self.surface, (0,0), (0,0, self.screen_width, self.screen_height))
+            self.screen.blit(self.surface, (0, 0), (0, 0, self.screen_width, self.screen_height))
             # Draw the beacon lines
             for beacon in self.robot.beacons:
-                pygame.draw.line(self.screen, pygame.Color('orange'), beacon[0].location, (self.robot.x, self.robot.y), 2)
+                pygame.draw.line(self.screen, pygame.Color('green'), beacon[0].location, (self.robot.x, self.robot.y),
+                                 2)
 
         self.__draw_robot__()
 
@@ -124,8 +125,8 @@ class MobileRobotGame:
             if self.world.beacons is not None:
                 for beacon in self.world.beacons:
                     pygame.draw.circle(self.screen, pygame.Color('blue'),
-                                       (int(beacon.location[0]),int(beacon.location[1])), 5)
-            
+                                       (int(beacon.location[0]), int(beacon.location[1])), 5)
+
             self.localization_path.draw(self.screen)
 
         if self.debug:

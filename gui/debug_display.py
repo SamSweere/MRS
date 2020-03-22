@@ -41,33 +41,47 @@ class DebugDisplay:
     def draw(self, s):
         # Elapsed time since start
         elapsed_time = time.time() - self.start_time
-        self.__render_text__(time.strftime("%M:%S", time.gmtime(elapsed_time)), s, self.game.screen_width - 60, 20)
+
+        text_y_left = 20
+        text_y_right = 20
+        x_loc_right = self.game.screen_width - 100
+
+        self.__render_text__(time.strftime("%M:%S", time.gmtime(elapsed_time)), s, x_loc_right, text_y_right)
+        text_y_right += 20
         
-        text_y = 20
         # FPS
         fps = self.game.fps_tracker.get_fps()
-        self.__render_text__(f"FPS: {fps:3.0f}", s, 30, text_y)
-        text_y += 20
+        self.__render_text__(f"FPS: {fps:3.0f}", s, 30, text_y_left)
+        text_y_left += 20
         
         if self.game.scenario == "evolutionary":
-            self.__render_text__(f"Vl: {round(self.world.robot.vl, 2)}", s, 30, text_y)
-            text_y += 20
+            self.__render_text__(f"Vl: {round(self.world.robot.vl, 2)}", s, 30, text_y_left)
+            text_y_left += 20
             
-            self.__render_text__(f"Vl: {round(self.world.robot.vr, 2)}", s, 30, text_y)
-            text_y += 20
+            self.__render_text__(f"Vl: {round(self.world.robot.vr, 2)}", s, 30, text_y_left)
+            text_y_left += 20
 
-        self.__render_text__(f"V: {round(self.v_queue.median() * 500, 1)}", s, 30, text_y)
-        text_y += 20
+        self.v_queue.update(self.robot.velocity)
+        self.__render_text__(f"V: {round(self.v_queue.median() * 500, 1)}", s, 30, text_y_left)
+        text_y_left += 20
         
-        self.__render_text__(f"x: {round(self.robot.x, 2)}", s, 30, text_y)
-        text_y += 20
+        self.__render_text__(f"x: {round(self.robot.x, 2)}", s, 30, text_y_left)
+        text_y_left += 20
         
-        self.__render_text__(f"y: {round(self.robot.y, 2)}", s, 30, text_y)
-        text_y += 20
+        self.__render_text__(f"y: {round(self.robot.y, 2)}", s, 30, text_y_left)
+        text_y_left += 20
         
-        self.__render_text__(f"angle: {round(self.robot.angle, 2)}", s, 30, text_y)
-        text_y += 20
-        
+        self.__render_text__(f"angle: {round(self.robot.angle, 2)}", s, 30, text_y_left)
+        text_y_left += 20
+
+        self.__render_text__(f"p_x: {round(self.robot.p_x, 2)}", s, x_loc_right, text_y_right)
+        text_y_right += 20
+
+        self.__render_text__(f"p_y: {round(self.robot.p_y, 2)}", s, x_loc_right, text_y_right)
+        text_y_right += 20
+
+
+
     def __render_text__(self, text, screen, x, y):
         text_surface = self.debug_font.render(text, False, self.debug_color)
         screen.blit(text_surface, (x, y))
