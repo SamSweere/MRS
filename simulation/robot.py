@@ -2,14 +2,36 @@ import numpy as np
 import math
 from simulation.kf_localizer import KFLocalizer
 
+
 def vel_motion_model(state, action, delta_time):
     x, y, angle = state
     v, w = action
-    
+
     new_x = x + v * math.cos(angle) * delta_time
     new_y = y + v * math.sin(angle) * delta_time
     new_angle = angle + delta_time * w
     return (new_x, new_y, new_angle)
+
+
+def triangulate(x1, y1, r1, x2, y2, r2, x3, y3, r3):
+    # Using formula from:
+    A = -2 * x1 + 2 * x2
+    B = -2 * y1 + 2 * y2
+    C = r1 ** 2 - r2 ** 2 - x1 ** 2 + x2 ** 2 - y1 ** 2 + y2 ** 2
+    D = -2 * x2 + 2 * x3
+    E = -2 * y2 + 2 * y3
+    F = r2 ** 2 - r3 ** 2 - x2 ** 2 + x3 ** 2 - y2 ** 2 + y3 ** 2
+
+    if (E * A - B * D) == 0.0:
+        # Two points lie on each others line, return None
+        # TODO: this is solvable, just not with this method
+        return None
+
+    x = (C * E - F * B) / (E * A - B * D)
+    y = (C * D - A * F) / (B * D - A * E)
+
+    return x, y
+
 
 class Robot:
     def __init__(self, start_x, start_y, start_angle, scenario, collision, radius=20,
@@ -17,24 +39,23 @@ class Robot:
         self.x = start_x
         self.y = start_y
         self.scenario = scenario
-
+        self.collision = collision
+        self.radius = radius
+        self.max_v = max_v
+        self.angle = start_angle  # In radians
 
         if scenario == "evolutionary":
             self.motion_model = "diff_drive"
         elif scenario == "localization":
             self.omni_sensor_range = omni_sensor_range
             self.motion_model = "vel_drive"
-            self.beacons = [] # beacons have format (beacon, distance)
+            self.beacons = []  # beacons have format (beacon, distance)
             # Define variables fot the predicted location
             self.p_x = self.x
             self.p_y = self.y
+            self.p_angle = self.angle
         else:
             raise NameError("Invalid scenario name")
-
-        self.collision = collision
-        self.radius = radius
-        self.max_v = max_v
-        self.angle = start_angle  # In radians
 
         if self.motion_model == "diff_drive":
             self.v_step = v_step
@@ -48,21 +69,21 @@ class Robot:
             self.velocity = (self.vr - self.vl / 2)
             self.w = (self.vr - self.vl) / self.l
             self.R, self.icc = self.calculate_icc()
-            
+
         elif self.motion_model == "vel_drive":
-            self.angle_step = 0.20*math.pi
+            self.angle_step = 0.20 * math.pi
             self.angle_change = 0
             self.v = 0
             self.v_step = v_step
             self.rotate_left = False
             self.rotate_right = False
             self.pressed_arrows = False
-            
+
             # Initialize localization
             state_mu = (self.x, self.y, self.angle)
             state_std = np.identity(3) * 0.01
             motion_noise = np.identity(3) * 0.01
-            motion_noise[0,0] *= 0.5
+            motion_noise[0, 0] *= 0.5
             self.localizer = KFLocalizer(state_mu, state_std, vel_motion_model, motion_noise)
 
     def update_vr(self, direction):
@@ -109,7 +130,7 @@ class Robot:
 
         if abs(r_v) > self.max_v:
             # Over max v set to max v
-            self.v = r_v/abs(r_v)*self.max_v
+            self.v = r_v / abs(r_v) * self.max_v
         else:
             # within speed limit
             self.v = r_v
@@ -121,7 +142,7 @@ class Robot:
             return
 
         # Used in the vel_drive scenario
-        self.angle_change += direction*self.angle_step
+        self.angle_change += direction * self.angle_step
 
     def calculate_icc(self):
         """Returns the radius and the (x,y) coordinates of the center of rotation"""
@@ -207,7 +228,8 @@ class Robot:
         if self.scenario == "localization":
             # Scan for beacons
             # TODO: no error implemented yet, do this in scan for beacons method
-            self.scan_for_beacons()
+            self.beacons = self.scan_for_beacons()
+            self.location_from_beacons()
 
         # To calculate the actual speed
         self.velocity = math.sqrt((x_tmp - self.x) ** 2 + (y_tmp - self.y) ** 2)
@@ -238,7 +260,51 @@ class Robot:
             # TODO: introduce error here
             beacons_in_range[i] = (beacons_in_range[i][0], beacons_in_range[i][1] + error)
 
-        self.beacons = beacons_in_range
+        return beacons_in_range
+
+    def location_from_beacons(self):
+        # Estimate the location of the robot from the beacons
+        f = []
+        for beacon in self.beacons:
+            beacon = beacon[0]
+            # Note true x and y value of the robot since this is independent on the predicted location
+            r = math.sqrt((beacon.x - self.x) ** 2 + (beacon.y - self.y) ** 2)
+            # -1 times since our y coordinate system is inverted
+            phi = math.atan2(-1 * (beacon.y - self.y), beacon.x - self.x) - self.angle
+            f.append((r, phi, beacon.location))
+
+        # From the r and phi get the x and y location, note that in the exercise we are allowed
+        # to add the error later
+        # if len(f) == 1:
+        #     # If we only see one beacon we cannot determine our angle, so we have to use our predicted angle
+        #     # Lots of error in this case (maybe not even usable)
+        #     # TODO: include error here
+        #     # TODO: is this even usable?
+        #     p_x = -1*(math.cos(phi + self.p_angle)*r - beacon.x)
+        #     p_y = math.sin(phi + self.p_angle)*r + beacon.y
+
+        # TODO: we could get some estimate from 1 beacon, however we would have to use our predicted angle
+        # which is not part of z
+        if len(f) >= 3:
+            # Three points can lie on the same line, in which case our function cant handle it, try other ways
+            shift = 0
+            tria_loc = triangulate(f[0+shift][2][0], f[0+shift][2][1], f[0+shift][0],
+                               f[1+shift][2][0], f[1+shift][2][1], f[1+shift][0],
+                               f[2+shift][2][0], f[2+shift][2][1], f[2+shift][0])
+            while tria_loc is None and shift + 3 <= len(f):
+                shift += 1
+                tria_loc = triangulate(f[0 + shift][2][0], f[0 + shift][2][1], f[0 + shift][0],
+                                       f[1 + shift][2][0], f[1 + shift][2][1], f[1 + shift][0],
+                                       f[2 + shift][2][0], f[2 + shift][2][1], f[2 + shift][0])
+
+            if tria_loc is not None:
+                x, y = tria_loc
+                self.p_x = x
+                self.p_y = y
+
+
+
+
 
     def collect_sensor_data(self):
         raycast_length = self.radius + self.max_sensor_length
