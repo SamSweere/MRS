@@ -33,13 +33,14 @@ class LocalizationPath:
         
         self.path_surface = pygame.Surface((game.screen_width, game.screen_height), pygame.SRCALPHA)
         self.path_color = pygame.Color('orange')
-        self.old_pos = (self.localizer.state_mu[0], self.localizer.state_mu[1])
+        self.old_pos = (self.localizer.state_mu[0][0], self.localizer.state_mu[1][1])
         self.passed_time = 0
         self.dash_fraction = 0
 
     def update(self, delta_time):
-        new_pos = (self.localizer.state_mu[0], self.localizer.state_mu[1])
-        self.dash_fraction = draw_dashed_curve(self.path_surface, self.path_color, self.old_pos, new_pos, self.dash_fraction, width=2)
+        new_pos = (self.localizer.state_mu[0][0], self.localizer.state_mu[1][1])
+        self.dash_fraction = draw_dashed_curve(surf=self.path_surface, color=self.path_color, start=self.old_pos, end=new_pos,
+                                               fraction=self.dash_fraction, width=2)
         self.old_pos = new_pos
         
         # Store the freeze the uncertainty ellipse after a set amount of time
@@ -53,8 +54,8 @@ class LocalizationPath:
         #self.__draw_uncertainty_ellipse__(surface)
         
     def __draw_uncertainty_ellipse__(self, surface):
-        x_mu = self.localizer.state_mu[0]
-        y_mu = self.localizer.state_mu[1]
+        x_mu = self.localizer.state_mu[0][0]
+        y_mu = self.localizer.state_mu[1][1]
         x_std = self.localizer.state_std[0,0]
         y_std = self.localizer.state_std[1,1]
         

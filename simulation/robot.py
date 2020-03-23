@@ -35,7 +35,7 @@ def triangulate(x1, y1, r1, x2, y2, r2, x3, y3, r3):
 
 class Robot:
     def __init__(self, start_x, start_y, start_angle, scenario, collision, radius=20,
-                 max_v=100, v_step=10, n_sensors=12, max_sensor_length=100, omni_sensor_range=200):
+                 max_v=100, v_step=10, n_sensors=12, max_sensor_length=100, omni_sensor_range=150):
         self.x = start_x
         self.y = start_y
         self.scenario = scenario
@@ -50,13 +50,29 @@ class Robot:
             self.omni_sensor_range = omni_sensor_range
             self.motion_model = "vel_drive"
             self.beacons = []  # beacons have format (beacon, distance)
+            # Initialize localization
+            state_mu = (self.x, self.y, self.angle)
+            state_std = np.identity(3) * 0.01
+            motion_noise = np.identity(3)
+            motion_noise[0, 0] *= 0.001  # x
+            motion_noise[1, 1] *= 0.002  # y
+            motion_noise[2, 2] *= 0.0001  # angle
+
+            self.sensor_noise = np.identity(3)
+            self.sensor_noise[0, 0] *= 10.0  # x
+            self.sensor_noise[1, 1] *= 10.0  # y
+            self.sensor_noise[2, 2] *= 0.1  # angle
+
+            print(motion_noise)
+            self.localizer = KFLocalizer(state_mu=state_mu, state_std=state_std, motion_model=vel_motion_model,
+                                         motion_noise=motion_noise, sensor_noise=self.sensor_noise)
+
+
             # # Define variables fot the predicted location
             # self.p_x = self.x
             # self.p_y = self.y
             # self.p_angle = self.angle
             # Define the standard deviations for the localization errors
-            self.sigma_triangulate_loc = 10.0
-            self.sigma_triangulate_angle = 0.1
 
         else:
             raise NameError("Invalid scenario name")
@@ -83,15 +99,7 @@ class Robot:
             self.rotate_right = False
             self.pressed_arrows = False
 
-            # Initialize localization
-            state_mu = (self.x, self.y, self.angle)
-            state_std = np.identity(3) * 0.01
-            motion_noise = np.identity(3)
-            motion_noise[0, 0] *= 0.01 # x
-            motion_noise[1, 1] *= 0.02 # y
-            motion_noise[2, 2] *= 0.01 # angle
-            print(motion_noise)
-            self.localizer = KFLocalizer(state_mu, state_std, vel_motion_model, motion_noise)
+
 
     def update_vr(self, direction):
         # Used in the diff_drive scenario
@@ -238,7 +246,7 @@ class Robot:
             self.beacons = self.scan_for_beacons()
             # Triangulate location if possible
             z = self.location_from_beacons()
-            self.localizer.update_z(z)
+            self.localizer.update_z(z, self.sensor_noise)
 
 
             # # TODO: only for debugging
@@ -320,9 +328,9 @@ class Robot:
 
         if got_location:
             # We got the location and angle, add noise
-            x += np.random.normal(0, self.sigma_triangulate_loc)
-            y += np.random.normal(0, self.sigma_triangulate_loc)
-            angle += np.random.normal(0, self.sigma_triangulate_angle)
+            x += np.random.normal(0, self.sensor_noise[0, 0])
+            y += np.random.normal(0, self.sensor_noise[1, 1])
+            angle += np.random.normal(0, self.sensor_noise[2, 2])
 
             return x, y, angle
         else:
