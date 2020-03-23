@@ -50,10 +50,14 @@ class Robot:
             self.omni_sensor_range = omni_sensor_range
             self.motion_model = "vel_drive"
             self.beacons = []  # beacons have format (beacon, distance)
-            # Define variables fot the predicted location
-            self.p_x = self.x
-            self.p_y = self.y
-            self.p_angle = self.angle
+            # # Define variables fot the predicted location
+            # self.p_x = self.x
+            # self.p_y = self.y
+            # self.p_angle = self.angle
+            # Define the standard deviations for the localization errors
+            self.sigma_triangulate_loc = 10.0
+            self.sigma_triangulate_angle = 0.1
+
         else:
             raise NameError("Invalid scenario name")
 
@@ -82,8 +86,11 @@ class Robot:
             # Initialize localization
             state_mu = (self.x, self.y, self.angle)
             state_std = np.identity(3) * 0.01
-            motion_noise = np.identity(3) * 0.01
-            motion_noise[0, 0] *= 0.5
+            motion_noise = np.identity(3)
+            motion_noise[0, 0] *= 0.01 # x
+            motion_noise[1, 1] *= 0.02 # y
+            motion_noise[2, 2] *= 0.01 # angle
+            print(motion_noise)
             self.localizer = KFLocalizer(state_mu, state_std, vel_motion_model, motion_noise)
 
     def update_vr(self, direction):
@@ -229,7 +236,21 @@ class Robot:
             # Scan for beacons
             # TODO: no error implemented yet, do this in scan for beacons method
             self.beacons = self.scan_for_beacons()
-            self.location_from_beacons()
+            # Triangulate location if possible
+            z = self.location_from_beacons()
+            self.localizer.update_z(z)
+
+
+            # # TODO: only for debugging
+            # if z is not None:
+            #     # Do something
+            #     self.p_x = z[0]
+            #     self.p_y = z[1]
+            #     self.p_angle = z[2]
+            #     pass
+            # else:
+            #     # Do something else
+            #     pass
 
         # To calculate the actual speed
         self.velocity = math.sqrt((x_tmp - self.x) ** 2 + (y_tmp - self.y) ** 2)
@@ -275,22 +296,16 @@ class Robot:
 
         # From the r and phi get the x and y location, note that in the exercise we are allowed
         # to add the error later
-        # if len(f) == 1:
-        #     # If we only see one beacon we cannot determine our angle, so we have to use our predicted angle
-        #     # Lots of error in this case (maybe not even usable)
-        #     # TODO: include error here
-        #     # TODO: is this even usable?
-        #     p_x = -1*(math.cos(phi + self.p_angle)*r - beacon.x)
-        #     p_y = math.sin(phi + self.p_angle)*r + beacon.y
 
         # TODO: we could get some estimate from 1 beacon, however we would have to use our predicted angle
+        got_location = False
         # which is not part of z
         if len(f) >= 3:
             # Three points can lie on the same line, in which case our function cant handle it, try other ways
             shift = 0
-            tria_loc = triangulate(f[0+shift][2][0], f[0+shift][2][1], f[0+shift][0],
-                               f[1+shift][2][0], f[1+shift][2][1], f[1+shift][0],
-                               f[2+shift][2][0], f[2+shift][2][1], f[2+shift][0])
+            tria_loc = triangulate(f[0 + shift][2][0], f[0 + shift][2][1], f[0 + shift][0],
+                                   f[1 + shift][2][0], f[1 + shift][2][1], f[1 + shift][0],
+                                   f[2 + shift][2][0], f[2 + shift][2][1], f[2 + shift][0])
             while tria_loc is None and shift + 3 <= len(f):
                 shift += 1
                 tria_loc = triangulate(f[0 + shift][2][0], f[0 + shift][2][1], f[0 + shift][0],
@@ -299,12 +314,20 @@ class Robot:
 
             if tria_loc is not None:
                 x, y = tria_loc
-                self.p_x = x
-                self.p_y = y
+                # Now that we know the position get the angle, we well only use one beacon for this
+                angle = math.atan2(-1 * (self.beacons[0][0].y - y), self.beacons[0][0].x - x) - f[0][1]
+                got_location = True
 
+        if got_location:
+            # We got the location and angle, add noise
+            x += np.random.normal(0, self.sigma_triangulate_loc)
+            y += np.random.normal(0, self.sigma_triangulate_loc)
+            angle += np.random.normal(0, self.sigma_triangulate_angle)
 
-
-
+            return x, y, angle
+        else:
+            # No location
+            return None
 
     def collect_sensor_data(self):
         raycast_length = self.radius + self.max_sensor_length

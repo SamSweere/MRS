@@ -74,10 +74,13 @@ class DebugDisplay:
         self.__render_text__(f"angle: {round(self.robot.angle, 2)}", s, 30, text_y_left)
         text_y_left += 20
 
-        self.__render_text__(f"p_x: {round(self.robot.p_x, 2)}", s, x_loc_right, text_y_right)
+        self.__render_text__(f"p_x: {round(self.robot.localizer.state_mu[0], 2)}", s, x_loc_right, text_y_right)
         text_y_right += 20
 
-        self.__render_text__(f"p_y: {round(self.robot.p_y, 2)}", s, x_loc_right, text_y_right)
+        self.__render_text__(f"p_y: {round(self.robot.localizer.state_mu[1], 2)}", s, x_loc_right, text_y_right)
+        text_y_right += 20
+
+        self.__render_text__(f"p_angle: {round(self.robot.localizer.state_mu[2], 2)}", s, x_loc_right, text_y_right)
         text_y_right += 20
 
 

@@ -266,7 +266,6 @@ class WorldGenerator:
                     break
         elif robot_start_loc is None:
             robot_start_loc = (self.width / 2, self.height / 2, 0)
-            robot_start_loc = (rand_x, rand_y, np.random.uniform(0, 2 * np.pi))
 
         # Place robot randomly until no collisions occur
         robot = Robot(*robot_start_loc, scenario=self.scenario, radius=self.robot_radius,collision=self.collision)

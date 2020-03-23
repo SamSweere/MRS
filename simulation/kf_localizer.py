@@ -17,3 +17,5 @@ class KFLocalizer:
         # Note the real formula is A * state_std * A^T + motion_noise
         self.state_std += self.motion_noise
 
+    def update_z(self, z):
+        self.z = z #Note: z can be None
