@@ -311,16 +311,18 @@ class Robot:
         if len(f) >= 3:
             # Three points can lie on the same line, in which case our function cant handle it, try other ways
             shift = 0
-            tria_loc = triangulate(f[0 + shift][2][0], f[0 + shift][2][1], f[0 + shift][0],
-                                   f[1 + shift][2][0], f[1 + shift][2][1], f[1 + shift][0],
-                                   f[2 + shift][2][0], f[2 + shift][2][1], f[2 + shift][0])
-            while (tria_loc is None) and (shift + 3 <= len(f)):
+            tria_loc = []
+            while (shift + 3 <= len(f)):
+                tria_loc.append(list(
+                    triangulate(
+                        f[0 + shift][2][0], f[0 + shift][2][1], f[0 + shift][0],
+                        f[1 + shift][2][0], f[1 + shift][2][1], f[1 + shift][0],
+                        f[2 + shift][2][0], f[2 + shift][2][1], f[2 + shift][0])
+                ))
                 shift += 1
-                tria_loc = triangulate(f[0 + shift][2][0], f[0 + shift][2][1], f[0 + shift][0],
-                                       f[1 + shift][2][0], f[1 + shift][2][1], f[1 + shift][0],
-                                       f[2 + shift][2][0], f[2 + shift][2][1], f[2 + shift][0])
 
-            if tria_loc is not None:
+            if len(tria_loc) > 0:
+                tria_loc = np.mean(np.array(tria_loc), axis=0)
                 x, y = tria_loc
                 # Now that we know the position get the angle, we well only use one beacon for this
                 angle = math.atan2(-1 * (self.beacons[0][0].y - y), self.beacons[0][0].x - x) - f[0][1]
