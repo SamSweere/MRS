@@ -244,9 +244,10 @@ class Robot:
             # Scan for beacons
             # TODO: no error implemented yet, do this in scan for beacons method
             self.beacons = self.scan_for_beacons()
-            # Triangulate location if possible
-            z = self.location_from_beacons()
-            self.localizer.update_z(z, self.sensor_noise)
+            if len(self.beacons) >= 3:
+                # Triangulate location
+                z = self.location_from_beacons()
+                self.localizer.correct(z)
 
 
             # # TODO: only for debugging
