@@ -24,7 +24,7 @@ class KFLocalizer:
         
     def correct(self, z):
         z = np.array(z)
-        
+        # C is identity in all calculations
         K = np.matmul(self.state_std, np.linalg.inv(self.state_std + self.sensor_noise))
         self.state_mu = self.state_mu + np.matmul(K, z - self.state_mu)
         self.state_std = np.matmul((np.identity(K.shape[0]) - K), self.state_std)

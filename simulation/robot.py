@@ -14,7 +14,7 @@ def vel_motion_model(state, action, delta_time):
 
 
 def triangulate(x1, y1, r1, x2, y2, r2, x3, y3, r3):
-    # Using formula from:
+    # Using formula from: https://www.101computing.net/cell-phone-trilateration-algorithm/
     A = -2 * x1 + 2 * x2
     B = -2 * y1 + 2 * y2
     C = r1 ** 2 - r2 ** 2 - x1 ** 2 + x2 ** 2 - y1 ** 2 + y2 ** 2
@@ -307,7 +307,6 @@ class Robot:
         # to add the error later
 
         # TODO: we could get some estimate from 1 beacon, however we would have to use our predicted angle
-        got_location = False
         # which is not part of z
         if len(f) >= 3:
             # Three points can lie on the same line, in which case our function cant handle it, try other ways
@@ -315,7 +314,7 @@ class Robot:
             tria_loc = triangulate(f[0 + shift][2][0], f[0 + shift][2][1], f[0 + shift][0],
                                    f[1 + shift][2][0], f[1 + shift][2][1], f[1 + shift][0],
                                    f[2 + shift][2][0], f[2 + shift][2][1], f[2 + shift][0])
-            while tria_loc is None and shift + 3 <= len(f):
+            while (tria_loc is None) and (shift + 3 <= len(f)):
                 shift += 1
                 tria_loc = triangulate(f[0 + shift][2][0], f[0 + shift][2][1], f[0 + shift][0],
                                        f[1 + shift][2][0], f[1 + shift][2][1], f[1 + shift][0],
@@ -325,15 +324,11 @@ class Robot:
                 x, y = tria_loc
                 # Now that we know the position get the angle, we well only use one beacon for this
                 angle = math.atan2(-1 * (self.beacons[0][0].y - y), self.beacons[0][0].x - x) - f[0][1]
-                got_location = True
-
-        if got_location:
-            # We got the location and angle, add noise
-            x += np.random.normal(0, self.sensor_noise[0, 0])
-            y += np.random.normal(0, self.sensor_noise[1, 1])
-            angle += np.random.normal(0, self.sensor_noise[2, 2])
-
-            return x, y, angle
+                # We got the location and angle, add noise
+                x += np.random.normal(0, self.sensor_noise[0, 0])
+                y += np.random.normal(0, self.sensor_noise[1, 1])
+                angle += np.random.normal(0, self.sensor_noise[2, 2])
+                return x, y, angle
         else:
             # No location
             return None
