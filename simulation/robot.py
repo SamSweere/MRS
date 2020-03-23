@@ -63,7 +63,7 @@ class Robot:
             self.sensor_noise[1, 1] *= 10.0  # y
             self.sensor_noise[2, 2] *= 0.1  # angle
 
-            self.stochastic_env = np.ones((3,3)) * 0.001
+            self.stochastic_env = np.ones((3,3)) * 0.002
 
             print(motion_noise)
             self.localizer = KFLocalizer(state_mu=state_mu, state_std=state_std, motion_model=vel_motion_model,
@@ -329,10 +329,15 @@ class Robot:
                 x, y = tria_loc
                 # Now that we know the position get the angle, we well only use one beacon for this
                 angle = math.atan2(-1 * (self.beacons[0][0].y - y), self.beacons[0][0].x - x) - f[0][1]
-                # We got the location and angle, add noise
-                x += np.random.normal(0, self.sensor_noise[0, 0])
-                y += np.random.normal(0, self.sensor_noise[1, 1])
-                angle += np.random.normal(0, self.sensor_noise[2, 2])
+                # We got the location and angle, add noise in proportion to change
+                state = (self.x, self.y, self.angle)
+                action = (self.v, self.angle_change)
+                # hack for motion model
+                uncertainty_multiplier = 0.1
+                new_x, new_y, new_angle = vel_motion_model(state, action, 1)
+                x += np.random.normal(0, self.sensor_noise[0, 0]) * np.abs(x - new_x) * uncertainty_multiplier
+                y += np.random.normal(0, self.sensor_noise[1, 1]) * np.abs(y - new_y) * uncertainty_multiplier
+                angle += np.random.normal(0, self.sensor_noise[2, 2]) * np.abs(angle - new_angle) * uncertainty_multiplier
                 return x, y, angle
         else:
             # No location
