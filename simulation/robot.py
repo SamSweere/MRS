@@ -63,6 +63,8 @@ class Robot:
             self.sensor_noise[1, 1] *= 10.0  # y
             self.sensor_noise[2, 2] *= 0.1  # angle
 
+            self.stochastic_env = np.ones((3,3)) * 0.001
+
             print(motion_noise)
             self.localizer = KFLocalizer(state_mu=state_mu, state_std=state_std, motion_model=vel_motion_model,
                                          motion_noise=motion_noise, sensor_noise=self.sensor_noise)
@@ -233,9 +235,10 @@ class Robot:
             self.check_collision(r_x, r_y, r_angle)
         else:
             # No reason to have the requested location and angle refused
-            self.x = r_x
-            self.y = r_y
-            self.angle = r_angle
+            # We assume stochasticity in environment
+            self.x = r_x + np.random.normal(0, self.stochastic_env[0, 0])
+            self.y = r_y + np.random.normal(0, self.stochastic_env[1, 1])
+            self.angle = r_angle + np.random.normal(0, self.stochastic_env[2, 2])
 
         if self.motion_model == "diff_drive":
             self.collect_sensor_data()

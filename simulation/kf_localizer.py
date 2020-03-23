@@ -20,6 +20,7 @@ class KFLocalizer:
         # We assume A is an identity-matrix and B * action is represented by the motion model
         self.state_mu = self.motion_model(self.state_mu, action, delta_time)
         # Note the real formula is A * state_std * A^T + motion_noise
+        # TODO: double check if this makes sense
         self.state_std += self.motion_noise
         
     def correct(self, z):
