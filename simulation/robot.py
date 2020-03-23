@@ -54,9 +54,9 @@ class Robot:
             state_mu = (self.x, self.y, self.angle)
             state_std = np.identity(3) * 0.01
             motion_noise = np.identity(3)
-            motion_noise[0, 0] *= 0.001  # x
-            motion_noise[1, 1] *= 0.002  # y
-            motion_noise[2, 2] *= 0.0001  # angle
+            motion_noise[0, 0] *= 0.002  # x
+            motion_noise[1, 1] *= 0.004  # y
+            motion_noise[2, 2] *= 0.001  # angle
 
             self.sensor_noise = np.identity(3)
             self.sensor_noise[0, 0] *= 10.0  # x

@@ -16,8 +16,10 @@ class KFLocalizer:
         self.z = state_mu
 
     def predict(self, action, delta_time):
-        # Add the noise to the state_mu
-        self.state_mu += np.dot(self.state_mu, np.random.normal(0, self.motion_noise)) * (delta_time * 1000)
+        # Add the noise to the state_mu only if the action is not nothing
+        # No need to add noise if we know we are standing still
+        if action[0] != 0:
+            self.state_mu += np.dot(self.state_mu, np.random.normal(0, self.motion_noise)) * (delta_time * 1000)
 
         # Note the real formula is A * state_mu + B * action
         # We assume A is an identity-matrix and B * action is represented by the motion model
