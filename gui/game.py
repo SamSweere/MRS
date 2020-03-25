@@ -112,8 +112,6 @@ class MobileRobotGame:
             # Draw the beacon lines
             for beacon in self.robot.beacons:
                 pygame.draw.line(self.screen, pygame.Color('green'), beacon[0].location, (self.robot.x, self.robot.y),2)
-                
-            self.localization_path.draw(self.screen)
 
         self.__draw_robot__()
 
@@ -130,6 +128,8 @@ class MobileRobotGame:
 
         if self.debug:
             self.debug_display.draw(self.screen)
+            
+        self.localization_path.draw(self.screen)
 
     def __draw_robot__(self):
         if self.scenario == "evolutionary":

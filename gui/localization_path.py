@@ -50,7 +50,7 @@ class LocalizationPath:
     
     def draw(self, surface):
         surface.blit(self.path_surface, (0,0), (0,0, self.game.screen_width, self.game.screen_height))
-        #self.__draw_uncertainty_ellipse__(surface)
+        self.__draw_uncertainty_ellipse__(surface)
         
     def __draw_uncertainty_ellipse__(self, surface):
         x_mu = self.localizer.state_mu[0]

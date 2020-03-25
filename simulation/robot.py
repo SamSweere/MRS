@@ -2,14 +2,19 @@ import numpy as np
 import math
 from simulation.kf_localizer import KFLocalizer
 
-
-def vel_motion_model(state, action, delta_time):
+def vel_motion_model(state, action, delta_time, insert_noise=False):
     x, y, angle = state
     v, w = action
 
     new_x = x + v * math.cos(angle) * delta_time
     new_y = y + v * math.sin(angle) * delta_time
     new_angle = angle + delta_time * w
+    
+    if insert_noise:
+        new_x += np.random.normal(scale=0.01)
+        new_y += np.random.normal(scale=0.01)
+        new_angle += np.random.normal(scale=0.01)
+        
     return (new_x, new_y, new_angle)
 
 
@@ -53,28 +58,8 @@ class Robot:
             # Initialize localization
             state_mu = (self.x, self.y, self.angle)
             state_std = np.identity(3) * 0.01
-            motion_noise = np.identity(3)
-            motion_noise[0, 0] *= 0.002  # x
-            motion_noise[1, 1] *= 0.004  # y
-            motion_noise[2, 2] *= 0.001  # angle
-
-            self.sensor_noise = np.identity(3)
-            self.sensor_noise[0, 0] *= 10.0  # x
-            self.sensor_noise[1, 1] *= 10.0  # y
-            self.sensor_noise[2, 2] *= 0.1  # angle
-
-            self.stochastic_env = np.ones((3,3)) * 0.002
-
-            print(motion_noise)
-            self.localizer = KFLocalizer(state_mu=state_mu, state_std=state_std, motion_model=vel_motion_model,
-                                         motion_noise=motion_noise, sensor_noise=self.sensor_noise)
-
-
-            # # Define variables fot the predicted location
-            # self.p_x = self.x
-            # self.p_y = self.y
-            # self.p_angle = self.angle
-            # Define the standard deviations for the localization errors
+            self.localizer = KFLocalizer(state_mu=state_mu, state_std=state_std, motion_model=lambda *args: vel_motion_model(*args, insert_noise=True))
+            self.passed_time = 0
 
         else:
             raise NameError("Invalid scenario name")
@@ -225,7 +210,10 @@ class Robot:
             r_x, r_y, r_angle = self.differential_drive(delta_time)
         elif self.motion_model == "vel_drive":
             r_x, r_y, r_angle = self.velocity_based_drive(delta_time)
-            self.localizer.predict((self.v, self.angle_change), delta_time)
+            
+            # Predict our location, we assume that the noise is greater the faster we move
+            motion_noise = np.diag([self.v * 0.05, self.v * 0.075, 1]) * delta_time
+            self.localizer.predict((self.v, self.angle_change), delta_time, motion_noise)
 
         # Save the x and y for the speed calculation
         x_tmp = self.x
@@ -234,35 +222,25 @@ class Robot:
         if self.collision:
             self.check_collision(r_x, r_y, r_angle)
         else:
-            # No reason to have the requested location and angle refused
-            # We assume stochasticity in environment
-            self.x = r_x + np.random.normal(0, self.stochastic_env[0, 0])
-            self.y = r_y + np.random.normal(0, self.stochastic_env[1, 1])
-            self.angle = r_angle + np.random.normal(0, self.stochastic_env[2, 2])
+            self.x = r_x
+            self.y = r_y
+            self.angle = r_angle
 
         if self.motion_model == "diff_drive":
             self.collect_sensor_data()
 
         if self.scenario == "localization":
+            self.passed_time += delta_time
             # Scan for beacons
             # TODO: no error implemented yet, do this in scan for beacons method
             self.beacons = self.scan_for_beacons()
-            if len(self.beacons) >= 3:
-                # Triangulate location
-                z = self.location_from_beacons()
-                self.localizer.correct(z)
-
-
-            # # TODO: only for debugging
-            # if z is not None:
-            #     # Do something
-            #     self.p_x = z[0]
-            #     self.p_y = z[1]
-            #     self.p_angle = z[2]
-            #     pass
-            # else:
-            #     # Do something else
-            #     pass
+            if (len(self.beacons) >= 3) and (self.passed_time > 1):
+                print("Correct")
+                # correct our position, we assume that the sensors have a constant noise
+                z = np.array(self.location_from_beacons())
+                sensor_noise = np.diag([2, 2, 2])
+                self.localizer.correct(z, sensor_noise)
+                self.passed_time = 0
 
         # To calculate the actual speed
         self.velocity = math.sqrt((x_tmp - self.x) ** 2 + (y_tmp - self.y) ** 2)
@@ -302,46 +280,29 @@ class Robot:
             beacon = beacon[0]
             # Note true x and y value of the robot since this is independent on the predicted location
             r = math.sqrt((beacon.x - self.x) ** 2 + (beacon.y - self.y) ** 2)
+            r += np.random.normal(scale=0.1)
             # -1 times since our y coordinate system is inverted
             phi = math.atan2(-1 * (beacon.y - self.y), beacon.x - self.x) - self.angle
             f.append((r, phi, beacon.location))
+            
+        # Three points can lie on the same line, in which case our function cant handle it, try other ways
+        shift = 0
+        tria_loc = []
+        while (shift + 3 <= len(f)):
+            tria_loc.append(list(
+                triangulate(
+                    f[0 + shift][2][0], f[0 + shift][2][1], f[0 + shift][0],
+                    f[1 + shift][2][0], f[1 + shift][2][1], f[1 + shift][0],
+                    f[2 + shift][2][0], f[2 + shift][2][1], f[2 + shift][0])
+            ))
+            shift += 1
 
-        # From the r and phi get the x and y location, note that in the exercise we are allowed
-        # to add the error later
-
-        # TODO: we could get some estimate from 1 beacon, however we would have to use our predicted angle
-        # which is not part of z
-        if len(f) >= 3:
-            # Three points can lie on the same line, in which case our function cant handle it, try other ways
-            shift = 0
-            tria_loc = []
-            while (shift + 3 <= len(f)):
-                tria_loc.append(list(
-                    triangulate(
-                        f[0 + shift][2][0], f[0 + shift][2][1], f[0 + shift][0],
-                        f[1 + shift][2][0], f[1 + shift][2][1], f[1 + shift][0],
-                        f[2 + shift][2][0], f[2 + shift][2][1], f[2 + shift][0])
-                ))
-                shift += 1
-
-            if len(tria_loc) > 0:
-                tria_loc = np.mean(np.array(tria_loc), axis=0)
-                x, y = tria_loc
-                # Now that we know the position get the angle, we well only use one beacon for this
-                angle = math.atan2(-1 * (self.beacons[0][0].y - y), self.beacons[0][0].x - x) - f[0][1]
-                # We got the location and angle, add noise in proportion to change
-                state = (self.x, self.y, self.angle)
-                action = (self.v, self.angle_change)
-                # hack for motion model
-                uncertainty_multiplier = 0.1
-                new_x, new_y, new_angle = vel_motion_model(state, action, 1)
-                x += np.random.normal(0, self.sensor_noise[0, 0]) * np.abs(x - new_x) * uncertainty_multiplier
-                y += np.random.normal(0, self.sensor_noise[1, 1]) * np.abs(y - new_y) * uncertainty_multiplier
-                angle += np.random.normal(0, self.sensor_noise[2, 2]) * np.abs(angle - new_angle) * uncertainty_multiplier
-                return x, y, angle
-        else:
-            # No location
-            return None
+        
+        tria_loc = np.mean(np.array(tria_loc), axis=0)
+        x, y = tria_loc
+        # Now that we know the position get the angle, we well only use one beacon for this
+        angle = math.atan2(-1 * (self.beacons[0][0].y - y), self.beacons[0][0].x - x) - f[0][1]
+        return x, y, angle
 
     def collect_sensor_data(self):
         raycast_length = self.radius + self.max_sensor_length
