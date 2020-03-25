@@ -1,4 +1,5 @@
 import pygame
+import math
 
 # Draws a dashed curve
 # Works by using the fraction variable to keep track of the dash strokes
@@ -16,14 +17,22 @@ def draw_dashed_curve(surf, color, start, end, fraction, dash_length=10):
     new_fraction = fraction + length / dash_length
     slope = delta / length
     if fraction < 1:
-        end = start + slope * (length  / dash_length)
-        pygame.gfxdraw.line(surf, int(start.x), int(start.y), int(end.x), int(end.y), color)
-    elif new_fraction > 2:
-        start = start + slope * (fraction - 2)
-        pygame.gfxdraw.line(surf, int(start.x), int(start.y), int(end.x), int(end.y), color)
-        new_fraction = new_fraction - 2
+        # If we're in the middle of drawing an dash, finish or continue it
+        dash_end = start + slope * (min(1 - fraction, new_fraction - fraction)) * dash_length
+        pygame.draw.line(surf, color, start, dash_end, 2)
     
-    return new_fraction
+    # Draw the remaining full-dashes
+    for index in range(2, int(new_fraction), 2):
+        dash_start = start + (slope * index * dash_length)
+        dash_end = start + (slope * (index + 1) * dash_length)
+        pygame.draw.line(surf, color, dash_start, dash_end, 2)
+    
+    if (new_fraction % 2) < 1:
+        # There is still an half finished dash left to draw
+        dash_start = start + slope * int(new_fraction - fraction) * dash_length
+        pygame.draw.line(surf, color, dash_start, end, 2)
+    
+    return new_fraction % 2
 
 class LocalizationPath:
     def __init__(self, game):

@@ -10,7 +10,7 @@ def vel_motion_model(state, action, delta_time, insert_noise=False):
     new_y = y + v * math.sin(angle) * delta_time
     new_angle = angle + delta_time * w
     
-    if insert_noise:
+    if insert_noise and v > 0.01:
         new_x += np.random.normal(scale=0.01)
         new_y += np.random.normal(scale=0.01)
         new_angle += np.random.normal(scale=0.01)
@@ -212,7 +212,7 @@ class Robot:
             r_x, r_y, r_angle = self.velocity_based_drive(delta_time)
             
             # Predict our location, we assume that the noise is greater the faster we move
-            motion_noise = np.diag([self.v * 0.05, self.v * 0.075, 1]) * delta_time
+            motion_noise = np.diag([self.v * 0.05, self.v * 0.075, self.v * 0.05]) * delta_time
             self.localizer.predict((self.v, self.angle_change), delta_time, motion_noise)
 
         # Save the x and y for the speed calculation
@@ -235,7 +235,6 @@ class Robot:
             # TODO: no error implemented yet, do this in scan for beacons method
             self.beacons = self.scan_for_beacons()
             if (len(self.beacons) >= 3) and (self.passed_time > 1):
-                print("Correct")
                 # correct our position, we assume that the sensors have a constant noise
                 z = np.array(self.location_from_beacons())
                 sensor_noise = np.diag([2, 2, 2])
